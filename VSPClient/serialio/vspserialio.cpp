@@ -93,6 +93,12 @@ VSPSerialIO::~VSPSerialIO()
     delete ui;
 }
 
+void VSPSerialIO::closeEvent(QCloseEvent* event)
+{
+    disconnectPort();
+    QDialog::closeEvent(event);
+}
+
 inline void VSPSerialIO::initComboSerialPort(QComboBox* cbx, QComboBox* link)
 {
     const QIcon icon1(":/assets/png/vspclient_1.png");
@@ -621,6 +627,6 @@ void VSPSerialIO::onPortClosed()
 
 void VSPSerialIO::on_actionNewWindow_triggered()
 {
-    VSPSerialIO* w = new VSPSerialIO();
+    VSPSerialIO* w = new VSPSerialIO(dynamic_cast<QWidget*>(parent()));
     w->show();
 }

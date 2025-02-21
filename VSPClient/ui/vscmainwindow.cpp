@@ -69,7 +69,9 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     }
 
     connect(ui->btn11SerialIO, &QPushButton::clicked, this, [this]() {
-        (new VSPSerialIO(this))->setVisible(true);
+        VSPSerialIO* d = new VSPSerialIO(this);
+        d->setVisible(true);
+        d->raise();
     });
 
     connect(qApp, &QGuiApplication::saveStateRequest, this, [](QSessionManager&) {
@@ -142,14 +144,15 @@ inline void VSCMainWindow::showNotification(int ms, const QString& text)
 
 inline void VSCMainWindow::setupSystemTray()
 {
-    stIcon.setIcon(QIcon(":/assets/png/vspclient_3.png"));
+    stIcon.setIcon(QIcon(":/assets/png/vspclient_4.png"));
     stIcon.setToolTip(qApp->applicationDisplayName() + " \n\n" + tr(COPYRIGHT));
 
     connect(&stIcon, &QSystemTrayIcon::messageClicked, this, []() {
         //-
     });
-    connect(&stIcon, &QSystemTrayIcon::activated, this, []() {
+    connect(&stIcon, &QSystemTrayIcon::activated, this, [this]() {
         //-
+        setWindowState(Qt::WindowState::WindowActive);
     });
 
     QMenu* menu = new QMenu(this);
@@ -167,11 +170,18 @@ inline void VSCMainWindow::setupSystemTray()
     });
     menu->addAction(a);
 
-    a = new QAction(stIcon.icon(), "Open");
+    a = new QAction(stIcon.icon(), "Open Controller");
     connect(a, &QAction::triggered, this, [this]() {
         setWindowState(Qt::WindowState::WindowActive);
         show();
         raise();
+    });
+    menu->addAction(a);
+    a = new QAction(stIcon.icon(), "Open Serial I/O");
+    connect(a, &QAction::triggered, this, [this]() {
+        VSPSerialIO* d = new VSPSerialIO(this);
+        d->setVisible(true);
+        d->raise();
     });
     menu->addAction(a);
     menu->addSeparator();

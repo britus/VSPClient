@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include <QShowEvent>
 #include <QThread>
 #include <QWindow>
 
@@ -22,7 +23,7 @@ class VSPSerialIO: public QDialog
 public:
     VSPSerialIO(QWidget* parent = nullptr);
     ~VSPSerialIO();
-
+    void closeEvent(QCloseEvent* event) override;
 private slots:
     /*serial port */
     void onPortErrorOccured(QSerialPort::SerialPortError error);
