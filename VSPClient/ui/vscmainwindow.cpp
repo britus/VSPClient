@@ -133,8 +133,8 @@ inline void VSCMainWindow::showNotification(int ms, const QString& text)
 {
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         stIcon.showMessage(
-           qApp->applicationDisplayName(),                     //
-           COPYRIGHT + qApp->organizationName() + "\n" + text, //
+           qApp->applicationDisplayName(), //
+           tr(COPYRIGHT) + "\n\n" + text,  //
            QSystemTrayIcon::NoIcon /* stIcon.icon()*/,
            ms);
     }
