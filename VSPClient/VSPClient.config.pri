@@ -23,8 +23,8 @@ CONFIG += debug
 
 # Build lib framework or app
 #CONFIG += vsp_library
-#CONFIG += vsp_framework
-CONFIG += vsp_app
+CONFIG += vsp_framework
+#CONFIG += vsp_app
 
 # Generate a normal application bundle
 vsp_app {
@@ -147,4 +147,7 @@ mac:vsp_app {
     QMAKE_POST_LINK += \
         $$PWD/qt-bundle-bugfix.sh $${TARGET} app VSPController && \
         $$PWD/qt-bundle-bugfix.sh $${TARGET} app VSPSetup
+
+    CODE_SIGN_ENTITLEMENTS=$$PWD/VSPClient.entitlements
+    CODE_SIGN_IDENTITY='Mac Developer'
 }

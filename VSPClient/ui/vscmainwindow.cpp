@@ -76,7 +76,9 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
 
     connect(qApp, &QGuiApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
         if (state != Qt::ApplicationActive) {
-            showNotification(5000, "");
+            QTimer::singleShot(1000, this, [this]() {
+                showNotification(5000, "Minimized o.O");
+            });
         }
     });
 
@@ -128,7 +130,6 @@ void VSCMainWindow::closeEvent(QCloseEvent*)
 inline void VSCMainWindow::showNotification(int ms, const QString& text)
 {
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
-        stIcon.show();
         stIcon.showMessage(
            qApp->applicationDisplayName(),                     //
            COPYRIGHT + qApp->organizationName() + "\n" + text, //
@@ -140,9 +141,7 @@ inline void VSCMainWindow::showNotification(int ms, const QString& text)
 inline void VSCMainWindow::setupSystemTray()
 {
     stIcon.setIcon(QIcon(":/assets/png/vspclient_3.png"));
-    stIcon.setToolTip(
-       qApp->applicationDisplayName() //
-       + " \n" COPYRIGHT + qApp->organizationName());
+    stIcon.setToolTip(qApp->applicationDisplayName() + " \n\n" + tr(COPYRIGHT));
 
     connect(&stIcon, &QSystemTrayIcon::messageClicked, this, []() {
         //-
@@ -162,7 +161,7 @@ inline void VSCMainWindow::setupSystemTray()
            qApp->applicationDisplayName() + "\n\n" //
               + tr(COPYRIGHT) + "\nWritten by "    //
               + qApp->organizationName());
-        // showNotification(5000, "-:o:-");
+        showNotification(5000, "-:o:-");
     });
     menu->addAction(a);
 
@@ -182,7 +181,7 @@ inline void VSCMainWindow::setupSystemTray()
     menu->addAction(a);
 
     stIcon.setContextMenu(menu);
-    stIcon.setVisible(true);
+    stIcon.show();
 }
 
 inline void VSCMainWindow::showOverlay()
@@ -204,7 +203,7 @@ inline void VSCMainWindow::showOverlay()
        "border-color: rgb(252, 115, 9); "
        "border-style: solid; "
        "border-width: 1px; "
-       "border-radius: 5px;");
+       "border-radius: 7px;");
     setProperty("overlay", QVariant::fromValue(overlay));
 
     // GIF-Label erstellen
@@ -256,8 +255,8 @@ void VSCMainWindow::resizeEvent(QResizeEvent* event)
 void VSCMainWindow::onSetupFailWithError(uint32_t code, const char* message)
 {
     qDebug("CTRLWIN::onSetupFailWithError(): code=%d msg=%s\n", code, message);
-
-    ui->textBrowser->setPlainText(tr("VSP setup status #%1\nInfo: %2") //
+    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
+    ui->textBrowser->setPlainText(tr("VSP setup status #%1\nInfo:\n%2") //
                                      .arg(code)
                                      .arg(message));
 }
@@ -266,11 +265,14 @@ void VSCMainWindow::onSetupFinishWithResult(uint32_t code, const char* message)
 {
     qDebug("CTRLWIN::onSetupFinishWithResult(): code=%d msg=%s\n", code, message);
 
+    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
     ui->textBrowser->setPlainText(tr("%1 %2").arg(code).arg(message));
 }
 
 void VSCMainWindow::onSetupNeedsUserApproval()
 {
+    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
+    ui->textBrowser->setPlainText("Wait for approval..");
 }
 
 void VSCMainWindow::onClientConnected()
@@ -347,6 +349,7 @@ void VSCMainWindow::onUpdateStatusLog(const QByteArray& message)
 {
     qDebug("CTRLWIN::onUpdateStatusLog(): %s\n", qPrintable(message));
 
+    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
     ui->textBrowser->setPlainText(message);
 }
 
