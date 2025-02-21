@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="progress1">assets/ani/progress.gif</file>
+        <file alias="progress2">assets/ani/progress2.gif</file>
+        <file>assets/icns/vspclient.icns</file>
+        <file>assets/ico/vspclient_0.ico</file>
+        <file>assets/ico/vspclient_1.ico</file>
+        <file>assets/ico/vspclient_2.ico</file>
+        <file>assets/ico/vspclient_3.ico</file>
+        <file>assets/ico/vspclient_4.ico</file>
+        <file>assets/ico/vspclient_5.ico</file>
+        <file>assets/ico/vspclient_6.ico</file>
+        <file>assets/ico/vspclient_7.ico</file>
+        <file>assets/png/vspclient_0.png</file>
+        <file>assets/png/vspclient_1.png</file>
+        <file>assets/png/vspclient_2.png</file>
+        <file>assets/png/vspclient_3.png</file>
+        <file>assets/png/vspclient_4.png</file>
+        <file>assets/png/vspclient_5.png</file>
+        <file>assets/png/vspclient_6.png</file>
+        <file>assets/png/vspclient_7.png</file>
+    </qresource>
+</RCC>
