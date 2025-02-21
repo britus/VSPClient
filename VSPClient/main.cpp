@@ -32,7 +32,11 @@ public:
     }
 };
 
+#if defined(VSPCLIENT_LIBRARY)
+extern "C" bool qt_main(int argc, char* argv[])
+#else
 int main(int argc, char* argv[])
+#endif
 {
     QApplication::setAttribute(Qt::AA_NativeWindows, true);
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL, true);
