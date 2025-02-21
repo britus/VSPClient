@@ -81,7 +81,9 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     });
 
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
-        setupSystemTray();
+        if (QSystemTrayIcon::supportsMessages()) {
+            setupSystemTray();
+        }
     }
 
     // ---------
@@ -123,14 +125,6 @@ void VSCMainWindow::closeEvent(QCloseEvent*)
     qApp->quit();
 }
 
-void PopupMenu::showEvent(QShowEvent* event)
-{
-    // QPoint p = this->pos();
-    // QRect geo = w->geometry();
-    // this->move(w->x(), w->y());
-    QMenu::showEvent(event);
-}
-
 inline void VSCMainWindow::showNotification(int ms, const QString& text)
 {
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
@@ -162,7 +156,13 @@ inline void VSCMainWindow::setupSystemTray()
 
     a = new QAction(stIcon.icon(), "About");
     connect(a, &QAction::triggered, this, [this]() {
-        showNotification(5000, "-:o:-");
+        QMessageBox::about(
+           this,
+           qApp->applicationName(),                //
+           qApp->applicationDisplayName() + "\n\n" //
+              + tr(COPYRIGHT) + "\nWritten by "    //
+              + qApp->organizationName());
+        // showNotification(5000, "-:o:-");
     });
     menu->addAction(a);
 
@@ -633,4 +633,12 @@ PopupMenu::PopupMenu(QWidget* target, QWidget* parent)
     : QMenu(parent)
     , w(target)
 {
+}
+
+void PopupMenu::showEvent(QShowEvent* event)
+{
+    // QPoint p = this->pos();
+    // QRect geo = w->geometry();
+    // this->move(w->x(), w->y());
+    QMenu::showEvent(event);
 }
