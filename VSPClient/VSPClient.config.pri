@@ -2,11 +2,11 @@
 # VSPClient build configuration included by .pro
 #
 
-##
-TARGET = VSPClient
-
 # major.minor.patch.build
 VERSION = 1.0.3.14
+
+##
+TARGET = VSPClient
 
 # for QT Creator and Visual Studio project files only.
 QMAKE_PROJECT_NAME = $${TARGET}

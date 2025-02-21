@@ -7,29 +7,7 @@ QT += serialbus
 QT += serialport
 QT += xml
 
-TARGET = VSPClient
-
-# major.minor.patch.build
-VERSION = 1.0.3.14
-
-###
-CONFIG += c++17
-CONFIG += sdk_no_version_check
-CONFIG += nostrip
-CONFIG += debug
-#CONFIG += lrelease
-CONFIG += embed_translations
-CONFIG += create_prl
-CONFIG += app_bundle
-CONFIG += embed_translations
-CONFIG += embed_libraries
-CONFIG += incremental
-CONFIG += global_init_link_order
-CONFIG += lib_version_first
-
-# disables all the APIs deprecated before Qt 6.0.0
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
-DEFINES += VSP_DEBUG
+include(VSPClient.config.pri)
 
 include(driver/driver.pri)
 include(model/model.pri)
