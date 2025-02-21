@@ -81,7 +81,10 @@ QMAKE_INFO_PLIST += \
 #translations_de.path = de.lproj
 #QMAKE_BUNDLE_DATA += translations_en translations_de
 
-LICENSE.clear
+icons.files = $$PWD/assets/icns/vspclient.icns
+icons.path = Contents/Resources
+QMAKE_BUNDLE_DATA += icons
+
 LICENSE.files = $$PWD/LICENSE
 LICENSE.path = Contents/Resources
 QMAKE_BUNDLE_DATA += LICENSE
