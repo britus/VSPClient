@@ -71,7 +71,9 @@ int main(int argc, char* argv[])
     }
 
     a.setStyleSheet(
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
        "*{font-size:16pt;}"
+#endif
        "QPushButton {border-radius:5px;"
        "border-style:solid;"
        "border-width:1px;"

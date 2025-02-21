@@ -37,38 +37,46 @@ VSPSerialIO::VSPSerialIO(QWidget* parent)
     ui->cbxDtr->setChecked(false);
     if (!ui->cbxDtr->property("init").toBool()) {
         ui->cbxDtr->setProperty("init", QVariant::fromValue(true));
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         connect(ui->cbxDtr, qOverload<bool>(&QCheckBox::clicked), this, [this](bool state) {
             // TODO: onClickEvent()
             Q_UNUSED(this)
             Q_UNUSED(state)
         });
+#endif
     }
     ui->cbxRts->setChecked(false);
     if (!ui->cbxRts->property("init").toBool()) {
         ui->cbxRts->setProperty("init", QVariant::fromValue(true));
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         connect(ui->cbxRts, qOverload<bool>(&QCheckBox::clicked), this, [this](bool state) {
             // TODO: onClickEvent()
             Q_UNUSED(this)
             Q_UNUSED(state)
         });
+#endif
     }
     ui->cbxCts->setChecked(false);
     if (!ui->cbxCts->property("init").toBool()) {
         ui->cbxCts->setProperty("init", QVariant::fromValue(true));
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         connect(ui->cbxCts, qOverload<bool>(&QCheckBox::clicked), this, [this](bool state) {
             // TODO: onClickEvent()
             Q_UNUSED(this)
             Q_UNUSED(state)
         });
+#endif
     }
     ui->cbxDSR->setChecked(false);
     if (!ui->cbxDSR->property("init").toBool()) {
         ui->cbxDSR->setProperty("init", QVariant::fromValue(true));
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         connect(ui->cbxDSR, qOverload<bool>(&QCheckBox::clicked), this, [this](bool state) {
             // TODO: onClickEvent()
             Q_UNUSED(this)
             Q_UNUSED(state)
         });
+#endif
     }
 
     connect(qApp, &QGuiApplication::aboutToQuit, this, [this]() {
@@ -114,6 +122,7 @@ inline void VSPSerialIO::initComboSerialPort(QComboBox* cbx, QComboBox* link)
     }
 
     cbx->setProperty("init", true);
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
     connect(cbx, qOverload<int>(&QComboBox::activated), this, [this, cbx, link](int index) {
         const QSerialPortInfo spi = cbx->itemData(index).value<QSerialPortInfo>();
         const int selection = (!link ? 0 : link->currentIndex());
@@ -126,6 +135,7 @@ inline void VSPSerialIO::initComboSerialPort(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(selection)
         Q_UNUSED(vsel)
     });
+#endif
 }
 
 inline void VSPSerialIO::initComboBaudRate(QComboBox* cbx, QComboBox* link)
@@ -171,6 +181,7 @@ inline void VSPSerialIO::initComboBaudRate(QComboBox* cbx, QComboBox* link)
     }
 
     cbx->setProperty("init", true);
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
     connect(cbx, qOverload<int>(&QComboBox::activated), this, [this, cbx, link](int index) {
         const QSerialPort::BaudRate value = cbx->itemData(index).value<QSerialPort::BaudRate>();
         const int selection = (!link ? 0 : link->currentIndex());
@@ -183,6 +194,7 @@ inline void VSPSerialIO::initComboBaudRate(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(vsel)
         Q_UNUSED(value)
     });
+#endif
 }
 
 inline void VSPSerialIO::initComboDataBits(QComboBox* cbx, QComboBox* link)
@@ -224,6 +236,7 @@ inline void VSPSerialIO::initComboDataBits(QComboBox* cbx, QComboBox* link)
     }
 
     cbx->setProperty("init", true);
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
     connect(cbx, qOverload<int>(&QComboBox::activated), this, [this, cbx, link](int index) {
         const QSerialPort::DataBits value = cbx->itemData(index).value<QSerialPort::DataBits>();
         const int selection = (!link ? 0 : link->currentIndex());
@@ -236,6 +249,7 @@ inline void VSPSerialIO::initComboDataBits(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(vsel)
         Q_UNUSED(value)
     });
+#endif
 }
 
 inline void VSPSerialIO::initComboStopBits(QComboBox* cbx, QComboBox* link)
@@ -276,6 +290,7 @@ inline void VSPSerialIO::initComboStopBits(QComboBox* cbx, QComboBox* link)
     }
 
     cbx->setProperty("init", true);
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
     connect(cbx, qOverload<int>(&QComboBox::activated), this, [this, cbx, link](int index) {
         const QSerialPort::StopBits value = cbx->itemData(index).value<QSerialPort::StopBits>();
         const int selection = (!link ? 0 : link->currentIndex());
@@ -288,6 +303,7 @@ inline void VSPSerialIO::initComboStopBits(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(vsel)
         Q_UNUSED(value)
     });
+#endif
 }
 
 inline void VSPSerialIO::initComboParity(QComboBox* cbx, QComboBox* link)
@@ -330,6 +346,7 @@ inline void VSPSerialIO::initComboParity(QComboBox* cbx, QComboBox* link)
     }
 
     cbx->setProperty("init", true);
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
     connect(cbx, qOverload<int>(&QComboBox::activated), this, [this, cbx, link](int index) {
         const QSerialPort::Parity value = cbx->itemData(index).value<QSerialPort::Parity>();
         const int selection = (!link ? 0 : link->currentIndex());
@@ -342,6 +359,7 @@ inline void VSPSerialIO::initComboParity(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(vsel)
         Q_UNUSED(value)
     });
+#endif
 }
 
 inline void VSPSerialIO::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
@@ -382,6 +400,7 @@ inline void VSPSerialIO::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
     }
 
     cbx->setProperty("init", true);
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
     connect(cbx, qOverload<int>(&QComboBox::activated), this, [this, cbx, link](int index) {
         const QSerialPort::FlowControl value = cbx->itemData(index).value<QSerialPort::FlowControl>();
         const int selection = (!link ? 0 : link->currentIndex());
@@ -394,6 +413,7 @@ inline void VSPSerialIO::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(vsel)
         Q_UNUSED(value)
     });
+#endif
 }
 
 void VSPSerialIO::on_btnSendFile_clicked()
