@@ -2,6 +2,32 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.developer-tools</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>Shows informative messages about the state of the VSP driver.</string>
+	<key>OSBundleUsageDescription</key>
+	<string>Required to Control the Virtual Serial Port links</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Require acces to file for VSP test.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Require acces to file for VSP test.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Require acces to file for VSP test.</string>
+	<key>NSPrefPaneIconFile</key>
+	<string>vspclient.icns</string>
+	<key>UILaunchImageFile</key>
+	<string>vspclient_5.png</string>
+	<key>UIPrerenderedIcon</key>
+	<false/>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>LSUIPresentationMode</key>
+	<integer>0</integer>
+	<key>LSVisibleInClassic</key>
+	<true/>
+	<key>NSSupportsSuddenTermination</key>
+	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2025 by EoF Software Labs</string>
 	<key>BuildMachineOSBuild</key>
