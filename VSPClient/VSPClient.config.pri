@@ -23,8 +23,8 @@ CONFIG += debug
 
 # Build lib framework or app
 #CONFIG += vsp_library
-CONFIG += vsp_framework
-#CONFIG += vsp_app
+#CONFIG += vsp_framework
+CONFIG += vsp_app
 
 # Generate a normal application bundle
 vsp_app {

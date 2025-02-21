@@ -58,11 +58,13 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     m_buttonMap[ui->btn08Traces] = ui->pg08Traces;
     m_buttonMap[ui->btn09Connect] = ui->pg09Connect;
 
-    foreach (auto page, m_buttonMap.values()) {
+    const QList<VSPAbstractPage*> pages = m_buttonMap.values();
+    foreach (auto page, pages) {
         connect(page, &VSPAbstractPage::execute, this, &VSCMainWindow::onActionExecute);
     }
 
-    foreach (auto button, m_buttonMap.keys()) {
+    const QList<QPushButton*> buttons = m_buttonMap.keys();
+    foreach (auto button, buttons) {
         connect(button, &QPushButton::clicked, this, &VSCMainWindow::onSelectPage);
     }
 
@@ -133,7 +135,7 @@ inline void VSCMainWindow::showNotification(int ms, const QString& text)
         stIcon.showMessage(
            qApp->applicationDisplayName(),                     //
            COPYRIGHT + qApp->organizationName() + "\n" + text, //
-           QSystemTrayIcon::MessageIcon::NoIcon,
+           stIcon.icon(),
            ms);
     }
 }
@@ -255,10 +257,12 @@ void VSCMainWindow::resizeEvent(QResizeEvent* event)
 void VSCMainWindow::onSetupFailWithError(uint32_t code, const char* message)
 {
     qDebug("CTRLWIN::onSetupFailWithError(): code=%d msg=%s\n", code, message);
+
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     ui->textBrowser->setPlainText(tr("VSP setup status #%1\nInfo:\n%2") //
                                      .arg(code)
                                      .arg(message));
+    showNotification(2750, ui->textBrowser->toPlainText());
 }
 
 void VSCMainWindow::onSetupFinishWithResult(uint32_t code, const char* message)
@@ -267,6 +271,7 @@ void VSCMainWindow::onSetupFinishWithResult(uint32_t code, const char* message)
 
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
     ui->textBrowser->setPlainText(tr("%1 %2").arg(code).arg(message));
+    showNotification(2750, ui->textBrowser->toPlainText());
 }
 
 void VSCMainWindow::onSetupNeedsUserApproval()
@@ -294,8 +299,11 @@ void VSCMainWindow::onClientConnected()
     QString dn = m_vsp->DeviceName();
     QString dp = m_vsp->DevicePath();
 
+    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     ui->textBrowser->setPlainText("Connected. [" + dn + ": " + dp + "]");
     ui->stackedWidget->setCurrentWidget(ui->pg01SPCreate);
+
+    showNotification(2750, ui->textBrowser->toPlainText());
     enableDefaultButton(ui->btn01SPCreate);
     disableButton(ui->btn09Connect);
 }
@@ -317,7 +325,11 @@ void VSCMainWindow::onClientDisconnected()
        << ui->btn08Traces);
 
     ui->stackedWidget->setCurrentWidget(ui->pg09Connect);
+
+    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
     ui->textBrowser->setPlainText("Disconnected.");
+
+    showNotification(1750, ui->textBrowser->toPlainText());
     enableButton(ui->btn09Connect);
     enableDefaultButton(ui->btn09Connect);
 }
@@ -329,11 +341,16 @@ void VSCMainWindow::onClientError(int error, const QString& message)
     m_errorStack[error] = message;
 
     QString text = "";
-    foreach (auto code, m_errorStack.keys()) {
+
+    QList<uint> codes = m_errorStack.keys();
+    foreach (auto code, codes) {
         text += tr("VSP Error %1:\n%2\n\n").arg(code).arg(m_errorStack[code]);
     }
 
+    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
     ui->textBrowser->setPlainText(text);
+
+    showNotification(1750, text);
 
     QTimer::singleShot(50, this, [this, error, text]() {
         m_box.setWindowTitle(windowTitle());
