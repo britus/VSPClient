@@ -59,6 +59,11 @@ LICENSE.files = $$PWD/LICENSE
 LICENSE.path = Resources
 QMAKE_BUNDLE_DATA += LICENSE
 
+icons.version = Versions
+icons.files = $$PWD/vspsetup.icns
+icons.path = Resources
+QMAKE_BUNDLE_DATA += icons
+
 #otool -L
 LIBS += -dead_strip
 LIBS += -framework IOKit

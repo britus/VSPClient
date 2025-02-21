@@ -8,6 +8,8 @@
     <string>en</string>
     <key>CFBundleExecutable</key>
     <string>VSPSetup</string>
+    <key>CFBundleIconFile</key>
+    <string>vspsetup.icns</string>
     <key>CFBundleIdentifier</key>
     <string>org.eof.tools.VSPSetup</string>
     <key>CFBundleInfoDictionaryVersion</key>

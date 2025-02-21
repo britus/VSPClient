@@ -74,6 +74,9 @@ LIBS += -liconv
 LIBS += -F$$OUT_PWD/../VSPController -framework VSPController
 LIBS += -F$$OUT_PWD/../VSPSetup      -framework VSPSetup
 
+INCLUDEPATH += $$OUT_PWD/../../VSPController
+INCLUDEPATH += $$OUT_PWD/../../VSPSetup
+
 # ----------------------------------------
 
 mac {
@@ -104,7 +107,7 @@ mac {
     QMAKE_BUNDLE_DATA += translations_en translations_de
 
     LICENSE.clear
-    LICENSE.files = $$PWD/LICENSE.txt
+    LICENSE.files = $$PWD/LICENSE
     LICENSE.path = Contents/Resources
 
     QMAKE_BUNDLE_DATA += LICENSE
@@ -126,6 +129,7 @@ mac:vsp_framework {
     QMAKE_FRAMEWORK_VERSION = 2.1
     QMAKE_BUNDLE_EXTENSION = .framework
     QMAKE_FRAMEWORK_BUNDLE_NAME = $${TARGET}
+
     QMAKE_INFO_PLIST += \
         $$PWD/Info.plist \
         $$PWD/VSPClient.entitlements
