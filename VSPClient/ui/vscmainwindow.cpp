@@ -135,7 +135,7 @@ inline void VSCMainWindow::showNotification(int ms, const QString& text)
         stIcon.showMessage(
            qApp->applicationDisplayName(),                     //
            COPYRIGHT + qApp->organizationName() + "\n" + text, //
-           stIcon.icon(),
+           QSystemTrayIcon::NoIcon /* stIcon.icon()*/,
            ms);
     }
 }
@@ -159,11 +159,11 @@ inline void VSCMainWindow::setupSystemTray()
     connect(a, &QAction::triggered, this, [this]() {
         QMessageBox::about(
            this,
-           qApp->applicationName(),                //
-           qApp->applicationDisplayName() + "\n\n" //
-              + tr(COPYRIGHT) + "\nWritten by "    //
+           qApp->applicationName(),                 //
+           qApp->applicationDisplayName() + "\n\n"  //
+              + tr(COPYRIGHT) + "\nand written by " //
               + qApp->organizationName());
-        showNotification(5000, "-:o:-");
+        showNotification(5000, "(-:o:-)");
     });
     menu->addAction(a);
 
