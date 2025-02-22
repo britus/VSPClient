@@ -28,8 +28,8 @@ fi
 
 mkdir -p ${OUT_PWD}/${TARGET}/Contents/Frameworks
 
-cp -Rpv ${OUT_PWD}/../${FRAMEWORK}/${FRAMEWORK}.framework \
-        ${OUT_PWD}/${TARGET}/Contents/Frameworks/
+#cp -Rpv ${OUT_PWD}/../${FRAMEWORK}/${FRAMEWORK}.framework \
+#        ${OUT_PWD}/${TARGET}/Contents/Frameworks/
 
 ln -vsf Versions/Current/${FRAMEWORK} ${FRAMEWORK}
 

@@ -27,6 +27,10 @@ public:
 
     void update(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel) override;
 
+signals:
+    void installDriver();
+    void uninstallDriver();
+
 protected:
     void onActionExecute() override;
 

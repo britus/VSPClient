@@ -63,6 +63,14 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
         connect(page, &VSPAbstractPage::execute, this, &VSCMainWindow::onActionExecute);
     }
 
+    /* Driver installation / removal */
+    connect(ui->pg09Connect, &PGConnect::installDriver, this, &VSCMainWindow::onActionInstall);
+    connect(ui->pg09Connect, &PGConnect::uninstallDriver, this, &VSCMainWindow::onActionUninstall);
+
+#if defined(_VSPCLIENT_LIBRARY_)
+    ui->toolButton->setVisible(false);
+#endif
+
     const QList<QPushButton*> buttons = m_buttonMap.keys();
     foreach (auto button, buttons) {
         connect(button, &QPushButton::clicked, this, &VSCMainWindow::onSelectPage);
@@ -80,16 +88,16 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
 
     connect(qApp, &QGuiApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
         if (state != Qt::ApplicationActive) {
+            // dummy
             QTimer::singleShot(1000, this, [this]() {
-                showNotification(5000, "Minimized o.O");
+                if (this->hasFocus()) {
+                }
             });
         }
     });
 
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
-        if (QSystemTrayIcon::supportsMessages()) {
-            setupSystemTray();
-        }
+        setupSystemTray();
     }
 
     // ---------
@@ -133,10 +141,10 @@ void VSCMainWindow::closeEvent(QCloseEvent*)
 
 inline void VSCMainWindow::showNotification(int ms, const QString& text)
 {
-    if (QSystemTrayIcon::isSystemTrayAvailable()) {
-        stIcon.showMessage(
-           qApp->applicationDisplayName(), //
-           tr(COPYRIGHT) + "\n\n" + text,  //
+    if (QSystemTrayIcon::supportsMessages()) {
+        stIcon.showMessage( //
+           qApp->applicationDisplayName(),
+           tr(COPYRIGHT) + "\n\n" + text,
            QSystemTrayIcon::NoIcon /* stIcon.icon()*/,
            ms);
     }
@@ -150,9 +158,8 @@ inline void VSCMainWindow::setupSystemTray()
     connect(&stIcon, &QSystemTrayIcon::messageClicked, this, []() {
         //-
     });
-    connect(&stIcon, &QSystemTrayIcon::activated, this, [this]() {
-        //-
-        setWindowState(Qt::WindowState::WindowActive);
+    connect(&stIcon, &QSystemTrayIcon::activated, this, [/*this*/]() {
+        // setWindowState(Qt::WindowState::WindowActive);
     });
 
     QMenu* menu = new QMenu(this);
@@ -467,7 +474,6 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
     switch (command) {
         case vspControlGetStatus: {
             if (!m_vsp->GetStatus()) {
-                onClientError(0xfa000001, tr("Failed to read driver status."));
                 goto error_exit;
             }
             break;
@@ -475,7 +481,6 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
         case vspControlCreatePort: {
             TVSPPortParameters p = data.value<TVSPPortParameters>();
             if (!m_vsp->CreatePort(&p)) {
-                onClientError(0xfa000001, tr("Failed to create port."));
                 goto error_exit;
             }
             break;
@@ -483,7 +488,6 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
         case vspControlRemovePort: {
             VSPDataModel::TPortItem p = data.value<VSPDataModel::TPortItem>();
             if (!m_vsp->RemovePort(p.id)) {
-                onClientError(0xfa000001, tr("Failed to remove port."));
                 goto error_exit;
             }
             break;
@@ -491,11 +495,10 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
         case vspControlLinkPorts: {
             VSPDataModel::TPortLink link = data.value<VSPDataModel::TPortLink>();
             if (link.source.id == link.target.id) {
-                onClientError(0xfa000002, "You can't link same port together.");
+                onClientError(0xfa100001, tr("You can't link same ports together.\nEach unlinked port echo TX to RX."));
                 goto error_exit;
             }
             if (!m_vsp->LinkPorts(link.source.id, link.target.id)) {
-                onClientError(0xfa000001, tr("Failed to create port link status."));
                 goto error_exit;
             }
             break;
@@ -503,21 +506,18 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
         case vspControlUnlinkPorts: {
             VSPDataModel::TPortLink link = data.value<VSPDataModel::TPortLink>();
             if (!m_vsp->UnlinkPorts(link.source.id, link.target.id)) {
-                onClientError(0xfa000001, tr("Failed to remove link."));
                 goto error_exit;
             }
             break;
         }
         case vspControlGetPortList: {
             if (!m_vsp->GetPortList()) {
-                onClientError(0xfa000001, tr("Failed to get active ports."));
                 goto error_exit;
             }
             break;
         }
         case vspControlGetLinkList: {
             if (!m_vsp->GetLinkList()) {
-                onClientError(0xfa000001, tr("Failed to get active port links."));
                 goto error_exit;
             }
             break;
@@ -525,7 +525,6 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
         case vspControlEnableChecks: {
             VSPDataModel::TDataRecord r = data.value<VSPDataModel::TDataRecord>();
             if (!m_vsp->EnableChecks(r.port.id)) {
-                onClientError(0xfa000001, tr("Failed to enable/disable checks."));
                 goto error_exit;
             }
             break;
@@ -533,21 +532,16 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
         case vspControlEnableTrace: {
             VSPDataModel::TDataRecord r = data.value<VSPDataModel::TDataRecord>();
             if (!m_vsp->EnableTrace(r.port.id)) {
-                onClientError(0xfa000001, tr("Failed to enable/disable traces."));
                 goto error_exit;
             }
             break;
         }
         case vspControlPingPong: {
             if (!m_vsp->IsConnected() && !m_vsp->ConnectDriver()) {
-                onClientError(0xfa0000f0, "Failed to connect driver interface.");
-                if (!QDesktopServices::openUrl(QUrl(QStringLiteral("vspinstall://")))) {
-                    m_vsp->activateDriver();
-                }
+                m_vsp->activateDriver();
                 goto error_exit;
             }
             else if (!m_vsp->GetStatus()) {
-                onClientError(0xfa000001, tr("Failed to read driver status."));
                 goto error_exit;
             }
             break;
@@ -562,6 +556,18 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
 
 error_exit:
     removeOverlay();
+}
+
+void VSCMainWindow::onActionInstall()
+{
+    if (!m_vsp->IsConnected()) {
+        m_vsp->activateDriver();
+    }
+}
+
+void VSCMainWindow::onActionUninstall()
+{
+    m_vsp->deactivateDriver();
 }
 
 void VSCMainWindow::updateOverlayGeometry()

@@ -42,7 +42,7 @@ private slots:
     void onClientError(int error, const QString& message);
     void onUpdateStatusLog(const QByteArray& message);
     void onUpdateButtons(bool enabled = false);
-    void onCommandResult(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel);
+    void onCommandResult(VSPClient::TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel);
     void onComplete();
 
     void onSetupFailWithError(uint32_t code, const char* message);
@@ -50,7 +50,9 @@ private slots:
     void onSetupNeedsUserApproval();
 
     void onSelectPage();
-    void onActionExecute(const TVSPControlCommand command, const QVariant& data);
+    void onActionExecute(const VSPClient::TVSPControlCommand command, const QVariant& data);
+    void onActionInstall();
+    void onActionUninstall();
 
 protected:
     void resizeEvent(QResizeEvent* event) override;

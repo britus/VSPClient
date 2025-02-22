@@ -16,6 +16,14 @@ PGConnect::PGConnect(QWidget* parent)
     ui->setupUi(this);
 
     connectButton(ui->btnConnect);
+
+    connect(ui->btnInstall, &QPushButton::clicked, this, [this]() {
+        emit installDriver();
+    });
+
+    connect(ui->btnUninstall, &QPushButton::clicked, this, [this]() {
+        emit uninstallDriver();
+    });
 }
 
 PGConnect::~PGConnect()
