@@ -162,7 +162,7 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
     });
     t->setTimerType(Qt::PreciseTimer);
     t->setSingleShot(true);
-    t->start(80);
+    t->start(100);
 }
 
 void VSPDriverClient::OnErrorOccured(int error, const char* message)

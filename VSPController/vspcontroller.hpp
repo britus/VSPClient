@@ -102,6 +102,12 @@ typedef struct {
 
 } TVSPControllerData;
 
+typedef struct {
+    int system;
+    int sub;
+    int code;
+} TVSPSystemError;
+
 class VSPControllerPriv;
 
 class VSPCONTROLLER_EXPORT VSPController
@@ -188,6 +194,10 @@ protected:
      *
      */
     int GetConnection();
+    /** ----------------------
+     *
+     */
+    const TVSPSystemError GetSystemError(int error) const;
 
 private:
     VSPControllerPriv* p;

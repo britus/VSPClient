@@ -128,6 +128,18 @@ int VSPController::GetConnection()
 // -------------------------------------------------------------------
 //
 //
+const TVSPSystemError VSPController::GetSystemError(int error) const
+{
+    return {
+       .system = err_get_system(error),
+       .sub = err_get_sub(error),
+       .code = err_get_code(error),
+    };
+}
+
+// -------------------------------------------------------------------
+//
+//
 const char* VSPController::DeviceName() const
 {
     return p->DeviceName();

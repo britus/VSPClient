@@ -48,9 +48,9 @@ extern void onNeedsUserApproval();
     [self deactivateExtension:_dextIdentifier];
 }
 
+// State descriptions analogous to Swift version
 - (NSString *)dextLoadingState {
     switch (self.state) {
-        // State descriptions analogous to Swift version
         case VSPSmLoaderStateUnknown:
             return @"VSPSmLoaderStateUnknown";
         case VSPSmLoaderStateUnloaded:
@@ -93,18 +93,14 @@ extern void onNeedsUserApproval();
         OSSystemExtensionRequest *request = [
         OSSystemExtensionRequest deactivationRequestForExtension:dextIdentifier
                                  queue:dispatch_get_main_queue()];
-    request.delegate = self;
-    if (@available(macOS 10.15, *)) {
+        request.delegate = self;
         [[OSSystemExtensionManager sharedManager] submitRequest:request];
+        self.state = [VSPSmLoader processState:self.state
+                                     withEvent:VSPSmLoaderEventUninstallStarted];
     } else {
-        // Fallback on earlier versions
+        onDidFailWithError(0xf0001015, "At least MacOS 10.15 or later required.");
+        return;
     }
-    } else {
-        // Fallback on earlier versions
-    }
-
-    self.state = [VSPSmLoader processState:self.state
-                                 withEvent:VSPSmLoaderEventUninstallStarted];
 }
 
 // Implement OSSystemExtensionRequestDelegate methods...
@@ -114,45 +110,30 @@ extern void onNeedsUserApproval();
                                 withExtension:(nonnull OSSystemExtensionProperties *)extension
 API_AVAILABLE(macos(10.15))
 {
-    if (@available(macOS 10.15, *)) {
-        NSLog(@"Got the upgrade request (%@ -> %@); answering replace.",
-              existing.bundleVersion, extension.bundleVersion);
-    } else {
-        // Fallback on earlier versions
-    }
-    if (@available(macOS 10.15, *)) {
-        os_log(OS_LOG_DEFAULT, "[VSPLM] Got the upgrade request (%@ -> %@); answering replace",
-               existing.bundleVersion, extension.bundleVersion);
-    } else {
-        // Fallback on earlier versions
-    }
-    if (@available(macOS 10.15, *)) {
-        return OSSystemExtensionReplacementActionReplace;
-    } else {
-        // Fallback on earlier versions
-        return 1;
-    }
+    os_log(OS_LOG_DEFAULT, "[VSPLM] Got the upgrade request (%@ -> %@); answering replace",
+           existing.bundleVersion, extension.bundleVersion);
+    return OSSystemExtensionReplacementActionReplace;
 }
 
 - (void)request:(nonnull OSSystemExtensionRequest *)request didFailWithError:(nonnull NSError *)error  API_AVAILABLE(macos(10.15)){
     os_log(OS_LOG_DEFAULT, "[VSPLM] %s", error.description.UTF8String);
-    onDidFailWithError(-1, error.description.UTF8String);
+    onDidFailWithError(error.code, error.description.UTF8String);
 }
 
 - (void)request:(nonnull OSSystemExtensionRequest *)request didFinishWithResult:(OSSystemExtensionRequestResult)result  API_AVAILABLE(macos(10.15)){
     if (result == OSSystemExtensionRequestCompleted) {
-        os_log(OS_LOG_DEFAULT, "[VSPLM] %s", "Installation successfully.");
+        os_log(OS_LOG_DEFAULT, "[VSPLM] Installation successfully.");
     }
     else if (result == OSSystemExtensionRequestWillCompleteAfterReboot) {
-        os_log(OS_LOG_DEFAULT, "[VSPLM] %s", "Installation pending. Activate after reboot!");
+        os_log(OS_LOG_DEFAULT, "[VSPLM] Installation pending. Activate after reboot!");
     } else {
-        os_log(OS_LOG_DEFAULT, "[VSPLM] %s  %d", "Installation status", (int)result);
+        os_log(OS_LOG_DEFAULT, "[VSPLM] Installation status: %d", (int)result);
     }
     onDidFinishWithResult((uint32_t)result, "Installation finished");
 }
 
 - (void)requestNeedsUserApproval:(nonnull OSSystemExtensionRequest *)request  API_AVAILABLE(macos(10.15)){
-    os_log(OS_LOG_DEFAULT, "[VSPLM] %s", "Require user approval.");
+    os_log(OS_LOG_DEFAULT, "[VSPLM] Require user approval.");
     onNeedsUserApproval();
 }
 
