@@ -98,7 +98,15 @@ VSPSerialIO::~VSPSerialIO()
 
 void VSPSerialIO::closeEvent(QCloseEvent* event)
 {
-    disconnectPort();
+    if (m_port) {
+        // remove event handlers
+        disconnect(m_port);
+
+        if (m_port->isOpen()) {
+            m_port->close();
+        }
+    }
+
     QDialog::closeEvent(event);
 }
 
@@ -617,6 +625,7 @@ void VSPSerialIO::onPortErrorOccured(QSerialPort::SerialPortError error)
         QTimer::singleShot(100, this, [this, error]() {
             QString msg = QStringLiteral("Serial port error: %1").arg(error);
             ui->txInputView->setPlainText(msg);
+            QApplication::restoreOverrideCursor();
         });
     }
 }
