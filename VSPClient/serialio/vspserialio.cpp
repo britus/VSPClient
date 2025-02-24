@@ -98,7 +98,15 @@ VSPSerialIO::~VSPSerialIO()
 
 void VSPSerialIO::closeEvent(QCloseEvent* event)
 {
-    disconnectPort();
+    if (m_port) {
+        // remove event handlers
+        disconnect(m_port);
+
+        if (m_port->isOpen()) {
+            m_port->close();
+        }
+    }
+
     QDialog::closeEvent(event);
 }
 
