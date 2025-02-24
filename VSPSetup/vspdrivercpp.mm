@@ -62,7 +62,7 @@ static char g_message[256];
 extern "C" {
 void onDidFailWithError(uint32_t code, const char* message)
 {
-    strncpy(g_message, message, sizeof(g_message)-1);
+    snprintf(g_message, sizeof(g_message) - 1, "\n%s", message);
     g_callback->OnDidFailWithError(code, g_message);
 }
 

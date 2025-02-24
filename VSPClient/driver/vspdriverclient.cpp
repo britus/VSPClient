@@ -78,7 +78,7 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
     QByteArray txStatus =
        (data->context != 4 //
            ? " success"
-           : " failed #" + QString::number(result & 0x00000000ffffffff, 16).toUtf8());
+           : "Last command failed.");
 
     text << "Driver callback result:" << Qt::endl;
     text << "Data size......: " << size << Qt::endl;
@@ -154,15 +154,17 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
         if (result != 0) {
             emit errorOccured(result, txStatus);
         }
-        emit commandResult(                                //
-           static_cast<TVSPControlCommand>(data->command), //
-           &m_portList,
-           &m_linkList);
+        else {
+            emit commandResult(                                //
+               static_cast<TVSPControlCommand>(data->command), //
+               &m_portList,
+               &m_linkList);
+        }
         emit complete();
     });
     t->setTimerType(Qt::PreciseTimer);
     t->setSingleShot(true);
-    t->start(100);
+    t->start(150);
 }
 
 void VSPDriverClient::OnErrorOccured(int error, const char* message)

@@ -164,7 +164,7 @@ QSerialPort::FlowControl PGSPCreate::flowCtrl() const
 
 inline void PGSPCreate::initComboSerialPort(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/res/full/elcl16/synced.gif");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
     const QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
     const int selection = (!link ? 0 : link->currentIndex());
     const QVariant vsel = (!link ? QVariant() : link->itemData(selection));
@@ -188,7 +188,7 @@ inline void PGSPCreate::initComboSerialPort(QComboBox* cbx, QComboBox* link)
 
 inline void PGSPCreate::initComboBaudRate(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon3(":/res/actions/16x16/debug-exec.png");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
 
     typedef struct {
         QString name;
@@ -215,7 +215,7 @@ inline void PGSPCreate::initComboBaudRate(QComboBox* cbx, QComboBox* link)
 
     cbx->clear();
     for (int i = 0; i < 8; i++) {
-        cbx->addItem(icon3, baudRates[i].name, QVariant::fromValue(baudRates[i].baud));
+        cbx->addItem(icon1, baudRates[i].name, QVariant::fromValue(baudRates[i].baud));
         if (!vsel.isNull() && vsel.isValid()) {
             if (baudRates[i].baud == vsel.value<QSerialPort::BaudRate>()) {
                 cbx->setCurrentIndex(i);
@@ -226,7 +226,7 @@ inline void PGSPCreate::initComboBaudRate(QComboBox* cbx, QComboBox* link)
 
 inline void PGSPCreate::initComboDataBits(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon3(":/res/actions/16x16/debug-exec.png");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
 
     typedef struct {
         QString name;
@@ -249,7 +249,7 @@ inline void PGSPCreate::initComboDataBits(QComboBox* cbx, QComboBox* link)
 
     cbx->clear();
     for (int i = 0; i < 4; i++) {
-        cbx->addItem(icon3, dataBits[i].name, QVariant::fromValue(dataBits[i].bits));
+        cbx->addItem(icon1, dataBits[i].name, QVariant::fromValue(dataBits[i].bits));
         if (!vsel.isNull() && vsel.isValid()) {
             if (dataBits[i].bits == vsel.value<QSerialPort::DataBits>()) {
                 cbx->setCurrentIndex(i);
@@ -260,7 +260,7 @@ inline void PGSPCreate::initComboDataBits(QComboBox* cbx, QComboBox* link)
 
 inline void PGSPCreate::initComboStopBits(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon3(":/res/actions/16x16/debug-exec.png");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
 
     typedef struct {
         QString name;
@@ -282,7 +282,7 @@ inline void PGSPCreate::initComboStopBits(QComboBox* cbx, QComboBox* link)
 
     cbx->clear();
     for (int i = 0; i < 3; i++) {
-        cbx->addItem(icon3, stopBits[i].name, QVariant::fromValue(stopBits[i].bits));
+        cbx->addItem(icon1, stopBits[i].name, QVariant::fromValue(stopBits[i].bits));
         if (!vsel.isNull() && vsel.isValid()) {
             if (stopBits[i].bits == vsel.value<QSerialPort::StopBits>()) {
                 cbx->setCurrentIndex(i);
@@ -293,7 +293,7 @@ inline void PGSPCreate::initComboStopBits(QComboBox* cbx, QComboBox* link)
 
 inline void PGSPCreate::initComboParity(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon3(":/res/actions/16x16/debug-exec.png");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
 
     typedef struct {
         QString name;
@@ -317,7 +317,7 @@ inline void PGSPCreate::initComboParity(QComboBox* cbx, QComboBox* link)
 
     cbx->clear();
     for (int i = 0; i < 5; i++) {
-        cbx->addItem(icon3, parity[i].name, QVariant::fromValue(parity[i].parity));
+        cbx->addItem(icon1, parity[i].name, QVariant::fromValue(parity[i].parity));
         if (!vsel.isNull() && vsel.isValid()) {
             if (parity[i].parity == vsel.value<QSerialPort::Parity>()) {
                 cbx->setCurrentIndex(i);
@@ -333,7 +333,7 @@ inline void PGSPCreate::initComboParity(QComboBox* cbx, QComboBox* link)
 
 inline void PGSPCreate::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon3(":/res/actions/16x16/debug-exec.png");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
 
     typedef struct {
         QString name;
@@ -355,7 +355,7 @@ inline void PGSPCreate::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
 
     cbx->clear();
     for (int i = 0; i < 3; i++) {
-        cbx->addItem(icon3, flowctrl[i].name, QVariant::fromValue(flowctrl[i].flow));
+        cbx->addItem(icon1, flowctrl[i].name, QVariant::fromValue(flowctrl[i].flow));
         if (!vsel.isNull() && vsel.isValid()) {
             if (flowctrl[i].flow == vsel.value<QSerialPort::FlowControl>()) {
                 cbx->setCurrentIndex(i);

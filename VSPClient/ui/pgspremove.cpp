@@ -31,13 +31,15 @@ void PGSPRemove::onActionExecute()
 
 void PGSPRemove::update(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel)
 {
+    const QIcon icon1(":/assets/png/vspclient_1.png");
+
     Q_UNUSED(command);
     Q_UNUSED(linkModel);
 
     ui->cbSerialPorts->clear();
     for (int i = 0; i < portModel->rowCount(); i++) {
         VSPDataModel::TDataRecord r = portModel->at(i).value<VSPDataModel::TDataRecord>();
-        ui->cbSerialPorts->addItem(r.port.name, QVariant::fromValue(r.port));
+        ui->cbSerialPorts->addItem(icon1, r.port.name, QVariant::fromValue(r.port));
     }
 
     bool enab = ui->cbSerialPorts->count() > 0;
