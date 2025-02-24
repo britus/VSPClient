@@ -433,18 +433,20 @@ inline void VSPSerialIO::connectPort()
 {
     if (!m_port->isOpen()) {
         QApplication::setOverrideCursor(Qt::WaitCursor);
+        qApp->processEvents();
 
-        if (!m_port->open(QSerialPort::ReadWrite)) {
-            ui->txInputView->setPlainText("Unable to connect serial port " + m_port->portName());
-            return;
-        }
+        QTimer::singleShot(50, this, [this]() {
+            if (!m_port->open(QSerialPort::ReadWrite)) {
+                ui->txInputView->setPlainText("Unable to connect serial port " + m_port->portName());
+                return;
+            }
+            m_port->flush();
 
-        ui->btnConnect->setText("Disconnect");
-        ui->gbxOutput->setEnabled(true);
-
-        m_port->flush();
-
-        QApplication::restoreOverrideCursor();
+            ui->gbxOutput->setEnabled(true);
+            ui->btnConnect->setText("Disconnect");
+            ui->txInputView->setPlainText("");
+            QApplication::restoreOverrideCursor();
+        });
     }
 }
 
@@ -452,22 +454,26 @@ inline void VSPSerialIO::disconnectPort()
 {
     if (m_port && m_port->isOpen()) {
         QApplication::setOverrideCursor(Qt::WaitCursor);
+        qApp->processEvents();
 
-        ui->btnConnect->setText("Connect");
-        ui->gbxOutput->setEnabled(false);
+        QTimer::singleShot(10, this, [this]() {
+            if (m_looper) {
+                m_looperStop = true;
+            }
 
-        if (m_looper) {
-            m_looperStop = true;
-        }
+            m_isLooping = false;
 
-        m_isLooping = false;
-        ui->btnLooper->setText("Looper");
-        ui->btnLooper->setEnabled(true);
+            ui->gbxOutput->setEnabled(false);
+            ui->btnConnect->setText("Connect");
 
-        m_port->flush();
-        m_port->close();
+            ui->btnLooper->setText("Looper");
+            ui->btnLooper->setEnabled(true);
 
-        QApplication::restoreOverrideCursor();
+            m_port->flush();
+            m_port->close();
+
+            QApplication::restoreOverrideCursor();
+        });
     }
 }
 
