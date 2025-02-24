@@ -39,23 +39,25 @@ VSPSerialIO::VSPSerialIO(QWidget* parent)
         ui->cbxDtr->setProperty("init", QVariant::fromValue(true));
 #if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         connect(ui->cbxDtr, qOverload<bool>(&QCheckBox::clicked), this, [this](bool state) {
-            // TODO: onClickEvent()
-            Q_UNUSED(this)
-            Q_UNUSED(state)
+            if (m_port) {
+                m_port->setDataTerminalReady(state);
+            }
         });
 #endif
     }
+
     ui->cbxRts->setChecked(false);
     if (!ui->cbxRts->property("init").toBool()) {
         ui->cbxRts->setProperty("init", QVariant::fromValue(true));
 #if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         connect(ui->cbxRts, qOverload<bool>(&QCheckBox::clicked), this, [this](bool state) {
-            // TODO: onClickEvent()
-            Q_UNUSED(this)
-            Q_UNUSED(state)
+            if (m_port) {
+                m_port->setRequestToSend(state);
+            }
         });
 #endif
     }
+
     ui->cbxCts->setChecked(false);
     if (!ui->cbxCts->property("init").toBool()) {
         ui->cbxCts->setProperty("init", QVariant::fromValue(true));
@@ -67,6 +69,7 @@ VSPSerialIO::VSPSerialIO(QWidget* parent)
         });
 #endif
     }
+
     ui->cbxDSR->setChecked(false);
     if (!ui->cbxDSR->property("init").toBool()) {
         ui->cbxDSR->setProperty("init", QVariant::fromValue(true));
@@ -146,7 +149,7 @@ inline void VSPSerialIO::initComboSerialPort(QComboBox* cbx, QComboBox* link)
 
 inline void VSPSerialIO::initComboBaudRate(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon3(":/res/actions/16x16/debug-exec.png");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
 
     typedef struct {
         QString name;
@@ -173,7 +176,7 @@ inline void VSPSerialIO::initComboBaudRate(QComboBox* cbx, QComboBox* link)
 
     cbx->clear();
     for (int i = 0; i < 8; i++) {
-        cbx->addItem(icon3, baudRates[i].name, QVariant::fromValue(baudRates[i].baud));
+        cbx->addItem(icon1, baudRates[i].name, QVariant::fromValue(baudRates[i].baud));
         if (!vsel.isNull() && vsel.isValid()) {
             if (baudRates[i].baud == vsel.value<QSerialPort::BaudRate>()) {
                 cbx->setCurrentIndex(i);
@@ -205,7 +208,7 @@ inline void VSPSerialIO::initComboBaudRate(QComboBox* cbx, QComboBox* link)
 
 inline void VSPSerialIO::initComboDataBits(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon3(":/res/actions/16x16/debug-exec.png");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
 
     typedef struct {
         QString name;
@@ -228,7 +231,7 @@ inline void VSPSerialIO::initComboDataBits(QComboBox* cbx, QComboBox* link)
 
     cbx->clear();
     for (int i = 0; i < 4; i++) {
-        cbx->addItem(icon3, dataBits[i].name, QVariant::fromValue(dataBits[i].bits));
+        cbx->addItem(icon1, dataBits[i].name, QVariant::fromValue(dataBits[i].bits));
         if (!vsel.isNull() && vsel.isValid()) {
             if (dataBits[i].bits == vsel.value<QSerialPort::DataBits>()) {
                 cbx->setCurrentIndex(i);
@@ -260,7 +263,7 @@ inline void VSPSerialIO::initComboDataBits(QComboBox* cbx, QComboBox* link)
 
 inline void VSPSerialIO::initComboStopBits(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon3(":/res/actions/16x16/debug-exec.png");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
 
     typedef struct {
         QString name;
@@ -282,7 +285,7 @@ inline void VSPSerialIO::initComboStopBits(QComboBox* cbx, QComboBox* link)
 
     cbx->clear();
     for (int i = 0; i < 3; i++) {
-        cbx->addItem(icon3, stopBits[i].name, QVariant::fromValue(stopBits[i].bits));
+        cbx->addItem(icon1, stopBits[i].name, QVariant::fromValue(stopBits[i].bits));
         if (!vsel.isNull() && vsel.isValid()) {
             if (stopBits[i].bits == vsel.value<QSerialPort::StopBits>()) {
                 cbx->setCurrentIndex(i);
@@ -314,7 +317,7 @@ inline void VSPSerialIO::initComboStopBits(QComboBox* cbx, QComboBox* link)
 
 inline void VSPSerialIO::initComboParity(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon3(":/res/actions/16x16/debug-exec.png");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
 
     typedef struct {
         QString name;
@@ -338,7 +341,7 @@ inline void VSPSerialIO::initComboParity(QComboBox* cbx, QComboBox* link)
 
     cbx->clear();
     for (int i = 0; i < 5; i++) {
-        cbx->addItem(icon3, parity[i].name, QVariant::fromValue(parity[i].parity));
+        cbx->addItem(icon1, parity[i].name, QVariant::fromValue(parity[i].parity));
         if (!vsel.isNull() && vsel.isValid()) {
             if (parity[i].parity == vsel.value<QSerialPort::Parity>()) {
                 cbx->setCurrentIndex(i);
@@ -370,7 +373,7 @@ inline void VSPSerialIO::initComboParity(QComboBox* cbx, QComboBox* link)
 
 inline void VSPSerialIO::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon3(":/res/actions/16x16/debug-exec.png");
+    const QIcon icon1(":/assets/png/vspclient_1.png");
 
     typedef struct {
         QString name;
@@ -392,7 +395,7 @@ inline void VSPSerialIO::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
 
     cbx->clear();
     for (int i = 0; i < 3; i++) {
-        cbx->addItem(icon3, flowctrl[i].name, QVariant::fromValue(flowctrl[i].flow));
+        cbx->addItem(icon1, flowctrl[i].name, QVariant::fromValue(flowctrl[i].flow));
         if (!vsel.isNull() && vsel.isValid()) {
             if (flowctrl[i].flow == vsel.value<QSerialPort::FlowControl>()) {
                 cbx->setCurrentIndex(i);
@@ -429,6 +432,8 @@ void VSPSerialIO::on_btnSendFile_clicked()
 inline void VSPSerialIO::connectPort()
 {
     if (!m_port->isOpen()) {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+
         if (!m_port->open(QSerialPort::ReadWrite)) {
             ui->txInputView->setPlainText("Unable to connect serial port " + m_port->portName());
             return;
@@ -438,12 +443,16 @@ inline void VSPSerialIO::connectPort()
         ui->gbxOutput->setEnabled(true);
 
         m_port->flush();
+
+        QApplication::restoreOverrideCursor();
     }
 }
 
 inline void VSPSerialIO::disconnectPort()
 {
     if (m_port && m_port->isOpen()) {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+
         ui->btnConnect->setText("Connect");
         ui->gbxOutput->setEnabled(false);
 
@@ -457,6 +466,8 @@ inline void VSPSerialIO::disconnectPort()
 
         m_port->flush();
         m_port->close();
+
+        QApplication::restoreOverrideCursor();
     }
 }
 
@@ -468,10 +479,15 @@ void VSPSerialIO::on_btnConnect_clicked()
         m_port->setStopBits(ui->cbxStopBits->currentData().value<QSerialPort::StopBits>());
         m_port->setParity(ui->cbxParity->currentData().value<QSerialPort::Parity>());
         m_port->setFlowControl(ui->cbxFlowControl->currentData().value<QSerialPort::FlowControl>());
+        m_port->setRequestToSend(ui->cbxRts->isChecked());
+        m_port->setDataTerminalReady(ui->cbxDtr->isChecked());
         connect(m_port, &QSerialPort::errorOccurred, this, &VSPSerialIO::onPortErrorOccured);
         connect(m_port, &QSerialPort::bytesWritten, this, &VSPSerialIO::onPortBytesWritten);
         connect(m_port, &QSerialPort::aboutToClose, this, &VSPSerialIO::onPortClosed);
         connect(m_port, &QSerialPort::readyRead, this, &VSPSerialIO::onPortReadyRead);
+        connect(m_port, &QSerialPort::dataTerminalReadyChanged, this, &VSPSerialIO::onDTRChanged);
+        connect(m_port, &QSerialPort::requestToSendChanged, this, &VSPSerialIO::onRTSChanged);
+        connect(m_port, &QSerialPort::breakEnabledChanged, this, &VSPSerialIO::onBreakChanged);
         connect(m_port, &QSerialPort::destroyed, this, [this](QObject*) {
             m_port = nullptr;
         });
@@ -571,6 +587,24 @@ void VSPSerialIO::on_btnLooper_clicked()
     }
 }
 
+void VSPSerialIO::onDTRChanged(bool set)
+{
+    if (ui->cbxDtr->isChecked() != set) {
+        ui->cbxDtr->setChecked(set);
+    }
+}
+
+void VSPSerialIO::onRTSChanged(bool set)
+{
+    if (ui->cbxRts->isChecked()) {
+        ui->cbxRts->setChecked(set);
+    }
+}
+
+void VSPSerialIO::onBreakChanged(bool)
+{
+}
+
 void VSPSerialIO::onPortErrorOccured(QSerialPort::SerialPortError error)
 {
     if (error != QSerialPort::NoError) {
@@ -623,6 +657,8 @@ void VSPSerialIO::onPortClosed()
     m_isLooping = false;
     ui->btnLooper->setText("Looper");
     ui->btnLooper->setEnabled(true);
+
+    QApplication::restoreOverrideCursor();
 }
 
 void VSPSerialIO::on_actionNewWindow_triggered()

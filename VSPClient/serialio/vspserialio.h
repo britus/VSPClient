@@ -30,6 +30,9 @@ private slots:
     void onPortBytesWritten(qint64 bytes);
     void onPortReadyRead();
     void onPortClosed();
+    void onDTRChanged(bool set);
+    void onRTSChanged(bool set);
+    void onBreakChanged(bool set);
     void on_btnSendFile_clicked();
     void on_btnConnect_clicked();
     void on_edOutputLine_textEdited(const QString& arg1);

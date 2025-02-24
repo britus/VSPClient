@@ -361,10 +361,10 @@ void VSCMainWindow::onClientError(int error, const QString& message)
 
     QList<uint> codes = m_errorStack.keys();
     foreach (auto code, codes) {
-        text += tr("VSP Error %1:\n%2\n\n").arg(code).arg(m_errorStack[code]);
+        text += tr("VSP Error: 0x%1 %2\n").arg(code, 8, 16, QChar('0')).arg(m_errorStack[code]);
     }
 
-    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
+    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     ui->textBrowser->setPlainText(text);
 
     showNotification(1750, text);
@@ -495,7 +495,10 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
         case vspControlLinkPorts: {
             VSPDataModel::TPortLink link = data.value<VSPDataModel::TPortLink>();
             if (link.source.id == link.target.id) {
-                onClientError(0xfa100001, tr("You can't link same ports together.\nEach unlinked port echo TX to RX."));
+                onClientError(
+                   0xfa100001,
+                   tr("\nYou cannot link same ports together.\n\n"
+                      "Each unlinked port echo TX to RX by default."));
                 goto error_exit;
             }
             if (!m_vsp->LinkPorts(link.source.id, link.target.id)) {

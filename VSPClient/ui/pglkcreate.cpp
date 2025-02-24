@@ -37,6 +37,8 @@ void PGLKCreate::onActionExecute()
 
 void PGLKCreate::update(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel)
 {
+    const QIcon icon1(":/assets/png/vspclient_1.png");
+
     Q_UNUSED(command);
 
     QList<quint8> linkedPorts;
@@ -59,8 +61,8 @@ void PGLKCreate::update(TVSPControlCommand command, VSPPortListModel* portModel,
     for (int i = 0; i < portModel->rowCount(); i++) {
         VSPDataModel::TDataRecord r = portModel->at(i).value<VSPDataModel::TDataRecord>();
         if (!linkedPorts.contains(r.port.id)) {
-            ui->cbPort1->addItem(r.port.name, QVariant::fromValue(r.port));
-            ui->cbPort2->addItem(r.port.name, QVariant::fromValue(r.port));
+            ui->cbPort1->addItem(icon1, r.port.name, QVariant::fromValue(r.port));
+            ui->cbPort2->addItem(icon1, r.port.name, QVariant::fromValue(r.port));
         }
     }
 
