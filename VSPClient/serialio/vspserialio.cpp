@@ -625,6 +625,7 @@ void VSPSerialIO::onPortErrorOccured(QSerialPort::SerialPortError error)
         QTimer::singleShot(100, this, [this, error]() {
             QString msg = QStringLiteral("Serial port error: %1").arg(error);
             ui->txInputView->setPlainText(msg);
+            QApplication::restoreOverrideCursor();
         });
     }
 }
