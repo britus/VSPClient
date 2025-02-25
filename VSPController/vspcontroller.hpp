@@ -21,7 +21,7 @@ namespace VSPClient {
 
 #define MAGIC_CONTROL    0xBE6605250000L
 #define MAX_SERIAL_PORTS 16
-#define MAX_PORT_LINKS   8
+#define MAX_PORT_LINKS   16
 #define MAX_PORT_NAME    64
 
 #ifndef VSP_UCD_SIZE

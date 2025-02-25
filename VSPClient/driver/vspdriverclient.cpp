@@ -10,9 +10,6 @@
 #include <QTimer>
 #include <vspdriverclient.h>
 
-#define MAX_SERIAL_PORTS 16
-#define MAX_PORT_LINKS   8
-
 VSPDriverClient::VSPDriverClient(QObject* parent)
     : QObject(parent)
     , VSPController()
