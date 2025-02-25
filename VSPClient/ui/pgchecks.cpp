@@ -25,21 +25,22 @@ PGChecks::~PGChecks()
 
 void PGChecks::onActionExecute()
 {
-    // const VSPDataModel::TPortItem p = seletion();
-    // emit VSPAbstractPage::execute(vspControlEnableChecks, QVariant::fromValue(p));
+    uint flags = 0;
+    if (ui->cbxBaudRate->isChecked())
+        flags |= 0x01;
+    if (ui->cbxDataBits->isChecked())
+        flags |= 0x02;
+    if (ui->cbxStopBits->isChecked())
+        flags |= 0x04;
+    if (ui->cbxParity->isChecked())
+        flags |= 0x08;
+    if (ui->cbxFlowCtrl->isChecked())
+        flags |= 0x10;
+
+    emit VSPAbstractPage::execute(vspControlEnableChecks, QVariant::fromValue(flags));
 }
 
-void PGChecks::update(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel)
+void PGChecks::update(TVSPControlCommand, VSPPortListModel*, VSPLinkListModel*)
 {
-#if 0
-    ui->cbPorts->clear();
-    for (int i = 0; i < portModel->rowCount(); i++) {
-        VSPDataModel::TDataRecord r = portModel->at(i).value<VSPDataModel::TDataRecord>();
-        ui->cbPorts->addItem(r.port.name, QVariant::fromValue(r.port));
-    }
-#else
-    Q_UNUSED(command);
-    Q_UNUSED(portModel);
-    Q_UNUSED(linkModel);
-#endif
+    //
 }

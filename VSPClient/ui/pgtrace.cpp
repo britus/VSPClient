@@ -25,21 +25,18 @@ PGTrace::~PGTrace()
 
 void PGTrace::onActionExecute()
 {
-    // const VSPDataModel::TPortItem p = seletion();
-    // emit VSPAbstractPage::execute(vspControlEnableChecks, QVariant::fromValue(p));
+    uint flags = 0;
+    if (ui->cbxTraceRX->isChecked())
+        flags |= 0x1;
+    if (ui->cbxTraceTX->isChecked())
+        flags |= 0x2;
+    if (ui->cbxTraceCmd->isChecked())
+        flags |= 0x4;
+
+    emit VSPAbstractPage::execute(vspControlEnableChecks, QVariant::fromValue(flags));
 }
 
-void PGTrace::update(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel)
+void PGTrace::update(TVSPControlCommand, VSPPortListModel*, VSPLinkListModel*)
 {
-#if 0
-    ui->cbPorts->clear();
-    for (int i = 0; i < portModel->rowCount(); i++) {
-        VSPDataModel::TDataRecord r = portModel->at(i).value<VSPDataModel::TDataRecord>();
-        ui->cbPorts->addItem(r.port.name, QVariant::fromValue(r.port));
-    }
-#else
-    Q_UNUSED(command);
-    Q_UNUSED(portModel);
-    Q_UNUSED(linkModel);
-#endif
+    //
 }
