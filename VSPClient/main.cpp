@@ -54,9 +54,7 @@ int main(int argc, char* argv[])
     /* macintosh, Windows, Fusion */
     QString styleName;
 
-#if defined(Q_OS_MACOS)
-    styleName = "macintosh";
-#elif defined(Q_OS_UNIX)
+#if defined(Q_OS_UNIX)
     styleName = "Fusion";
 #else
     styleName = "Windows";
@@ -83,7 +81,11 @@ int main(int argc, char* argv[])
        "QPushButton::default {border-color:rgb(252,115,9);}"
        "QPushButton::pressed {border-color:rgb(252,115,9);}"
        "QPushButton::hover {border-color:rgb(252,115,9);}"
-       "QPushButton::disabled {border-color:rgb(46,46,46);}");
+       "QPushButton::disabled {border-color:rgb(46,46,46);}"
+#if defined(Q_OS_UNIX)
+       "QComboBox {color: white;}"
+#endif
+    );
 
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
