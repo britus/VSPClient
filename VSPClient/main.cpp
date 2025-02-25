@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
        "border-style:solid;"
        "border-width:1px;"
        "border-color:rgb(76,76,76);"
-       "min-height:32px;min-width:110px}"
+       "min-height:32px;min-width:120px;padding:4px,4px,4px,4px;}"
        "QPushButton::focus {border-color:white;}"
        "QPushButton::default {border-color:rgb(252,115,9);}"
        "QPushButton::pressed {border-color:rgb(252,115,9);}"
