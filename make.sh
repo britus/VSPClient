@@ -11,7 +11,7 @@ make -j8
 cd ..
 
 if [ "x${COPYDIR}" != "x" ] ; then
-    mkdir -p ${COPYDIR}
+    mkdir -vp ${COPYDIR}
 
     ## ------------ Framework --------------
     if [ -d build/VSPClient/VSPClientUI.framework ] ; then
