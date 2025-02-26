@@ -341,6 +341,9 @@ void VSCMainWindow::onClientDisconnected()
        << ui->btn07Checks    //
        << ui->btn08Traces);
 
+    ui->btn07Checks->setVisible(false);
+    ui->btn08Traces->setVisible(false);
+
     ui->stackedWidget->setCurrentWidget(ui->pg09Connect);
 
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);

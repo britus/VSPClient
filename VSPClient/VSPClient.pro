@@ -28,7 +28,8 @@ TRANSLATIONS += \
 DISTFILES += \
     $$PWD/LICENSE \
     $$PWD/README.md \
-    $$PWD/qt-bundle-bugfix.sh
+    $$PWD/qt-bundle-bugfix.sh \
+    $$PWD/Info-App.plist
 
 # Default rules for deployment.
 target.path = /Applications

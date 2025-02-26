@@ -1,23 +1,22 @@
 TEMPLATE = lib
-DEFINES += VSPSETUP_LIBRARY
+TARGET = VSPSetup
 
 CONFIG -= qt
-CONFIG += c++17
-CONFIG += lib_bundle
+CONFIG += c++20
 CONFIG += sdk_no_version_check
 CONFIG += nostrip
 CONFIG += debug
 #CONFIG += lrelease
 CONFIG += embed_translations
-CONFIG += embed_libraries
 CONFIG += create_prl
 CONFIG += incremental
 CONFIG += global_init_link_order
 CONFIG += lib_version_first
+CONFIG += vsp_framework
 
 # disables all the APIs deprecated before Qt 6.0.0
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
-DEFINES += VSP_DEBUG
+DEFINES += VSPSETUP_LIBRARY
 
 INCLUDEPATH += $$PWD
 
@@ -32,8 +31,9 @@ OBJECTIVE_HEADERS += $$PWD/vspsmloader.h
 OBJECTIVE_HEADERS += $$PWD/vspsetup.h
 
 DISTFILES += \
-    Info.plist \
     LICENSE
+
+QMAKE_PROJECT_NAME = $${TARGET}
 
 QMAKE_CFLAGS += -mmacosx-version-min=12.2
 QMAKE_CXXFLAGS += -mmacosx-version-min=12.2
@@ -43,27 +43,6 @@ QMAKE_CXXFLAGS += -ggdb3
 
 QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
 
-QMAKE_PROJECT_NAME = VSPSetup
-QMAKE_FRAMEWORK_BUNDLE_NAME = VSPSetup
-QMAKE_FRAMEWORK_VERSION = 1.0
-QMAKE_BUNDLE_EXTENSION = .framework
-QMAKE_INFO_PLIST = $$PWD/Info.plist
-
-FRAMEWORK_HEADERS.version = Versions
-FRAMEWORK_HEADERS.files = $${OBJECTIVE_HEADERS}
-FRAMEWORK_HEADERS.path = Headers
-QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
-
-LICENSE.version = Versions
-LICENSE.files = $$PWD/LICENSE
-LICENSE.path = Resources
-QMAKE_BUNDLE_DATA += LICENSE
-
-icons.version = Versions
-icons.files = $$PWD/vspsetup.icns
-icons.path = Resources
-QMAKE_BUNDLE_DATA += icons
-
 #otool -L
 LIBS += -dead_strip
 LIBS += -framework IOKit
@@ -72,5 +51,31 @@ LIBS += -framework Foundation
 LIBS += -framework SystemExtensions
 LIBS += -framework SystemConfiguration
 LIBS += -liconv
+
+vsp_framework {
+    CONFIG += lib_bundle
+    CONFIG += embed_libraries
+    CONFIG += create_prl
+
+    QMAKE_FRAMEWORK_BUNDLE_NAME = $${TARGET}
+    QMAKE_FRAMEWORK_VERSION = A
+    QMAKE_BUNDLE_EXTENSION = .framework
+    #QMAKE_INFO_PLIST = $$PWD/Info.plist
+
+    FRAMEWORK_HEADERS.version = Versions
+    FRAMEWORK_HEADERS.files = $${OBJECTIVE_HEADERS}
+    FRAMEWORK_HEADERS.path = Headers
+    QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
+
+    LICENSE.version = Versions
+    LICENSE.files = $$PWD/LICENSE
+    LICENSE.path = Resources
+    QMAKE_BUNDLE_DATA += LICENSE
+
+    icons.version = Versions
+    icons.files = $$PWD/vspsetup.icns
+    icons.path = Resources
+    QMAKE_BUNDLE_DATA += icons
+}
 
 message("Build: $${TARGET}")
