@@ -67,9 +67,10 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     connect(ui->pg09Connect, &PGConnect::installDriver, this, &VSCMainWindow::onActionInstall);
     connect(ui->pg09Connect, &PGConnect::uninstallDriver, this, &VSCMainWindow::onActionUninstall);
 
-#if defined(_VSPCLIENT_LIBRARY_)
-    ui->toolButton->setVisible(false);
-#endif
+    /* debug stuff */
+    ui->btn08Traces->setVisible(false);
+    ui->btn09Connect->setVisible(false);
+    /* -- */
 
     const QList<QPushButton*> buttons = m_buttonMap.keys();
     foreach (auto button, buttons) {
@@ -135,7 +136,6 @@ VSCMainWindow::~VSCMainWindow()
 
 void VSCMainWindow::closeEvent(QCloseEvent*)
 {
-    // ui->tvItems->removeEventFilter(this);
     qApp->quit();
 }
 
@@ -339,9 +339,6 @@ void VSCMainWindow::onClientDisconnected()
        << ui->btn06LinkList  //
        << ui->btn07Checks    //
        << ui->btn08Traces);
-
-    ui->btn07Checks->setVisible(false);
-    ui->btn08Traces->setVisible(false);
 
     ui->stackedWidget->setCurrentWidget(ui->pg09Connect);
 
