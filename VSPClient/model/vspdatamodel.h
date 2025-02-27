@@ -29,6 +29,7 @@ public:
         TDataType type;
         TPortItem port;
         TPortLink link;
+        quint32 flags;
     } TDataRecord;
 
     explicit VSPDataModel(QObject* parent = nullptr);

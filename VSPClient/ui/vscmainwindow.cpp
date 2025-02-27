@@ -526,14 +526,15 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
         }
         case vspControlEnableChecks: {
             VSPDataModel::TDataRecord r = data.value<VSPDataModel::TDataRecord>();
-            if (!m_vsp->EnableChecks(r.port.id)) {
+            if (!m_vsp->EnableChecks(r.port.id, r.flags)) {
                 goto error_exit;
             }
             break;
         }
         case vspControlEnableTrace: {
             VSPDataModel::TDataRecord r = data.value<VSPDataModel::TDataRecord>();
-            if (!m_vsp->EnableTrace(r.port.id)) {
+
+            if (!m_vsp->EnableTrace(r.port.id, r.flags)) {
                 goto error_exit;
             }
             break;

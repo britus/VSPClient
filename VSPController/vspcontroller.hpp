@@ -162,11 +162,11 @@ public:
     /** ----------------------
      *
      */
-    bool EnableChecks(const uint8_t port);
+    bool EnableChecks(const uint8_t port, const uint32_t flags = 0);
     /** ----------------------
      *
      */
-    bool EnableTrace(const uint8_t port);
+    bool EnableTrace(const uint8_t port, const uint32_t flags = 0);
 
 protected:
     friend class VSPControllerPriv;

@@ -104,17 +104,17 @@ bool VSPController::UnlinkPorts(const uint8_t source, const uint8_t target)
 // -------------------------------------------------------------------
 //
 //
-bool VSPController::EnableChecks(const uint8_t port)
+bool VSPController::EnableChecks(const uint8_t port, const uint32_t flags)
 {
-    return p->EnableChecks(port);
+    return p->EnableChecks(port, flags);
 }
 
 // -------------------------------------------------------------------
 //
 //
-bool VSPController::EnableTrace(const uint8_t port)
+bool VSPController::EnableTrace(const uint8_t port, const uint32_t flags)
 {
-    return p->EnableTrace(port);
+    return p->EnableTrace(port, flags);
 }
 
 // -------------------------------------------------------------------
@@ -336,11 +336,12 @@ bool VSPControllerPriv::UnlinkPorts(const uint8_t source, const uint8_t target)
 // -------------------------------------------------------------------
 //
 //
-bool VSPControllerPriv::EnableChecks(const uint8_t port)
+bool VSPControllerPriv::EnableChecks(const uint8_t port, const uint32_t flags)
 {
     TVSPControllerData input = {};
     input.context = vspContextPort;
     input.command = vspControlEnableChecks;
+    input.parameter.flags = flags;
     input.parameter.link.source = port;
     input.parameter.link.target = port;
 
@@ -350,11 +351,12 @@ bool VSPControllerPriv::EnableChecks(const uint8_t port)
 // -------------------------------------------------------------------
 //
 //
-bool VSPControllerPriv::EnableTrace(const uint8_t port)
+bool VSPControllerPriv::EnableTrace(const uint8_t port, const uint32_t flags)
 {
     TVSPControllerData input = {};
     input.context = vspContextPort;
     input.command = vspControlEnableTrace;
+    input.parameter.flags = flags;
     input.parameter.link.source = port;
     input.parameter.link.target = port;
 

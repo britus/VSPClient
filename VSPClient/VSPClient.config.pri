@@ -16,8 +16,8 @@ CONFIG += debug
 
 # Build lib framework or app
 #CONFIG += vsp_library
-CONFIG += vsp_framework
-#CONFIG += vsp_app
+#CONFIG += vsp_framework
+CONFIG += vsp_app
 
 # major.minor.patch.build
 # VERSION = 1.0.4.14
