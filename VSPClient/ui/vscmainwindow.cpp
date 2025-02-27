@@ -285,9 +285,8 @@ void VSCMainWindow::onSetupFailWithError(uint32_t code, const char* message)
 void VSCMainWindow::onSetupFinishWithResult(uint32_t code, const char* message)
 {
     qDebug("CTRLWIN::onSetupFinishWithResult(): code=%d msg=%s\n", code, message);
-
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
-    ui->textBrowser->setPlainText(tr("%1 %2").arg(code).arg(message));
+    ui->textBrowser->setPlainText(tr("%1 %2").arg(code == 0 ? "" : QString::number(code), message).trimmed());
     showNotification(2750, ui->textBrowser->toPlainText());
 }
 

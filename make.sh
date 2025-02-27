@@ -1,6 +1,5 @@
 #!/bin/bash
 
-QTDIR=${HOME}/Qt/6.8.2/macos
 COPYDIR=${1}
 
 mkdir -p build
