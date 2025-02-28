@@ -540,11 +540,12 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             break;
         }
         case vspControlPingPong: {
-            if (!m_vsp->IsConnected() && !m_vsp->ConnectDriver()) {
-                m_vsp->activateDriver();
-                goto error_exit;
+            if (!m_vsp->IsConnected()) {
+                if (!m_vsp->ConnectDriver()) {
+                    goto error_exit;
+                }
             }
-            else if (!m_vsp->GetStatus()) {
+            if (!m_vsp->GetStatus()) {
                 goto error_exit;
             }
             break;

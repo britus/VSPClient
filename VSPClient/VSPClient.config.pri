@@ -16,8 +16,8 @@ CONFIG += debug
 
 # Build lib framework or app
 #CONFIG += vsp_library
-#CONFIG += vsp_framework
-CONFIG += vsp_app
+CONFIG += vsp_framework
+#CONFIG += vsp_app
 
 # major.minor.patch.build
 # VERSION = 1.0.4.14
@@ -37,8 +37,8 @@ QMAKE_CXXFLAGS += -ggdb3
 # for QT Creator and Visual Studio project files only.
 QMAKE_PROJECT_NAME = $${TARGET}
 
-#QMAKE_LFLAGS        = -Wl,-rpath,@executable_path/../Frameworks/
-#QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
+QMAKE_LFLAGS        = -Wl,-rpath,@executable_path/../Frameworks/
+QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
 
 #otool -L
 LIBS += -dead_strip
