@@ -34,15 +34,48 @@
      <property name="title">
       <string>Enable/Disable Trace</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="2" column="0">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>136</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Serial Port:</string>
+        </property>
+        <property name="buddy">
+         <cstring>cbPorts</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cbPorts">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
        <widget class="QWidget" name="widget_2" native="true">
         <layout class="QGridLayout" name="gridLayout">
          <property name="leftMargin">
           <number>0</number>
          </property>
          <property name="topMargin">
-          <number>0</number>
+          <number>48</number>
          </property>
          <property name="rightMargin">
           <number>0</number>
@@ -60,14 +93,14 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
+         <item row="1" column="0">
           <widget class="QCheckBox" name="cbxTraceTX">
            <property name="text">
             <string>Trace TX</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
+         <item row="0" column="1">
           <widget class="QCheckBox" name="cbxTraceCmd">
            <property name="text">
             <string>Trace commands</string>
@@ -77,20 +110,7 @@
         </layout>
        </widget>
       </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>136</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
+      <item row="3" column="0" colspan="2">
        <widget class="QWidget" name="widget" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="spacing">
@@ -111,7 +131,7 @@
          <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -143,6 +163,7 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>cbPorts</tabstop>
   <tabstop>cbxTraceRX</tabstop>
   <tabstop>cbxTraceTX</tabstop>
   <tabstop>cbxTraceCmd</tabstop>

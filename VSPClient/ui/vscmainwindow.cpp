@@ -68,8 +68,8 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     connect(ui->pg09Connect, &PGConnect::uninstallDriver, this, &VSCMainWindow::onActionUninstall);
 
     /* debug stuff */
-    ui->btn08Traces->setVisible(false);
-    ui->btn09Connect->setVisible(false);
+    // ui->btn08Traces->setVisible(false);
+    // ui->btn07Checks->setVisible(false);
     /* -- */
 
     const QList<QPushButton*> buttons = m_buttonMap.keys();
@@ -461,9 +461,6 @@ void VSCMainWindow::onSelectPage()
 void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVariant& data)
 {
     qDebug("CTRLWIN::onActionExecute(): cmd=%d\n", command);
-
-    // VSPAbstractPage* page = ui->stackedWidget->currentWidget();
-    // int index = ui->stackedWidget->currentIndex();
 
     // reset error message stack
     m_errorStack.clear();
