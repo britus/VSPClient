@@ -25,7 +25,7 @@ PGTrace::~PGTrace()
 
 void PGTrace::onActionExecute()
 {
-    uint flags = 0;
+    quint32 flags = 0;
     if (ui->cbxTraceRX->isChecked())
         flags |= 0x1;
     if (ui->cbxTraceTX->isChecked())
@@ -33,10 +33,27 @@ void PGTrace::onActionExecute()
     if (ui->cbxTraceCmd->isChecked())
         flags |= 0x4;
 
-    emit VSPAbstractPage::execute(vspControlEnableChecks, QVariant::fromValue(flags));
+    quint64 params = (flags << 16)
+                     | (ui->cbPorts->currentIndex() >= 0 //
+                           ? ui->cbPorts->currentIndex()
+                           : 0);
+    emit VSPAbstractPage::execute(vspControlEnableChecks, QVariant::fromValue(params));
 }
 
-void PGTrace::update(TVSPControlCommand, VSPPortListModel*, VSPLinkListModel*)
+void PGTrace::update(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel)
 {
-    //
+    const QIcon icon1(":/assets/png/vspclient_1.png");
+
+    Q_UNUSED(command);
+    Q_UNUSED(linkModel);
+
+    ui->cbPorts->clear();
+    for (int i = 0; i < portModel->rowCount(); i++) {
+        VSPDataModel::TDataRecord r = portModel->at(i).value<VSPDataModel::TDataRecord>();
+        ui->cbPorts->addItem(icon1, r.port.name, QVariant::fromValue(r.port));
+    }
+
+    bool enab = ui->cbPorts->count() > 0;
+    ui->cbPorts->setEnabled(enab);
+    ui->btnUpdate->setEnabled(enab);
 }
