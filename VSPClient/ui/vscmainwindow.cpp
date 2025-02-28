@@ -542,10 +542,12 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
         case vspControlPingPong: {
             if (!m_vsp->IsConnected()) {
                 if (!m_vsp->ConnectDriver()) {
+                    onUpdateButtons(false);
                     goto error_exit;
                 }
             }
             if (!m_vsp->GetStatus()) {
+                onUpdateButtons(false);
                 goto error_exit;
             }
             break;
