@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BuildMachineOSBuild</key>
+	<string>21H1320</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Virtual Serial Port Controller</string>
+	<key>CFBundleExecutable</key>
+	<string>VSPClient</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.eof.tools.VSPClient</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>VSPClient</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.3</string>
+	<key>CFBundleSupportedPlatforms</key>
+	<array>
+		<string>MacOSX</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>VSP Driver Setup</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>vspctl</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>10</string>
+	<key>DTCompiler</key>
+	<string>com.apple.compilers.llvm.clang.1_0</string>
+	<key>DTPlatformBuild</key>
+	<string>14C18</string>
+	<key>DTPlatformName</key>
+	<string>macosx</string>
+	<key>DTPlatformVersion</key>
+	<string>13.1</string>
+	<key>DTSDKBuild</key>
+	<string>22C55</string>
+	<key>DTSDKName</key>
+	<string>macosx13.1</string>
+	<key>DTXcode</key>
+	<string>1420</string>
+	<key>DTXcodeBuild</key>
+	<string>14C18</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.developer-tools</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>12.2</string>
+	<key>LSUIPresentationMode</key>
+	<integer>0</integer>
+	<key>LSVisibleInClassic</key>
+	<true/>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Require acces to file for VSP test.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Require acces to file for VSP test.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Require acces to file for VSP test.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2025 by EoF Software Labs</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Permit VPS Controller to redirect data from serial port to a network connection.</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>Permit Virtual Serial Port to write data to network volume path.</string>
+	<key>NSPrefPaneIconFile</key>
+	<string>vspclient.icns</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSSupportsSuddenTermination</key>
+	<true/>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>Shows informative messages about the state of the VSP driver.</string>
+	<key>OSBundleUsageDescription</key>
+	<string>Required to Control the Virtual Serial Port links</string>
+	<key>UILaunchImageFile</key>
+	<string>vspclient_5.png</string>
+	<key>UIPrerenderedIcon</key>
+	<false/>
+	<key>com.apple.developer.driverkit</key>
+	<true/>
+	<key>com.apple.developer.driverkit.install</key>
+	<true/>
+	<key>com.apple.developer.driverkit.userclient-access</key>
+	<array>
+		<string>VSPDriver</string>
+	</array>
+	<key>com.apple.developer.system-extension.install</key>
+	<true/>
+	<key>com.apple.developer.system-extension.uninstall</key>
+	<true/>
+	<key>com.apple.private.driverkit.driver-access</key>
+	<array>
+		<string>VSPDriver</string>
+	</array>
+	<key>com.apple.security.temporary-exception.iokit-user-client-class</key>
+	<array>
+		<string>IOUserUserClient</string>
+	</array>
+</dict>
+</plist>
