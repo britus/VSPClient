@@ -37,10 +37,29 @@ void PGChecks::onActionExecute()
     if (ui->cbxFlowCtrl->isChecked())
         flags |= 0x10;
 
-    emit VSPAbstractPage::execute(vspControlEnableChecks, QVariant::fromValue(flags));
+    VSPDataModel::TPortItem port = {};
+    if (ui->cbPorts->currentIndex() >= 0) {
+        port = ui->cbPorts->currentData().value<VSPDataModel::TPortItem>();
+    }
+    quint64 params = (flags << 16) | port.id;
+
+    emit VSPAbstractPage::execute(vspControlEnableChecks, QVariant::fromValue(params));
 }
 
-void PGChecks::update(TVSPControlCommand, VSPPortListModel*, VSPLinkListModel*)
+void PGChecks::update(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel)
 {
-    //
+    const QIcon icon1(":/assets/png/vspclient_1.png");
+
+    Q_UNUSED(command);
+    Q_UNUSED(linkModel);
+
+    ui->cbPorts->clear();
+    for (int i = 0; i < portModel->rowCount(); i++) {
+        VSPDataModel::TDataRecord r = portModel->at(i).value<VSPDataModel::TDataRecord>();
+        ui->cbPorts->addItem(icon1, r.port.name, QVariant::fromValue(r.port));
+    }
+
+    bool enab = ui->cbPorts->count() > 0;
+    ui->cbPorts->setEnabled(enab);
+    ui->btnUpdate->setEnabled(enab);
 }

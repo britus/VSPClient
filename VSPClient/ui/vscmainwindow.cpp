@@ -522,16 +522,19 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             break;
         }
         case vspControlEnableChecks: {
-            VSPDataModel::TDataRecord r = data.value<VSPDataModel::TDataRecord>();
-            if (!m_vsp->EnableChecks(r.port.id, r.flags)) {
+            quint64 value = data.toUInt();
+            quint8 portId = value & 0x00ffL;
+            value = (value >> 16) & 0xffffL;
+            if (!m_vsp->EnableChecks(portId, value)) {
                 goto error_exit;
             }
             break;
         }
         case vspControlEnableTrace: {
-            VSPDataModel::TDataRecord r = data.value<VSPDataModel::TDataRecord>();
-
-            if (!m_vsp->EnableTrace(r.port.id, r.flags)) {
+            quint64 value = data.toUInt();
+            quint8 portId = value & 0x00ffL;
+            value = (value >> 16) & 0xffffL;
+            if (!m_vsp->EnableTrace(portId, value)) {
                 goto error_exit;
             }
             break;

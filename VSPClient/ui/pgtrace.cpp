@@ -33,10 +33,12 @@ void PGTrace::onActionExecute()
     if (ui->cbxTraceCmd->isChecked())
         flags |= 0x4;
 
-    quint64 params = (flags << 16)
-                     | (ui->cbPorts->currentIndex() >= 0 //
-                           ? ui->cbPorts->currentIndex()
-                           : 0);
+    VSPDataModel::TPortItem port = {};
+    if (ui->cbPorts->currentIndex() >= 0) {
+        port = ui->cbPorts->currentData().value<VSPDataModel::TPortItem>();
+    }
+    quint64 params = (flags << 16) | port.id;
+
     emit VSPAbstractPage::execute(vspControlEnableChecks, QVariant::fromValue(params));
 }
 

@@ -78,16 +78,16 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
            : "Last command failed.");
 
     text << "Driver callback result:" << Qt::endl;
-    text << "Data size......: " << size << Qt::endl;
-    text << "Context........: " << data->context << Qt::endl;
-    text << "Command........: " << data->command << txStatus << Qt::endl;
-    text << "Status code....: " << data->status.code << Qt::endl;
-    text << "Status flags...: " << Qt::hex << data->status.flags << Qt::endl;
-    text << "Parameter flags: " << Qt::hex << data->parameter.flags << Qt::endl;
-    text << "Port 1.........: " << data->parameter.link.source << Qt::endl;
-    text << "Port 2.........: " << data->parameter.link.target << Qt::endl;
-    text << "Port count.....: " << data->ports.count << Qt::endl;
-    text << "Link count.....: " << data->links.count << Qt::endl;
+    text << "Data size......: " << Qt::dec << size << Qt::endl;
+    text << "Context........: " << Qt::dec << data->context << Qt::endl;
+    text << "Command........: " << Qt::dec << data->command << txStatus << Qt::endl;
+    text << "Status code....: 0x" << Qt::hex << data->status.code << Qt::endl;
+    text << "Status flags...: 0x" << Qt::hex << data->status.flags << Qt::endl;
+    text << "Parameter flags: 0x" << Qt::hex << data->parameter.flags << Qt::endl;
+    text << "Port 1.........: " << Qt::dec << data->parameter.link.source << Qt::endl;
+    text << "Port 2.........: " << Qt::dec << data->parameter.link.target << Qt::endl;
+    text << "Port count.....: " << Qt::dec << data->ports.count << Qt::endl;
+    text << "Link count.....: " << Qt::dec << data->links.count << Qt::endl;
 
     if (data->ports.count) {
         m_portList.resetModel();

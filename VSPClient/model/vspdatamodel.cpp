@@ -162,7 +162,7 @@ void VSPDataModel::append(const TPortItem& port)
         }
     }
     beginResetModel();
-    m_records.append({TDataType::PortItem, port, {}});
+    m_records.append({TDataType::PortItem, port, {}, 0});
     endResetModel();
 }
 
@@ -178,7 +178,7 @@ void VSPDataModel::append(const TPortLink& link)
         }
     }
     beginResetModel();
-    m_records.append({TDataType::PortLink, {}, link});
+    m_records.append({TDataType::PortLink, {}, link, 0});
     endResetModel();
 }
 
