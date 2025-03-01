@@ -1,6 +1,7 @@
 #!/bin/bash
 
 COPYDIR=${1}
+PWD_DIR=`pwd`
 
 mkdir -p build
 
@@ -26,30 +27,30 @@ if [ "x${COPYDIR}" != "x" ] ; then
 	mkdir -vp ${COPYDIR}
 
 	## ------------ Framework --------------
-	if [ -d build/VSPClient/VSPClientUI.framework ] ; then
+	if [ -d ${PWD_DIR}/build/VSPClient/VSPClientUI.framework ] ; then
 		rm -fR ${COPYDIR}/VSPClientUI.framework && \
-			cp -Rv build/VSPClient/VSPClientUI.framework ${COPYDIR}/
+			cp -Rv ${PWD_DIR}/build/VSPClient/VSPClientUI.framework ${COPYDIR}/
 	fi
-	if [ -d build/VSPController/VSPController.framework ] ; then
+	if [ -d ${PWD_DIR}/build/VSPController/VSPController.framework ] ; then
 		rm -fR ${COPYDIR}/VSPController.framework && \
-			cp -Rv build/VSPController/VSPController.framework ${COPYDIR}/
+			cp -Rv ${PWD_DIR}/build/VSPController/VSPController.framework ${COPYDIR}/
 	fi
-	if [ -d build/VSPSetup/VSPSetup.framework ] ; then
+	if [ -d ${PWD_DIR}/build/VSPSetup/VSPSetup.framework ] ; then
 		rm -fR ${COPYDIR}/VSPSetup.framework && \
-			cp -Rv build/VSPSetup/VSPSetup.framework ${COPYDIR}/
+			cp -Rv ${PWD_DIR}/build/VSPSetup/VSPSetup.framework ${COPYDIR}/
 	fi
 
 	## ------------ Libraries --------------
-	if [ -e build/VSPClient/libVSPClient.dylib ] ; then
+	if [ -e ${PWD_DIR}/build/VSPClient/libVSPClient.dylib ] ; then
 		rm -fR ${COPYDIR}/libVSPClient* && \
-			cp -Rv build/VSPClient/libVSPClient* ${COPYDIR}/
+			cp -Rv ${PWD_DIR}/build/VSPClient/libVSPClient* ${COPYDIR}/
 	fi
-	if [ -e build/VSPController/libVSPController.dylib ] ; then
+	if [ -e ${PWD_DIR}/build/VSPController/libVSPController.dylib ] ; then
 		rm -fR ${COPYDIR}/libVSPController* && \
-			cp -Rv build/VSPController/libVSPController* ${COPYDIR}/
+			cp -Rv ${PWD_DIR}/build/VSPController/libVSPController* ${COPYDIR}/
 	fi
-	if [ -e build/VSPSetup/libVSPSetup.dylib ] ; then
+	if [ -e ${PWD_DIR}/build/VSPSetup/libVSPSetup.dylib ] ; then
 		rm -fR ${COPYDIR}/libVSPSetup* && \
-			cp -Rv build/VSPSetup/libVSPSetup* ${COPYDIR}/
+			cp -Rv ${PWD_DIR}/build/VSPSetup/libVSPSetup* ${COPYDIR}/
 	fi
 fi

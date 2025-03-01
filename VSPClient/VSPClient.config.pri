@@ -127,6 +127,9 @@ vsp_framework {
 	QMAKE_BUNDLE_EXTENSION = .framework
 	#QMAKE_INFO_PLIST = $$PWD/Info.plist
 
+	# Important for the App with embedded framework
+	QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
+
 	#FRAMEWORK_HEADERS.version = Versions
 	#FRAMEWORK_HEADERS.files = $${HEADERS}
 	#FRAMEWORK_HEADERS.path = Headers
@@ -152,6 +155,9 @@ vsp_library {
 	CONFIG += create_prl
 	CONFIG += embed_translations
 	CONFIG += lib_version_first
+
+	# Important for the App with embedded framework
+	QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
 }
 
 DISTFILES += \

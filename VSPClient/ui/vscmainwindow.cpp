@@ -637,14 +637,14 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
                     onClientConnected();
                     goto error_exit;
                 }
-                else {
-                    if (!m_vsp->ConnectDriver()) {
-                        onUpdateButtons(false);
-                        onActionInstall();
-                        m_firstStart = false;
-                        goto error_exit;
-                    }
+                if (!m_vsp->ConnectDriver()) {
+                    onUpdateButtons(false);
+                    onActionInstall();
+                    m_firstStart = false;
+                    goto error_exit;
                 }
+                m_firstStart = false;
+                m_demoMode = false;
             }
             if (!m_vsp->GetStatus()) {
                 onUpdateButtons(false);
