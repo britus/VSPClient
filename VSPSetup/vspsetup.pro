@@ -31,7 +31,7 @@ OBJECTIVE_HEADERS += $$PWD/vspsmloader.h
 OBJECTIVE_HEADERS += $$PWD/vspsetup.h
 
 DISTFILES += \
-    LICENSE
+	LICENSE
 
 QMAKE_PROJECT_NAME = $${TARGET}
 
@@ -40,8 +40,6 @@ QMAKE_CXXFLAGS += -mmacosx-version-min=12.2
 QMAKE_CXXFLAGS += -fno-omit-frame-pointer
 QMAKE_CXXFLAGS += -funwind-tables
 QMAKE_CXXFLAGS += -ggdb3
-
-QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
 
 #otool -L
 LIBS += -dead_strip
@@ -53,29 +51,32 @@ LIBS += -framework SystemConfiguration
 LIBS += -liconv
 
 vsp_framework {
-    CONFIG += lib_bundle
-    CONFIG += embed_libraries
-    CONFIG += create_prl
+	CONFIG += lib_bundle
+	CONFIG += embed_libraries
+	CONFIG += create_prl
 
-    QMAKE_FRAMEWORK_BUNDLE_NAME = $${TARGET}
-    QMAKE_FRAMEWORK_VERSION = A
-    QMAKE_BUNDLE_EXTENSION = .framework
-    #QMAKE_INFO_PLIST = $$PWD/Info.plist
+	QMAKE_FRAMEWORK_BUNDLE_NAME = $${TARGET}
+	QMAKE_FRAMEWORK_VERSION = A
+	QMAKE_BUNDLE_EXTENSION = .framework
+	#QMAKE_INFO_PLIST = $$PWD/Info.plist
 
-    FRAMEWORK_HEADERS.version = Versions
-    FRAMEWORK_HEADERS.files = $${OBJECTIVE_HEADERS}
-    FRAMEWORK_HEADERS.path = Headers
-    QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
+	# Important for the App with embedded framework
+	QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
 
-    LICENSE.version = Versions
-    LICENSE.files = $$PWD/LICENSE
-    LICENSE.path = Resources
-    QMAKE_BUNDLE_DATA += LICENSE
+	FRAMEWORK_HEADERS.version = Versions
+	FRAMEWORK_HEADERS.files = $${OBJECTIVE_HEADERS}
+	FRAMEWORK_HEADERS.path = Headers
+	QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
 
-    icons.version = Versions
-    icons.files = $$PWD/vspsetup.icns
-    icons.path = Resources
-    QMAKE_BUNDLE_DATA += icons
+	LICENSE.version = Versions
+	LICENSE.files = $$PWD/LICENSE
+	LICENSE.path = Resources
+	QMAKE_BUNDLE_DATA += LICENSE
+
+	icons.version = Versions
+	icons.files = $$PWD/vspsetup.icns
+	icons.path = Resources
+	QMAKE_BUNDLE_DATA += icons
 }
 
 message("Build: $${TARGET}")

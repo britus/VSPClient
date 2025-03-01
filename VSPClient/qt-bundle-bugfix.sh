@@ -16,19 +16,22 @@ fi
 OUT_PWD=`pwd`
 TARGET=${1}.${2}
 FRAMEWORK=${3}
+FMWKPATH=${OUT_PWD}/${TARGET}/Contents/Frameworks/${FRAMEWORK}.framework
 
-echo "Link: ${FRAMEWORK} into ${TARGET} framework path" && \
+echo "Link: ${FRAMEWORK} into ${TARGET} framework path"
 
-cd ${OUT_PWD}/${TARGET}/Contents/Frameworks/${FRAMEWORK}.framework
+
+cd ${FMWKPATH}
 
 if [ -e ${FRAMEWORK} ]; then
 	echo "${FRAMEWORK} link exist, OK."
 	exit 0
 fi
 
-#mkdir -p ${OUT_PWD}/${TARGET}/Contents/Frameworks
-#cp -Rpv ${OUT_PWD}/../${FRAMEWORK}/${FRAMEWORK}.framework \
-#        ${OUT_PWD}/${TARGET}/Contents/Frameworks/
+if [ ! -e ${FMWKPATH}/Versions/Current/${FRAMEWORK} ] ; then
+	echo "Invalid QT build! Missing file ${FMWKPATH}/Versions/Current/${FRAMEWORK}."
+	exit 1
+fi
 
 ln -vsf Versions/Current/${FRAMEWORK} ${FRAMEWORK}
 

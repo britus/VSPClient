@@ -31,6 +31,8 @@ void PGLKRemove::onActionExecute()
 
 void PGLKRemove::update(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel)
 {
+    const QIcon icon1(":/assets/png/vspclient_1.png");
+
     Q_UNUSED(command);
     Q_UNUSED(portModel);
 
@@ -39,7 +41,7 @@ void PGLKRemove::update(TVSPControlCommand command, VSPPortListModel* portModel,
     for (int i = 0; i < linkModel->rowCount(); i++) {
         VSPDataModel::TDataRecord r = //
            linkModel->at(i).value<VSPDataModel::TDataRecord>();
-        ui->comboBox->addItem(r.link.name, QVariant::fromValue(r.link));
+        ui->comboBox->addItem(icon1, r.link.name, QVariant::fromValue(r.link));
     }
 
     ui->comboBox->setEnabled(ui->comboBox->count() > 0);

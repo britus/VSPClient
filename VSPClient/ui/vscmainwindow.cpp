@@ -9,6 +9,7 @@
 #include <QAction>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QIcon>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMovie>
@@ -26,8 +27,13 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     , m_vsp(nullptr)
     , m_buttonMap()
     , m_box(this)
+    , m_firstStart(true)
+    , m_demoMode(false)
 {
     ui->setupUi(this);
+
+    const QIcon icon1(":/assets/png/vspclient_1.png");
+    setWindowIcon(icon1);
 
     m_vsp = new VSPDriverClient(this);
     connect(m_vsp, &VSPDriverClient::didFailWithError, this, &VSCMainWindow::onSetupFailWithError);
@@ -46,7 +52,7 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     splitter->addWidget(ui->stackedWidget);
     splitter->addWidget(ui->groupBox);
     splitter->setHandleWidth(4);
-    splitter->setSizes(QList<int>() << 180 << 140);
+    splitter->setSizes(QList<int>() << 280 << 0);
 
     m_buttonMap[ui->btn01SPCreate] = ui->pg01SPCreate;
     m_buttonMap[ui->btn02SPRemove] = ui->pg02SPRemove;
@@ -301,19 +307,10 @@ void VSCMainWindow::onClientConnected()
     qDebug("CTRLWIN::onClientConnected()\n");
 
     resetDefaultButton(ui->pnlButtons);
-    enableButton(
-       QList<QPushButton*>() //
-       << ui->btn01SPCreate  //
-       << ui->btn02SPRemove  //
-       << ui->btn03LKCreate  //
-       << ui->btn04LKRemove  //
-       << ui->btn05PortList  //
-       << ui->btn06LinkList  //
-       << ui->btn07Checks    //
-       << ui->btn08Traces);
+    onUpdateButtons(true);
 
-    QString dn = m_vsp->DeviceName();
-    QString dp = m_vsp->DevicePath();
+    QString dn = (m_demoMode ? "Demo" : m_vsp->DeviceName());
+    QString dp = (m_demoMode ? "Mode" : m_vsp->DevicePath());
 
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     ui->textBrowser->setPlainText("Connected. [" + dn + ": " + dp + "]");
@@ -329,16 +326,7 @@ void VSCMainWindow::onClientDisconnected()
     qDebug("CTRLWIN::onClientDisconnected()\n");
 
     resetDefaultButton(ui->pnlButtons);
-    disableButton(
-       QList<QPushButton*>() //
-       << ui->btn01SPCreate  //
-       << ui->btn02SPRemove  //
-       << ui->btn03LKCreate  //
-       << ui->btn04LKRemove  //
-       << ui->btn05PortList  //
-       << ui->btn06LinkList  //
-       << ui->btn07Checks    //
-       << ui->btn08Traces);
+    onUpdateButtons(false);
 
     ui->stackedWidget->setCurrentWidget(ui->pg09Connect);
 
@@ -366,16 +354,23 @@ void VSCMainWindow::onClientError(int error, const QString& message)
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     ui->textBrowser->setPlainText(text);
 
-    showNotification(1750, text);
-
-    QTimer::singleShot(50, this, [this, error, text]() {
-        m_box.setWindowTitle(windowTitle());
-        m_box.setText(text);
-        if (!m_vsp->IsConnected() && error == kIOErrorNotFound) {
-            m_box.setInformativeText(tr("You must install the VSP Driver extension first.\n"));
-        }
-        m_box.show();
-    });
+    if (!m_firstStart) {
+        showNotification(1750, text);
+        QTimer::singleShot(50, this, [this, error, text]() {
+            if (windowIcon().isNull()) {
+                m_box.setIcon(QMessageBox::Critical);
+            }
+            else {
+                m_box.setIconPixmap(windowIcon().pixmap(QSize(32, 32)));
+            }
+            m_box.setWindowTitle(windowTitle());
+            m_box.setText(text);
+            if (!m_vsp->IsConnected() && error == kIOErrorNotFound) {
+                m_box.setInformativeText(tr("You must install the VSP Driver extension first.\n"));
+            }
+            m_box.show();
+        });
+    }
 }
 
 void VSCMainWindow::onUpdateStatusLog(const QByteArray& message)
@@ -399,7 +394,8 @@ void VSCMainWindow::onUpdateButtons(bool enabled)
            << ui->btn05PortList  //
            << ui->btn06LinkList  //
            << ui->btn07Checks    //
-           << ui->btn08Traces);
+           << ui->btn08Traces    //
+           << ui->btn11SerialIO);
     }
     else {
         enableButton(
@@ -411,7 +407,8 @@ void VSCMainWindow::onUpdateButtons(bool enabled)
            << ui->btn05PortList  //
            << ui->btn06LinkList  //
            << ui->btn07Checks    //
-           << ui->btn08Traces);
+           << ui->btn08Traces    //
+           << ui->btn11SerialIO);
     }
 }
 
@@ -458,6 +455,23 @@ void VSCMainWindow::onSelectPage()
     onActionExecute(vspControlGetStatus, {});
 }
 
+inline void VSCMainWindow::showDemoMessage(const QString& message)
+{
+    if (m_demoMode) {
+        QTimer::singleShot(50, this, [this, message]() {
+            if (windowIcon().isNull()) {
+                m_box.setIcon(QMessageBox::Information);
+            }
+            else {
+                m_box.setIconPixmap(windowIcon().pixmap(QSize(32, 32)));
+            }
+            m_box.setWindowTitle(windowTitle());
+            m_box.setText(message);
+            m_box.show();
+        });
+    }
+}
+
 void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVariant& data)
 {
     qDebug("CTRLWIN::onActionExecute(): cmd=%d\n", command);
@@ -469,22 +483,46 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
 
     switch (command) {
         case vspControlGetStatus: {
-            if (!m_vsp->GetStatus()) {
-                goto error_exit;
+            if (!m_demoMode && m_vsp->IsConnected()) {
+                if (!m_vsp->GetStatus()) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, command]() {
+                    onCommandResult(command, m_vsp->portList(), m_vsp->linkList());
+                    onComplete();
+                });
             }
             break;
         }
         case vspControlCreatePort: {
             TVSPPortParameters p = data.value<TVSPPortParameters>();
-            if (!m_vsp->CreatePort(&p)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->CreatePort(&p)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this]() {
+                    m_vsp->createDemoPort();
+                    showDemoMessage("Virtual demo port created.");
+                });
             }
             break;
         }
         case vspControlRemovePort: {
             VSPDataModel::TPortItem p = data.value<VSPDataModel::TPortItem>();
-            if (!m_vsp->RemovePort(p.id)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->RemovePort(p.id)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, p]() {
+                    m_vsp->removeDemoPort(p.id);
+                    showDemoMessage("Virtual demo port removed.");
+                });
             }
             break;
         }
@@ -493,31 +531,63 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             if (link.source.id == link.target.id) {
                 onClientError(
                    0xfa100001,
-                   tr("\nYou cannot link same ports together.\n\n"
-                      "Each unlinked port echo TX to RX by default."));
+                   tr("\n\nYou cannot link same ports together.\n"
+                      "Any unlinked port is in loopback mode by default."));
                 goto error_exit;
             }
-            if (!m_vsp->LinkPorts(link.source.id, link.target.id)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->LinkPorts(link.source.id, link.target.id)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, link]() {
+                    m_vsp->createDemoLink(link.source.id, link.target.id);
+                    showDemoMessage("Demo port link created.");
+                });
             }
             break;
         }
         case vspControlUnlinkPorts: {
             VSPDataModel::TPortLink link = data.value<VSPDataModel::TPortLink>();
-            if (!m_vsp->UnlinkPorts(link.source.id, link.target.id)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->UnlinkPorts(link.source.id, link.target.id)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, link]() {
+                    m_vsp->removeDemoLink(link.source.id, link.target.id);
+                    showDemoMessage("Demo port link removed.");
+                });
             }
             break;
         }
         case vspControlGetPortList: {
-            if (!m_vsp->GetPortList()) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->GetPortList()) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, command]() {
+                    onCommandResult(command, m_vsp->portList(), m_vsp->linkList());
+                    onComplete();
+                });
             }
             break;
         }
         case vspControlGetLinkList: {
-            if (!m_vsp->GetLinkList()) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->GetLinkList()) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, command]() {
+                    onCommandResult(command, m_vsp->portList(), m_vsp->linkList());
+                    onComplete();
+                });
             }
             break;
         }
@@ -525,8 +595,17 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             quint64 value = data.toUInt();
             quint8 portId = value & 0x00ffL;
             value = (value >> 16) & 0xffffL;
-            if (!m_vsp->EnableChecks(portId, value)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->EnableChecks(portId, value)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, command]() {
+                    onCommandResult(command, m_vsp->portList(), m_vsp->linkList());
+                    onComplete();
+                    showDemoMessage("Demo port checks updated.");
+                });
             }
             break;
         }
@@ -534,16 +613,37 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             quint64 value = data.toUInt();
             quint8 portId = value & 0x00ffL;
             value = (value >> 16) & 0xffffL;
-            if (!m_vsp->EnableTrace(portId, value)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->EnableTrace(portId, value)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, command]() {
+                    onCommandResult(command, m_vsp->portList(), m_vsp->linkList());
+                    onComplete();
+                    showDemoMessage("Demo port traces updated.");
+                });
             }
             break;
         }
         case vspControlPingPong: {
             if (!m_vsp->IsConnected()) {
-                if (!m_vsp->ConnectDriver()) {
-                    onUpdateButtons(false);
+                quint64 value = data.toUInt();
+                if (value == 1) {
+                    m_demoMode = true;
+                    m_firstStart = false;
+                    setWindowTitle(windowTitle() + " [DEMO MODE]");
+                    onClientConnected();
                     goto error_exit;
+                }
+                else {
+                    if (!m_vsp->ConnectDriver()) {
+                        onUpdateButtons(false);
+                        onActionInstall();
+                        m_firstStart = false;
+                        goto error_exit;
+                    }
                 }
             }
             if (!m_vsp->GetStatus()) {

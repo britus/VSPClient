@@ -83,6 +83,20 @@ void VSPDataModel::fetchMore(const QModelIndex& parent)
     Q_UNUSED(parent);
 }
 
+bool VSPDataModel::removeRows(int row, int count, const QModelIndex& parent)
+{
+    Q_UNUSED(parent);
+    if (m_records.size() < row + count) {
+        return false;
+    }
+    beginResetModel();
+    for (int i = row, j = 0; j < count && i < m_records.size(); i++, j++) {
+        m_records.removeAt(i);
+    }
+    endResetModel();
+    return true;
+}
+
 QVariant VSPDataModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || index.row() >= m_records.size()) {
