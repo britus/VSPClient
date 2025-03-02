@@ -72,6 +72,7 @@ private:
 
 private:
     inline void setupSystemTray();
+    inline void showAboutBox();
     inline void showDemoMessage(const QString& message);
     inline void showNotification(int ms, const QString& text);
     inline void resetDefaultButton(QWidget* view);
