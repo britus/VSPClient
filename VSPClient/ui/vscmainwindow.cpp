@@ -34,7 +34,7 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
 {
     ui->setupUi(this);
 
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
     setWindowIcon(icon1);
 
     m_vsp = new VSPDriverClient(this);
@@ -107,7 +107,7 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     QAction* a;
 
     // ---------
-    QIcon tbicon(":/assets/png/vspclient_2.png");
+    QIcon tbicon(":/vspclient_2");
     QMacToolBar* toolBar = new QMacToolBar(this);
     QMacToolBarItem* item = toolBar->addItem(tbicon, tr("About"));
     connect(item, &QMacToolBarItem::activated, this, [this]() {
@@ -703,7 +703,7 @@ inline void VSCMainWindow::showAboutBox()
 
 inline void VSCMainWindow::setupSystemTray()
 {
-    stIcon.setIcon(QIcon(":/assets/png/vspclient_4.png"));
+    stIcon.setIcon(QIcon(":/vspclient_4"));
     stIcon.setToolTip(qApp->applicationDisplayName() + " \n\n" + tr(COPYRIGHT));
 
     connect(&stIcon, &QSystemTrayIcon::messageClicked, this, []() {
