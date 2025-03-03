@@ -164,7 +164,7 @@ QSerialPort::FlowControl PGSPCreate::flowCtrl() const
 
 inline void PGSPCreate::initComboSerialPort(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
     const QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
     const int selection = (!link ? 0 : link->currentIndex());
     const QVariant vsel = (!link ? QVariant() : link->itemData(selection));
@@ -188,7 +188,7 @@ inline void PGSPCreate::initComboSerialPort(QComboBox* cbx, QComboBox* link)
 
 inline void PGSPCreate::initComboBaudRate(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     typedef struct {
         QString name;
@@ -226,7 +226,7 @@ inline void PGSPCreate::initComboBaudRate(QComboBox* cbx, QComboBox* link)
 
 inline void PGSPCreate::initComboDataBits(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     typedef struct {
         QString name;
@@ -260,7 +260,7 @@ inline void PGSPCreate::initComboDataBits(QComboBox* cbx, QComboBox* link)
 
 inline void PGSPCreate::initComboStopBits(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     typedef struct {
         QString name;
@@ -293,7 +293,7 @@ inline void PGSPCreate::initComboStopBits(QComboBox* cbx, QComboBox* link)
 
 inline void PGSPCreate::initComboParity(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     typedef struct {
         QString name;
@@ -333,7 +333,7 @@ inline void PGSPCreate::initComboParity(QComboBox* cbx, QComboBox* link)
 
 inline void PGSPCreate::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     typedef struct {
         QString name;

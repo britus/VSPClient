@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     QApplication::setOrganizationName("EoF Software Labs");
     QApplication::setApplicationDisplayName(QStringLiteral("Virtual Serial Port Controller"));
     QApplication::setApplicationName("VSP Controller");
-    QApplication::setApplicationVersion("1.4.1");
+    QApplication::setApplicationVersion("1.4.2");
     QApplication::setDesktopSettingsAware(true);
     QApplication::setQuitOnLastWindowClosed(true);
 

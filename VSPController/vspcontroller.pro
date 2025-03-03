@@ -21,15 +21,15 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 DEFINES += VSPCONTROLLER_LIBRARY
 
 SOURCES += \
-    vspcontroller.cpp
+	vspcontroller.cpp
 
 HEADERS += \
-    vspcontroller.hpp \
-    vspcontroller_global.h \
-    vspcontrollerpriv.hpp
+	vspcontroller.hpp \
+	vspcontroller_global.h \
+	vspcontrollerpriv.hpp
 
 DISTFILES += \
-    LICENSE
+	LICENSE
 
 QMAKE_PROJECT_NAME = $${TAGET}
 
@@ -39,31 +39,32 @@ QMAKE_CXXFLAGS += -fno-omit-frame-pointer
 QMAKE_CXXFLAGS += -funwind-tables
 QMAKE_CXXFLAGS += -ggdb3
 
-QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
-
 vsp_framework {
-    CONFIG += embed_libraries
-    CONFIG += lib_bundle
+	CONFIG += embed_libraries
+	CONFIG += lib_bundle
 
-    QMAKE_FRAMEWORK_BUNDLE_NAME = $${TARGET}
-    QMAKE_FRAMEWORK_VERSION = A
-    QMAKE_BUNDLE_EXTENSION = .framework
-    #QMAKE_INFO_PLIST = $$PWD/Info.plist
+	QMAKE_FRAMEWORK_BUNDLE_NAME = $${TARGET}
+	QMAKE_FRAMEWORK_VERSION = A
+	QMAKE_BUNDLE_EXTENSION = .framework
+	#QMAKE_INFO_PLIST = $$PWD/Info.plist
 
-    FRAMEWORK_HEADERS.version = Versions
-    FRAMEWORK_HEADERS.files = $${HEADERS}
-    FRAMEWORK_HEADERS.path = Headers
-    QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
+	# Important for the App with embedded framework
+	QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
 
-    LICENSE.version = Versions
-    LICENSE.files = $$PWD/LICENSE
-    LICENSE.path = Resources
-    QMAKE_BUNDLE_DATA += LICENSE
+	FRAMEWORK_HEADERS.version = Versions
+	FRAMEWORK_HEADERS.files = $${HEADERS}
+	FRAMEWORK_HEADERS.path = Headers
+	QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
 
-    icons.version = Versions
-    icons.files = $$PWD/vspcontroller.icns
-    icons.path = Resources
-    QMAKE_BUNDLE_DATA += icons
+	LICENSE.version = Versions
+	LICENSE.files = $$PWD/LICENSE
+	LICENSE.path = Resources
+	QMAKE_BUNDLE_DATA += LICENSE
+
+	icons.version = Versions
+	icons.files = $$PWD/vspcontroller.icns
+	icons.path = Resources
+	QMAKE_BUNDLE_DATA += icons
 }
 
 #otool -L

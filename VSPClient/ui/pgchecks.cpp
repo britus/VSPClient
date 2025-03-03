@@ -48,7 +48,7 @@ void PGChecks::onActionExecute()
 
 void PGChecks::update(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     Q_UNUSED(command);
     Q_UNUSED(linkModel);

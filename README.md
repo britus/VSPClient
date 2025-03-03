@@ -8,6 +8,10 @@ This project contains the 3 frameworks written in QT which are required by the [
 - The installation/deinstallation
 - The driver communication layer
 
+## Releases
+
+* [RC_1.3.10_qt5](https://github.com/britus/VSPClient/releases/tag/RC_1.3.10_qt5)
+
 ## Donation
 
 If you want to [donate my work](https://www.paypal.com/donate/?hosted_button_id=4QZT5YLGGW7S4), please feel free and do it.

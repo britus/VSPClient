@@ -19,6 +19,10 @@ CONFIG += debug
 CONFIG += vsp_framework
 #CONFIG += vsp_app
 
+vsp_app {
+	TARGET = VSPClient
+}
+
 # major.minor.patch.build
 # VERSION = 1.0.4.14
 
@@ -28,17 +32,19 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 INCLUDEPATH += $$OUT_PWD/../../VSPController
 INCLUDEPATH += $$OUT_PWD/../../VSPSetup
 
+# for QT Creator and Visual Studio project.
+QMAKE_PROJECT_NAME = $${TARGET}
+
 QMAKE_CFLAGS += -mmacosx-version-min=12.2
 QMAKE_CXXFLAGS += -mmacosx-version-min=12.2
 QMAKE_CXXFLAGS += -fno-omit-frame-pointer
 QMAKE_CXXFLAGS += -funwind-tables
 QMAKE_CXXFLAGS += -ggdb3
+#QMAKE_CXXFLAGS += -arch x86_64 -arch arm64
 
-# for QT Creator and Visual Studio project files only.
-QMAKE_PROJECT_NAME = $${TARGET}
-
-QMAKE_LFLAGS        = -Wl,-rpath,@executable_path/../Frameworks/
-QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
+# suppress the default RPATH if you wish
+#QMAKE_LFLAGS_RPATH=
+#QMAKE_RPATHDIR=$$ORIGIN
 
 #otool -L
 LIBS += -dead_strip
@@ -50,19 +56,18 @@ LIBS += -liconv
 LIBS += -F$$OUT_PWD/../VSPController -framework VSPController
 LIBS += -F$$OUT_PWD/../VSPSetup      -framework VSPSetup
 
-#QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.2
-
-#QMAKE_PROVISIONING_PROFILE
-#QMAKE_OSX_ARCHITECTURES="x86_64;arm64"
-
-#QMAKE_CXXFLAGS     += -arch x86_64 -arch arm64
-
 # Generate application bundle
 vsp_app {
 	TEMPLATE = app
 	CONFIG += app_bundle
 	CONFIG += embed_libraries
 	CONFIG += embed_translations
+
+	#QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.2
+
+	# Important for the App with embedded frameworks and libs
+	QMAKE_RPATHDIR += @executable_path/../Frameworks
+	QMAKE_RPATHDIR += @executable_path/lib
 
 	translations_en.files = $$PWD/assets/en.lproj/InfoPlist.strings
 	translations_en.path = Contents/Resources/en.lproj
@@ -97,6 +102,10 @@ vsp_app {
 		$$PWD/Info.plist
 		$$PWD/VSPClient.entitlements
 
+	#QMAKE_PRE_LINK += \
+	#	echo "++PRE-LINK++ $$OUT_PWD/VSPClient/$${TARGET}.app" && \
+	#	rm -fR $$OUT_PWD/VSPClient/$${TARGET}.app
+
 	QMAKE_POST_LINK += \
 		$$PWD/qt-bundle-bugfix.sh $${TARGET} app VSPController && \
 		$$PWD/qt-bundle-bugfix.sh $${TARGET} app VSPSetup
@@ -117,6 +126,9 @@ vsp_framework {
 	QMAKE_FRAMEWORK_VERSION = A
 	QMAKE_BUNDLE_EXTENSION = .framework
 	#QMAKE_INFO_PLIST = $$PWD/Info.plist
+
+	# Important for the App with embedded framework
+	QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
 
 	#FRAMEWORK_HEADERS.version = Versions
 	#FRAMEWORK_HEADERS.files = $${HEADERS}
@@ -143,4 +155,10 @@ vsp_library {
 	CONFIG += create_prl
 	CONFIG += embed_translations
 	CONFIG += lib_version_first
+
+	# Important for the App with embedded framework
+	QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
 }
+
+DISTFILES += \
+	$$PWD/qt-bundle-bugfix.sh

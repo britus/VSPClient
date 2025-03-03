@@ -112,7 +112,7 @@ void VSPSerialIO::closeEvent(QCloseEvent* event)
 
 inline void VSPSerialIO::initComboSerialPort(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
     const QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
     const int selection = (!link ? 0 : link->currentIndex());
     const QVariant vsel = (!link ? QVariant() : link->itemData(selection));
@@ -157,7 +157,7 @@ inline void VSPSerialIO::initComboSerialPort(QComboBox* cbx, QComboBox* link)
 
 inline void VSPSerialIO::initComboBaudRate(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     typedef struct {
         QString name;
@@ -216,7 +216,7 @@ inline void VSPSerialIO::initComboBaudRate(QComboBox* cbx, QComboBox* link)
 
 inline void VSPSerialIO::initComboDataBits(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     typedef struct {
         QString name;
@@ -271,7 +271,7 @@ inline void VSPSerialIO::initComboDataBits(QComboBox* cbx, QComboBox* link)
 
 inline void VSPSerialIO::initComboStopBits(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     typedef struct {
         QString name;
@@ -325,7 +325,7 @@ inline void VSPSerialIO::initComboStopBits(QComboBox* cbx, QComboBox* link)
 
 inline void VSPSerialIO::initComboParity(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     typedef struct {
         QString name;
@@ -381,7 +381,7 @@ inline void VSPSerialIO::initComboParity(QComboBox* cbx, QComboBox* link)
 
 inline void VSPSerialIO::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
 {
-    const QIcon icon1(":/assets/png/vspclient_1.png");
+    const QIcon icon1(":/vspclient_1");
 
     typedef struct {
         QString name;
@@ -445,7 +445,8 @@ inline void VSPSerialIO::connectPort()
 
         QTimer::singleShot(50, this, [this]() {
             if (!m_port->open(QSerialPort::ReadWrite)) {
-                ui->txInputView->setPlainText("Unable to connect serial port " + m_port->portName());
+                ui->txInputView->setPlainText( //
+                   tr("Unable to connect serial port %1").arg(m_port->portName()));
                 return;
             }
             m_port->flush();
@@ -472,9 +473,9 @@ inline void VSPSerialIO::disconnectPort()
             m_isLooping = false;
 
             ui->gbxOutput->setEnabled(false);
-            ui->btnConnect->setText("Connect");
+            ui->btnConnect->setText(tr("Connect"));
 
-            ui->btnLooper->setText("Looper");
+            ui->btnLooper->setText(tr("Looper"));
             ui->btnLooper->setEnabled(true);
 
             m_port->flush();
@@ -623,7 +624,7 @@ void VSPSerialIO::onPortErrorOccured(QSerialPort::SerialPortError error)
 {
     if (error != QSerialPort::NoError) {
         QTimer::singleShot(100, this, [this, error]() {
-            QString msg = QStringLiteral("Serial port error: %1").arg(error);
+            QString msg = tr("Serial port error: %1").arg(error);
             ui->txInputView->setPlainText(msg);
             QApplication::restoreOverrideCursor();
         });
@@ -634,7 +635,7 @@ void VSPSerialIO::onPortBytesWritten(qint64 bytes)
 {
     m_outTotal += bytes;
 
-    ui->txOutputInfo->setText(QStringLiteral( //
+    ui->txOutputInfo->setText(tr( //
                                  "Written: %1 Total: %2")
                                  .arg(bytes)
                                  .arg(m_outTotal));
@@ -665,12 +666,12 @@ void VSPSerialIO::onPortClosed()
         m_looperStop = true;
     }
 
-    ui->btnConnect->setText("Connect");
+    ui->btnConnect->setText(tr("Connect"));
     ui->btnConnect->setEnabled(true);
     ui->gbxOutput->setEnabled(false);
 
     m_isLooping = false;
-    ui->btnLooper->setText("Looper");
+    ui->btnLooper->setText(tr("Looper"));
     ui->btnLooper->setEnabled(true);
 
     QApplication::restoreOverrideCursor();

@@ -74,20 +74,20 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
 
     QByteArray txStatus =
        (data->context != 4 //
-           ? " success"
-           : "Last command failed.");
+           ? tr(" success").toUtf8()
+           : tr("Last command failed.").toUtf8());
 
-    text << "Driver callback result:" << Qt::endl;
-    text << "Data size......: " << Qt::dec << size << Qt::endl;
-    text << "Context........: " << Qt::dec << data->context << Qt::endl;
-    text << "Command........: " << Qt::dec << data->command << txStatus << Qt::endl;
-    text << "Status code....: 0x" << Qt::hex << data->status.code << Qt::endl;
-    text << "Status flags...: 0x" << Qt::hex << data->status.flags << Qt::endl;
-    text << "Parameter flags: 0x" << Qt::hex << data->parameter.flags << Qt::endl;
-    text << "Port 1.........: " << Qt::dec << data->parameter.link.source << Qt::endl;
-    text << "Port 2.........: " << Qt::dec << data->parameter.link.target << Qt::endl;
-    text << "Port count.....: " << Qt::dec << data->ports.count << Qt::endl;
-    text << "Link count.....: " << Qt::dec << data->links.count << Qt::endl;
+    text << tr("Driver callback result:") << Qt::endl;
+    text << tr("Data size......: ") << Qt::dec << size << Qt::endl;
+    text << tr("Context........: ") << Qt::dec << data->context << Qt::endl;
+    text << tr("Command........: ") << Qt::dec << data->command << txStatus << Qt::endl;
+    text << tr("Status code....: 0x") << Qt::hex << data->status.code << Qt::endl;
+    text << tr("Status flags...: 0x") << Qt::hex << data->status.flags << Qt::endl;
+    text << tr("Parameter flags: 0x") << Qt::hex << data->parameter.flags << Qt::endl;
+    text << tr("Port 1.........: ") << Qt::dec << data->parameter.link.source << Qt::endl;
+    text << tr("Port 2.........: ") << Qt::dec << data->parameter.link.target << Qt::endl;
+    text << tr("Port count.....: ") << Qt::dec << data->ports.count << Qt::endl;
+    text << tr("Link count.....: ") << Qt::dec << data->links.count << Qt::endl;
 
     if (data->ports.count) {
         m_portList.resetModel();

@@ -67,9 +67,13 @@ private:
     QMap<uint, QString> m_errorStack;
     QMessageBox m_box;
     QSystemTrayIcon stIcon;
+    bool m_firstStart;
+    bool m_demoMode;
 
 private:
     inline void setupSystemTray();
+    inline void showAboutBox();
+    inline void showDemoMessage(const QString& message);
     inline void showNotification(int ms, const QString& text);
     inline void resetDefaultButton(QWidget* view);
     inline void enableDefaultButton(QPushButton* button);

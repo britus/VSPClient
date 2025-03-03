@@ -15,14 +15,10 @@ PGConnect::PGConnect(QWidget* parent)
 {
     ui->setupUi(this);
 
-    connectButton(ui->btnConnect);
+    connectButton(ui->btnDemo);
 
     connect(ui->btnInstall, &QPushButton::clicked, this, [this]() {
         emit installDriver();
-    });
-
-    connect(ui->btnUninstall, &QPushButton::clicked, this, [this]() {
-        emit uninstallDriver();
     });
 }
 
@@ -33,7 +29,7 @@ PGConnect::~PGConnect()
 
 void PGConnect::onActionExecute()
 {
-    emit VSPAbstractPage::execute(vspControlPingPong, {});
+    emit VSPAbstractPage::execute(vspControlPingPong, {1});
 }
 
 void PGConnect::update(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel)

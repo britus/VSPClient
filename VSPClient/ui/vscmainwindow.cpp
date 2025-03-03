@@ -9,11 +9,14 @@
 #include <QAction>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QIcon>
+#include <QMacToolBar>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMovie>
 #include <QSplitter>
 #include <QTimer>
+#include <QWindow>
 #include <vscmainwindow.h>
 #include <vspabstractpage.h>
 #include <vspserialio.h>
@@ -26,8 +29,13 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     , m_vsp(nullptr)
     , m_buttonMap()
     , m_box(this)
+    , m_firstStart(true)
+    , m_demoMode(false)
 {
     ui->setupUi(this);
+
+    const QIcon icon1(":/vspclient_1");
+    setWindowIcon(icon1);
 
     m_vsp = new VSPDriverClient(this);
     connect(m_vsp, &VSPDriverClient::didFailWithError, this, &VSCMainWindow::onSetupFailWithError);
@@ -46,7 +54,7 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     splitter->addWidget(ui->stackedWidget);
     splitter->addWidget(ui->groupBox);
     splitter->setHandleWidth(4);
-    splitter->setSizes(QList<int>() << 180 << 140);
+    splitter->setSizes(QList<int>() << 280 << 0);
 
     m_buttonMap[ui->btn01SPCreate] = ui->pg01SPCreate;
     m_buttonMap[ui->btn02SPRemove] = ui->pg02SPRemove;
@@ -66,11 +74,6 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     /* Driver installation / removal */
     connect(ui->pg09Connect, &PGConnect::installDriver, this, &VSCMainWindow::onActionInstall);
     connect(ui->pg09Connect, &PGConnect::uninstallDriver, this, &VSCMainWindow::onActionUninstall);
-
-    /* debug stuff */
-    // ui->btn08Traces->setVisible(false);
-    // ui->btn07Checks->setVisible(false);
-    /* -- */
 
     const QList<QPushButton*> buttons = m_buttonMap.keys();
     foreach (auto button, buttons) {
@@ -101,18 +104,39 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
         setupSystemTray();
     }
 
-    // ---------
-
     QAction* a;
+
+    // ---------
+    QIcon tbicon(":/vspclient_2");
+    QMacToolBar* toolBar = new QMacToolBar(this);
+    QMacToolBarItem* item = toolBar->addItem(tbicon, tr("About"));
+    connect(item, &QMacToolBarItem::activated, this, [this]() {
+        showAboutBox();
+    });
+    toolBar->attachToWindow(this->windowHandle());
+
+    // ---------
+    if (this->menuBar()) {
+        QMenu* appMenu = new QMenu(this);
+        a = appMenu->addAction(tr("About..."));
+        a->setMenuRole(QAction::ApplicationSpecificRole);
+        connect(a, &QAction::triggered, this, [this]() {
+            showAboutBox();
+        });
+        appMenu->addSeparator();
+        this->menuBar()->addMenu(appMenu);
+    }
+
+    // ---------
     PopupMenu* menu = new PopupMenu(ui->toolButton, this);
 
-    a = new QAction("Activate VSP Driver");
+    a = new QAction(tr("Activate VSP Driver"));
     connect(a, &QAction::triggered, this, [this]() {
         m_vsp->activateDriver();
     });
     menu->addAction(a);
 
-    a = new QAction("Deactivate VSP Driver");
+    a = new QAction(tr("Deactivate VSP Driver"));
     connect(a, &QAction::triggered, this, [this]() {
         m_vsp->deactivateDriver();
     });
@@ -139,132 +163,6 @@ void VSCMainWindow::closeEvent(QCloseEvent*)
     qApp->quit();
 }
 
-inline void VSCMainWindow::showNotification(int ms, const QString& text)
-{
-    if (QSystemTrayIcon::supportsMessages()) {
-        stIcon.showMessage( //
-           qApp->applicationDisplayName(),
-           tr(COPYRIGHT) + "\n\n" + text,
-           QSystemTrayIcon::NoIcon /* stIcon.icon()*/,
-           ms);
-    }
-}
-
-inline void VSCMainWindow::setupSystemTray()
-{
-    stIcon.setIcon(QIcon(":/assets/png/vspclient_4.png"));
-    stIcon.setToolTip(qApp->applicationDisplayName() + " \n\n" + tr(COPYRIGHT));
-
-    connect(&stIcon, &QSystemTrayIcon::messageClicked, this, []() {
-        //-
-    });
-    connect(&stIcon, &QSystemTrayIcon::activated, this, [/*this*/]() {
-        // setWindowState(Qt::WindowState::WindowActive);
-    });
-
-    QMenu* menu = new QMenu(this);
-    QAction* a;
-
-    a = new QAction(stIcon.icon(), "About");
-    connect(a, &QAction::triggered, this, [this]() {
-        QMessageBox::about(
-           this,
-           qApp->applicationName(),                 //
-           qApp->applicationDisplayName() + "\n\n"  //
-              + tr(COPYRIGHT) + "\nand written by " //
-              + qApp->organizationName());
-        showNotification(5000, "(-:o:-)");
-    });
-    menu->addAction(a);
-
-    a = new QAction(stIcon.icon(), "Open Controller");
-    connect(a, &QAction::triggered, this, [this]() {
-        setWindowState(Qt::WindowState::WindowActive);
-        show();
-        raise();
-    });
-    menu->addAction(a);
-    a = new QAction(stIcon.icon(), "Open Serial I/O");
-    connect(a, &QAction::triggered, this, [this]() {
-        VSPSerialIO* d = new VSPSerialIO(this);
-        d->setVisible(true);
-        d->raise();
-    });
-    menu->addAction(a);
-    menu->addSeparator();
-
-    a = new QAction(stIcon.icon(), "Close");
-    connect(a, &QAction::triggered, this, [this]() {
-        qApp->postEvent(this, new QCloseEvent());
-    });
-    menu->addAction(a);
-
-    stIcon.setContextMenu(menu);
-    stIcon.show();
-}
-
-inline void VSCMainWindow::showOverlay()
-{
-    QWidget* overlay;
-    QLabel* gifLabel;
-
-    qDebug("CTRLWIN::showOverlay():\n");
-
-    // Overlay-Widget erstellen
-    overlay = new QWidget(centralWidget());
-
-    // Mausereignisse durchlassen
-    overlay->setAttribute(Qt::WA_TransparentForMouseEvents);
-
-    // 80% transparent
-    overlay->setStyleSheet( //
-       "background-color: rgba(0, 0, 0, 51); "
-       "border-color: rgb(252, 115, 9); "
-       "border-style: solid; "
-       "border-width: 1px; "
-       "border-radius: 7px;");
-    setProperty("overlay", QVariant::fromValue(overlay));
-
-    // GIF-Label erstellen
-    gifLabel = new QLabel(overlay);
-    QMovie* movie = new QMovie(":/progress1", QByteArray(), this);
-    gifLabel->setMovie(movie);
-    movie->start();
-
-    // Overlay-Größe anpassen
-    QTimer* resizer = new QTimer(this);
-    connect(resizer, &QTimer::timeout, this, &VSCMainWindow::updateOverlayGeometry);
-    resizer->setSingleShot(true);
-    resizer->start(20);
-
-    if (ui->stackedWidget->currentWidget() != ui->pg09Connect) {
-        ui->pnlButtons->setEnabled(false);
-        ui->pnlContent->setEnabled(false);
-    }
-}
-
-inline void VSCMainWindow::removeOverlay()
-{
-    QVariant v = property("overlay");
-    if (v.isNull() || !v.isValid()) {
-        return;
-    }
-
-    qDebug("CTRLWIN::removeOverlay():\n");
-
-    QWidget* overlay;
-    if (!(overlay = v.value<QWidget*>())) {
-        return;
-    }
-
-    setProperty("overlay", {});
-    overlay->hide();
-    overlay->deleteLater();
-
-    ui->pnlContent->setEnabled(true);
-    ui->pnlButtons->setEnabled(true);
-}
-
 void VSCMainWindow::resizeEvent(QResizeEvent* event)
 {
     QMainWindow::resizeEvent(event);
@@ -276,18 +174,28 @@ void VSCMainWindow::onSetupFailWithError(uint32_t code, const char* message)
     qDebug("CTRLWIN::onSetupFailWithError(): code=%d msg=%s\n", code, message);
 
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
-    ui->textBrowser->setPlainText(tr("VSP setup status #%1\nInfo:\n%2") //
-                                     .arg(code)
-                                     .arg(message));
-    showNotification(2750, ui->textBrowser->toPlainText());
+    ui->textBrowser->setPlainText(tr("VSP setup status #%1\n%2").arg(code).arg(message));
+    if (code == 12) {
+        showNotification(2750, tr("Wait for user approval."));
+    }
+    else {
+        showNotification(2750, ui->textBrowser->toPlainText());
+    }
 }
 
 void VSCMainWindow::onSetupFinishWithResult(uint32_t code, const char* message)
 {
     qDebug("CTRLWIN::onSetupFinishWithResult(): code=%d msg=%s\n", code, message);
+
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
     ui->textBrowser->setPlainText(tr("%1 %2").arg(code == 0 ? "" : QString::number(code), message).trimmed());
-    showNotification(2750, ui->textBrowser->toPlainText());
+
+    if (code == 12) {
+        showNotification(2750, "User approval.");
+    }
+    else {
+        showNotification(2750, ui->textBrowser->toPlainText());
+    }
 }
 
 void VSCMainWindow::onSetupNeedsUserApproval()
@@ -301,22 +209,13 @@ void VSCMainWindow::onClientConnected()
     qDebug("CTRLWIN::onClientConnected()\n");
 
     resetDefaultButton(ui->pnlButtons);
-    enableButton(
-       QList<QPushButton*>() //
-       << ui->btn01SPCreate  //
-       << ui->btn02SPRemove  //
-       << ui->btn03LKCreate  //
-       << ui->btn04LKRemove  //
-       << ui->btn05PortList  //
-       << ui->btn06LinkList  //
-       << ui->btn07Checks    //
-       << ui->btn08Traces);
+    onUpdateButtons(true);
 
-    QString dn = m_vsp->DeviceName();
-    QString dp = m_vsp->DevicePath();
+    QString dn = (m_demoMode ? tr("Demo") : m_vsp->DeviceName());
+    QString dp = (m_demoMode ? tr("Mode") : m_vsp->DevicePath());
 
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
-    ui->textBrowser->setPlainText("Connected. [" + dn + ": " + dp + "]");
+    ui->textBrowser->setPlainText(tr("Connected. [%1: %2]").arg(dn, dp));
     ui->stackedWidget->setCurrentWidget(ui->pg01SPCreate);
 
     showNotification(2750, ui->textBrowser->toPlainText());
@@ -329,21 +228,12 @@ void VSCMainWindow::onClientDisconnected()
     qDebug("CTRLWIN::onClientDisconnected()\n");
 
     resetDefaultButton(ui->pnlButtons);
-    disableButton(
-       QList<QPushButton*>() //
-       << ui->btn01SPCreate  //
-       << ui->btn02SPRemove  //
-       << ui->btn03LKCreate  //
-       << ui->btn04LKRemove  //
-       << ui->btn05PortList  //
-       << ui->btn06LinkList  //
-       << ui->btn07Checks    //
-       << ui->btn08Traces);
+    onUpdateButtons(false);
 
     ui->stackedWidget->setCurrentWidget(ui->pg09Connect);
 
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
-    ui->textBrowser->setPlainText("Disconnected.");
+    ui->textBrowser->setPlainText(tr("Disconnected."));
 
     showNotification(1750, ui->textBrowser->toPlainText());
     enableButton(ui->btn09Connect);
@@ -366,16 +256,29 @@ void VSCMainWindow::onClientError(int error, const QString& message)
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     ui->textBrowser->setPlainText(text);
 
-    showNotification(1750, text);
+    if (!m_firstStart) {
+        showNotification(1750, text);
+        QTimer::singleShot(50, this, [this, error, text]() {
+            if (windowIcon().isNull()) {
+                m_box.setIcon(QMessageBox::Critical);
+            }
+            else {
+                m_box.setIconPixmap(windowIcon().pixmap(QSize(32, 32)));
+            }
 
-    QTimer::singleShot(50, this, [this, error, text]() {
-        m_box.setWindowTitle(windowTitle());
-        m_box.setText(text);
-        if (!m_vsp->IsConnected() && error == kIOErrorNotFound) {
-            m_box.setInformativeText(tr("You must install the VSP Driver extension first.\n"));
-        }
-        m_box.show();
-    });
+            m_box.setWindowTitle(windowTitle());
+            m_box.setText(text);
+
+            if (!m_vsp->IsConnected() && error == kIOErrorNotFound) {
+                m_box.setInformativeText(tr("You must install the VSP Driver extension first.\n"));
+            }
+            else {
+                m_box.setInformativeText("");
+            }
+
+            m_box.show();
+        });
+    }
 }
 
 void VSCMainWindow::onUpdateStatusLog(const QByteArray& message)
@@ -389,6 +292,7 @@ void VSCMainWindow::onUpdateStatusLog(const QByteArray& message)
 void VSCMainWindow::onUpdateButtons(bool enabled)
 {
     qDebug("CTRLWIN::onUpdateButtons(): enabled=%d\n", enabled);
+
     if (!enabled) {
         disableButton(
            QList<QPushButton*>() //
@@ -399,7 +303,8 @@ void VSCMainWindow::onUpdateButtons(bool enabled)
            << ui->btn05PortList  //
            << ui->btn06LinkList  //
            << ui->btn07Checks    //
-           << ui->btn08Traces);
+           << ui->btn08Traces    //
+           << ui->btn11SerialIO);
     }
     else {
         enableButton(
@@ -411,7 +316,8 @@ void VSCMainWindow::onUpdateButtons(bool enabled)
            << ui->btn05PortList  //
            << ui->btn06LinkList  //
            << ui->btn07Checks    //
-           << ui->btn08Traces);
+           << ui->btn08Traces    //
+           << ui->btn11SerialIO);
     }
 }
 
@@ -469,22 +375,46 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
 
     switch (command) {
         case vspControlGetStatus: {
-            if (!m_vsp->GetStatus()) {
-                goto error_exit;
+            if (!m_demoMode && m_vsp->IsConnected()) {
+                if (!m_vsp->GetStatus()) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, command]() {
+                    onCommandResult(command, m_vsp->portList(), m_vsp->linkList());
+                    onComplete();
+                });
             }
             break;
         }
         case vspControlCreatePort: {
             TVSPPortParameters p = data.value<TVSPPortParameters>();
-            if (!m_vsp->CreatePort(&p)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->CreatePort(&p)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this]() {
+                    m_vsp->createDemoPort();
+                    showDemoMessage(tr("Virtual demo port created."));
+                });
             }
             break;
         }
         case vspControlRemovePort: {
             VSPDataModel::TPortItem p = data.value<VSPDataModel::TPortItem>();
-            if (!m_vsp->RemovePort(p.id)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->RemovePort(p.id)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, p]() {
+                    m_vsp->removeDemoPort(p.id);
+                    showDemoMessage(tr("Virtual demo port removed."));
+                });
             }
             break;
         }
@@ -493,31 +423,63 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             if (link.source.id == link.target.id) {
                 onClientError(
                    0xfa100001,
-                   tr("\nYou cannot link same ports together.\n\n"
-                      "Each unlinked port echo TX to RX by default."));
+                   tr("\n\nYou cannot link same ports together.\n"
+                      "Any unlinked port is in loopback mode by default."));
                 goto error_exit;
             }
-            if (!m_vsp->LinkPorts(link.source.id, link.target.id)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->LinkPorts(link.source.id, link.target.id)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, link]() {
+                    m_vsp->createDemoLink(link.source.id, link.target.id);
+                    showDemoMessage(tr("Demo port link created."));
+                });
             }
             break;
         }
         case vspControlUnlinkPorts: {
             VSPDataModel::TPortLink link = data.value<VSPDataModel::TPortLink>();
-            if (!m_vsp->UnlinkPorts(link.source.id, link.target.id)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->UnlinkPorts(link.source.id, link.target.id)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, link]() {
+                    m_vsp->removeDemoLink(link.source.id, link.target.id);
+                    showDemoMessage(tr("Demo port link removed."));
+                });
             }
             break;
         }
         case vspControlGetPortList: {
-            if (!m_vsp->GetPortList()) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->GetPortList()) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, command]() {
+                    onCommandResult(command, m_vsp->portList(), m_vsp->linkList());
+                    onComplete();
+                });
             }
             break;
         }
         case vspControlGetLinkList: {
-            if (!m_vsp->GetLinkList()) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->GetLinkList()) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, command]() {
+                    onCommandResult(command, m_vsp->portList(), m_vsp->linkList());
+                    onComplete();
+                });
             }
             break;
         }
@@ -525,8 +487,17 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             quint64 value = data.toUInt();
             quint8 portId = value & 0x00ffL;
             value = (value >> 16) & 0xffffL;
-            if (!m_vsp->EnableChecks(portId, value)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->EnableChecks(portId, value)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, command]() {
+                    onCommandResult(command, m_vsp->portList(), m_vsp->linkList());
+                    onComplete();
+                    showDemoMessage(tr("Demo port checks updated."));
+                });
             }
             break;
         }
@@ -534,18 +505,41 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             quint64 value = data.toUInt();
             quint8 portId = value & 0x00ffL;
             value = (value >> 16) & 0xffffL;
-            if (!m_vsp->EnableTrace(portId, value)) {
-                goto error_exit;
+            if (!m_demoMode) {
+                if (!m_vsp->EnableTrace(portId, value)) {
+                    goto error_exit;
+                }
+            }
+            else {
+                QTimer::singleShot(700, this, [this, command]() {
+                    onCommandResult(command, m_vsp->portList(), m_vsp->linkList());
+                    onComplete();
+                    showDemoMessage(tr("Demo port traces updated."));
+                });
             }
             break;
         }
         case vspControlPingPong: {
             if (!m_vsp->IsConnected()) {
-                if (!m_vsp->ConnectDriver()) {
+                quint64 value = data.toUInt();
+                if (value == 1) {
+                    m_demoMode = true;
+                    m_firstStart = false;
+                    setWindowTitle(tr("%1 [DEMO MODE]").arg(windowTitle()));
+                    onClientConnected();
                     goto error_exit;
                 }
+                if (!m_vsp->ConnectDriver()) {
+                    onUpdateButtons(false);
+                    onActionInstall();
+                    m_firstStart = false;
+                    goto error_exit;
+                }
+                m_firstStart = false;
+                m_demoMode = false;
             }
             if (!m_vsp->GetStatus()) {
+                onUpdateButtons(false);
                 goto error_exit;
             }
             break;
@@ -665,6 +659,155 @@ inline void VSCMainWindow::disableDefaultButton(QPushButton* button)
 {
     button->setAutoDefault(false);
     button->setDefault(false);
+}
+
+inline void VSCMainWindow::showDemoMessage(const QString& message)
+{
+    if (m_demoMode) {
+        QTimer::singleShot(50, this, [this, message]() {
+            if (windowIcon().isNull()) {
+                m_box.setIcon(QMessageBox::Information);
+            }
+            else {
+                m_box.setIconPixmap(windowIcon().pixmap(QSize(32, 32)));
+            }
+            m_box.setWindowTitle(windowTitle());
+            m_box.setInformativeText("");
+            m_box.setText(message);
+            m_box.show();
+        });
+    }
+}
+
+inline void VSCMainWindow::showNotification(int ms, const QString& text)
+{
+    if (QSystemTrayIcon::supportsMessages()) {
+        stIcon.showMessage( //
+           qApp->applicationDisplayName(),
+           tr(COPYRIGHT) + "\n\n" + text,
+           QSystemTrayIcon::NoIcon /* stIcon.icon()*/,
+           ms);
+    }
+}
+
+inline void VSCMainWindow::showAboutBox()
+{
+    showNotification(5000, tr("Version %1").arg(qApp->applicationVersion()));
+    QMessageBox::about(
+       this,
+       qApp->applicationName(),                                //
+       qApp->applicationDisplayName() + "\n\n"                 //
+          + tr(COPYRIGHT) + tr("\nwritten by EoF authors\n\n") //
+          + tr("Version %1").arg(qApp->applicationVersion()));
+}
+
+inline void VSCMainWindow::setupSystemTray()
+{
+    stIcon.setIcon(QIcon(":/vspclient_4"));
+    stIcon.setToolTip(qApp->applicationDisplayName() + " \n\n" + tr(COPYRIGHT));
+
+    connect(&stIcon, &QSystemTrayIcon::messageClicked, this, []() {
+        //-
+    });
+    connect(&stIcon, &QSystemTrayIcon::activated, this, [/*this*/]() {
+        // setWindowState(Qt::WindowState::WindowActive);
+    });
+
+    QMenu* menu = new QMenu(this);
+    QAction* a;
+
+    a = new QAction(stIcon.icon(), tr("About..."));
+    connect(a, &QAction::triggered, this, [this]() {
+        showAboutBox();
+    });
+    menu->addAction(a);
+
+    a = new QAction(stIcon.icon(), tr("Open Controller"));
+    connect(a, &QAction::triggered, this, [this]() {
+        setWindowState(Qt::WindowState::WindowActive);
+        show();
+        raise();
+    });
+    menu->addAction(a);
+    a = new QAction(stIcon.icon(), tr("Open Serial I/O"));
+    connect(a, &QAction::triggered, this, [this]() {
+        VSPSerialIO* d = new VSPSerialIO(this);
+        d->setVisible(true);
+        d->raise();
+    });
+    menu->addAction(a);
+    menu->addSeparator();
+
+    a = new QAction(stIcon.icon(), tr("Close"));
+    connect(a, &QAction::triggered, this, [this]() {
+        qApp->postEvent(this, new QCloseEvent());
+    });
+    menu->addAction(a);
+
+    stIcon.setContextMenu(menu);
+    stIcon.show();
+}
+
+inline void VSCMainWindow::showOverlay()
+{
+    QWidget* overlay;
+    QLabel* gifLabel;
+
+    qDebug("CTRLWIN::showOverlay():\n");
+
+    // Overlay-Widget erstellen
+    overlay = new QWidget(centralWidget());
+
+    // Mausereignisse durchlassen
+    overlay->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    // 80% transparent
+    overlay->setStyleSheet( //
+       "background-color: rgba(0, 0, 0, 51); "
+       "border-color: rgb(252, 115, 9); "
+       "border-style: solid; "
+       "border-width: 1px; "
+       "border-radius: 7px;");
+    setProperty("overlay", QVariant::fromValue(overlay));
+
+    // GIF-Label erstellen
+    gifLabel = new QLabel(overlay);
+    QMovie* movie = new QMovie(":/progress1", QByteArray(), this);
+    gifLabel->setMovie(movie);
+    movie->start();
+
+    // Overlay-Größe anpassen
+    QTimer* resizer = new QTimer(this);
+    connect(resizer, &QTimer::timeout, this, &VSCMainWindow::updateOverlayGeometry);
+    resizer->setSingleShot(true);
+    resizer->start(20);
+
+    if (ui->stackedWidget->currentWidget() != ui->pg09Connect) {
+        ui->pnlButtons->setEnabled(false);
+        ui->pnlContent->setEnabled(false);
+    }
+}
+
+inline void VSCMainWindow::removeOverlay()
+{
+    QVariant v = property("overlay");
+    if (v.isNull() || !v.isValid()) {
+        return;
+    }
+
+    qDebug("CTRLWIN::removeOverlay():\n");
+
+    QWidget* overlay;
+    if (!(overlay = v.value<QWidget*>())) {
+        return;
+    }
+
+    setProperty("overlay", {});
+    overlay->hide();
+    overlay->deleteLater();
+
+    ui->pnlContent->setEnabled(true);
+    ui->pnlButtons->setEnabled(true);
 }
 
 // ------------------------------------------------------------------

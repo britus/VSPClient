@@ -57,6 +57,9 @@
        </property>
        <item>
         <widget class="QPushButton" name="btn01SPCreate">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Create Serial Port</string>
          </property>
@@ -64,6 +67,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn02SPRemove">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Remove Serial Port</string>
          </property>
@@ -71,6 +77,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn03LKCreate">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -84,6 +93,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn04LKRemove">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -97,6 +109,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn05PortList">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -110,6 +125,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn06LinkList">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Get Link List</string>
          </property>
@@ -117,6 +135,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn07Checks">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -130,6 +151,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn08Traces">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -143,6 +167,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn11SerialIO">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Serial I/O Test</string>
          </property>
@@ -171,7 +198,7 @@
        <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
+          <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -188,6 +215,12 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>24</height>
+          </size>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="spacing">
@@ -209,33 +242,33 @@
            <widget class="QToolButton" name="toolButton">
             <property name="maximumSize">
              <size>
-              <width>12</width>
-              <height>12</height>
+              <width>14</width>
+              <height>14</height>
              </size>
             </property>
             <property name="text">
              <string/>
             </property>
             <property name="popupMode">
-             <enum>QToolButton::ToolButtonPopupMode::DelayedPopup</enum>
+             <enum>QToolButton::DelayedPopup</enum>
             </property>
             <property name="toolButtonStyle">
-             <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
+             <enum>Qt::ToolButtonIconOnly</enum>
             </property>
            </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Policy::Expanding</enum>
+             <enum>QSizePolicy::Expanding</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>111</width>
-              <height>14</height>
+              <width>14</width>
+              <height>111</height>
              </size>
             </property>
            </spacer>
@@ -297,7 +330,7 @@
           <item>
            <widget class="QStackedWidget" name="stackedWidget">
             <property name="frameShape">
-             <enum>QFrame::Shape::NoFrame</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="currentIndex">
              <number>0</number>
@@ -326,7 +359,7 @@
            <number>0</number>
           </property>
           <property name="sizeConstraint">
-           <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+           <enum>QLayout::SetDefaultConstraint</enum>
           </property>
           <property name="leftMargin">
            <number>4</number>
@@ -349,13 +382,13 @@
              </font>
             </property>
             <property name="autoFormatting">
-             <set>QTextEdit::AutoFormattingFlag::AutoNone</set>
+             <set>QTextEdit::AutoNone</set>
             </property>
             <property name="tabChangesFocus">
              <bool>true</bool>
             </property>
             <property name="lineWrapMode">
-             <enum>QTextEdit::LineWrapMode::NoWrap</enum>
+             <enum>QTextEdit::NoWrap</enum>
             </property>
             <property name="openExternalLinks">
              <bool>true</bool>

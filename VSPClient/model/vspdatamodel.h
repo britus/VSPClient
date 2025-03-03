@@ -47,6 +47,8 @@ public:
     bool canFetchMore(const QModelIndex& parent) const override;
     void fetchMore(const QModelIndex& parent) override;
 
+    bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
+
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     virtual void resetModel();
