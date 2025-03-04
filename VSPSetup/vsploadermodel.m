@@ -24,7 +24,8 @@ extern void onNeedsUserApproval(void);
     uint64_t  _status;
 }
 
-- (instancetype)init:(const char*)dextBundleId {
+- (instancetype)init:(const char*)dextBundleId
+{
     self = [super init];
     if (self) {
         _status = 0xf0000000;
@@ -45,15 +46,18 @@ extern void onNeedsUserApproval(void);
     return self;
 }
 
-- (void)activateMyDext {
+- (void)activateMyDext
+{
     [self activateExtension:_dextBundleId];
 }
-- (void)removeMyDext {
+- (void)removeMyDext
+{
     [self deactivateExtension:_dextBundleId];
 }
 
 // State descriptions analogous to Swift version
-- (NSString *)dextLoadingState {
+- (NSString *)dextLoadingState
+{
     switch (self.state) {
         case VSPSmLoaderStateUnknown:
             return @"VSPSmLoaderStateUnknown";
@@ -72,7 +76,8 @@ extern void onNeedsUserApproval(void);
     }
 }
 
-- (void)activateExtension:(NSString *)dextBundleId {
+- (void)activateExtension:(NSString *)dextBundleId
+{
     _isUserUnload = NO;
     _status = 0xf1000000;
 
@@ -91,7 +96,8 @@ extern void onNeedsUserApproval(void);
     }
 }
 
-- (void)deactivateExtension:(NSString *)dextBundleId {
+- (void)deactivateExtension:(NSString *)dextBundleId
+{
     _isUserUnload = YES;
     _status = 0xf2000000;
 
@@ -114,19 +120,24 @@ extern void onNeedsUserApproval(void);
 - (OSSystemExtensionReplacementAction)request:(nonnull OSSystemExtensionRequest *)request
                   actionForReplacingExtension:(nonnull OSSystemExtensionProperties *)existing
                                 withExtension:(nonnull OSSystemExtensionProperties *)extension
-API_AVAILABLE(macos(10.15))
+                                API_AVAILABLE(macos(10.15))
 {
     os_log(OS_LOG_DEFAULT, "[VSPLM] Got the upgrade request (%@ -> %@); answering replace",
            existing.bundleVersion, extension.bundleVersion);
     return OSSystemExtensionReplacementActionReplace;
 }
 
-- (void)request:(nonnull OSSystemExtensionRequest *)request didFailWithError:(nonnull NSError *)error  API_AVAILABLE(macos(10.15)){
+- (void)request:(nonnull OSSystemExtensionRequest *)request
+        didFailWithError:(nonnull NSError *)error API_AVAILABLE(macos(10.15))
+{
     os_log(OS_LOG_DEFAULT, "[VSPLM] %@", error.description);
     onDidFailWithError(error.code, error.description.UTF8String);
 }
 
-- (void)request:(nonnull OSSystemExtensionRequest *)request didFinishWithResult:(OSSystemExtensionRequestResult)result  API_AVAILABLE(macos(10.15)){
+- (void)request:(nonnull OSSystemExtensionRequest *)request
+        didFinishWithResult:(OSSystemExtensionRequestResult)result
+        API_AVAILABLE(macos(10.15))
+{
     if (result == OSSystemExtensionRequestCompleted) {
         os_log(OS_LOG_DEFAULT, "[VSPLM] Installation successfully.");
         _status |= result;
@@ -149,7 +160,9 @@ API_AVAILABLE(macos(10.15))
     }
 }
 
-- (void)requestNeedsUserApproval:(nonnull OSSystemExtensionRequest *)request  API_AVAILABLE(macos(10.15)){
+- (void)requestNeedsUserApproval:(nonnull OSSystemExtensionRequest *)request
+        API_AVAILABLE(macos(10.15))
+{
     os_log(OS_LOG_DEFAULT, "[VSPLM] Require user approval.");
     onNeedsUserApproval();
 }

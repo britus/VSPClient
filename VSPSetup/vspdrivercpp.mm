@@ -27,7 +27,8 @@ static char g_message[256];
 
 @implementation VSPDriverSetupWrapper
 
-- (instancetype)init:(const char*)dextBundleId {
+- (instancetype)init:(const char*)dextBundleId
+{
     self = [super init];
     if (self) {
         os_log(OS_LOG_DEFAULT, "[VSPDS] Setup using bundle Id: %s", dextBundleId);
@@ -36,12 +37,14 @@ static char g_message[256];
     return self;
 }
 
--(void)dealloc {
+-(void)dealloc
+{
     [_loaderModel release];
     [super dealloc];
 }
 
-- (void) activate {
+- (void) activate
+{
     [_loaderModel activateMyDext];
 }
 
