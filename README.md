@@ -10,7 +10,7 @@ This project contains the 3 frameworks written in QT which are required by the [
 
 ## Releases
 
-* [RC_1.3.10_qt5](https://github.com/britus/VSPClient/releases/tag/RC_1.3.10_qt5)
+* [RC 1.3.21 qt5 sboff](https://github.com/britus/VSPClient/releases/tag/RC_1.3.21_qt5_sboff)
 
 ## Donation
 
