@@ -118,7 +118,7 @@ signals:
     // VSPController interface events
     void connected();
     void disconnected();
-    void errorOccured(int error, const QString& message);
+    void errorOccured(const VSPClient::TVSPSystemError& error, const QString& message);
     void updateStatusLog(const QByteArray& message);
     void updateButtons(bool enabled = false);
     void complete();
@@ -133,7 +133,7 @@ protected:
     void OnConnected() override;
     void OnDisconnected() override;
     void OnIOUCCallback(int result, void* args, uint32_t numArgs) override;
-    void OnErrorOccured(int error, const char* message) override;
+    void OnErrorOccured(const VSPClient::TVSPSystemError& error, const char* message) override;
     void OnDataReady(void* data) override;
 
 private:
@@ -142,3 +142,4 @@ private:
 };
 Q_DECLARE_METATYPE(TVSPControllerData)
 Q_DECLARE_METATYPE(TVSPPortParameters)
+Q_DECLARE_METATYPE(TVSPSystemError)

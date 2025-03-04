@@ -8,7 +8,6 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOTypes.h>
-#include <os/log.h>
 #include <vspcontroller.hpp>
 #include <vspcontrollerpriv.hpp>
 
@@ -170,41 +169,29 @@ const char* VSPController::DevicePath() const
 static inline void PrintArray(const char* ctx, const int64_t* ptr, const uint32_t length)
 {
     if (ptr && length) {
-        printf("[%s] --------------------------\n{\n", ctx);
+        fprintf(stdout, "[%s] --------------------------\n{\n", ctx);
         for (uint32_t idx = 0; idx < length; ++idx) {
-            printf("\tptr[%02u] = %llu\n", idx, ptr[idx]);
+            fprintf(stdout, "\tptr[%02u] = %llu\n", idx, ptr[idx]);
         }
-        printf("}\n");
+        fprintf(stdout, "}\n");
     }
 }
 
 static inline void PrintStruct(const char* ctx, const TVSPControllerData* ptr)
 {
     if (ptr) {
-        printf("[%s] --------------------------\n{\n", ctx);
-        printf("\t.context = %u,\n", ptr->context);
-        printf("\t.command = %u,\n", ptr->command);
-        printf("\t.parameter.flags = 0x%llx,\n", ptr->parameter.flags);
-        printf("\t.ppl.sourceId = %u,\n", ptr->parameter.link.source);
-        printf("\t.ppl.targetId = %u,\n", ptr->parameter.link.target);
-        printf("\t.status.code = %u,\n", ptr->status.code);
-        printf("\t.status.flags = 0x%llx,\n", ptr->status.flags);
-        printf("}\n");
+        fprintf(stdout, "[%s] --------------------------\n{\n", ctx);
+        fprintf(stdout, "\t.context = %u,\n", ptr->context);
+        fprintf(stdout, "\t.command = %u,\n", ptr->command);
+        fprintf(stdout, "\t.parameter.flags = 0x%llx,\n", ptr->parameter.flags);
+        fprintf(stdout, "\t.ppl.sourceId = %u,\n", ptr->parameter.link.source);
+        fprintf(stdout, "\t.ppl.targetId = %u,\n", ptr->parameter.link.target);
+        fprintf(stdout, "\t.status.code = %u,\n", ptr->status.code);
+        fprintf(stdout, "\t.status.flags = 0x%llx,\n", ptr->status.flags);
+        fprintf(stdout, "}\n");
     }
 }
 #endif
-
-// -------------------------------------------------------------------
-//
-//
-static inline void PrintErrorDetails(kern_return_t ret, const char* message)
-{
-    fprintf(stderr, "[VSP Driver Error] ---------------------------------\n");
-    fprintf(stderr, "\t%s\n", message);
-    fprintf(stderr, "\tSystem...: 0x%02x\n", err_get_system(ret));
-    fprintf(stderr, "\tSubsystem: 0x%03x\n", err_get_sub(ret));
-    fprintf(stderr, "\tCode.....: 0x%04x\n", err_get_code(ret));
-}
 
 VSPControllerPriv::VSPControllerPriv(const char* dextClassName, VSPController* parent)
     : m_machNotificationPort(0L)
@@ -404,7 +391,7 @@ const char* VSPControllerPriv::DevicePath() const
 //     <string>VSPDriver</string>
 // </array>
 //
-bool VSPControllerPriv::SetDextIdentifier(const char* name)
+inline bool VSPControllerPriv::SetDextIdentifier(const char* name)
 {
     if (name && strlen(name) < sizeof(TDextIdentifier)) {
         strncpy(m_dextClassName, name, sizeof(TDextIdentifier));
@@ -510,8 +497,19 @@ static void AsyncCallback(void* refcon, IOReturn result, void** args, UInt32 num
 //
 void VSPControllerPriv::ReportError(IOReturn error, const char* message)
 {
-    PrintErrorDetails(error, message);
-    m_controller->OnErrorOccured(error, message);
+    const TVSPSystemError m_errorInfo = {
+       .system = err_get_system(error),
+       .sub = err_get_sub(error),
+       .code = err_get_code(error),
+    };
+
+    fprintf(stderr, "[VSP Driver Error] ---------------------------------\n");
+    fprintf(stderr, "%s\n", message);
+    fprintf(stderr, "\tSystem...: 0x%04x\n", m_errorInfo.system);
+    fprintf(stderr, "\tSubsystem: 0x%04x\n", m_errorInfo.code);
+    fprintf(stderr, "\tCode.....: 0x%04x\n", m_errorInfo.code);
+
+    m_controller->OnErrorOccured(m_errorInfo, message);
 }
 
 // -------------------------------------------------------------------
@@ -572,7 +570,7 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
         return false;
     }
 
-    os_log(OS_LOG_DEFAULT, "[VSPCTRL] Using DEXT class name: %s", m_dextClassName);
+    fprintf(stdout, "[VSPCTRL] Using DEXT class name: %s\n", m_dextClassName);
 
     /// - Tag: SetUpMatchingNotification
     CFMutableDictionaryRef matchingDictionary = IOServiceNameMatching(m_dextClassName);
@@ -759,7 +757,7 @@ void VSPControllerPriv::AsyncCallback(IOReturn result, void** args, UInt32 numAr
         m_controller->OnIOUCCallback(result, m_vspResponse, sizeof(TVSPControllerData));
     }
     else {
-        m_controller->OnErrorOccured(kIOReturnNoSpace, "[UC] No async result buffer.");
+        ReportError(kIOReturnNotResponding, "[UC] No async result buffer.");
     }
 }
 

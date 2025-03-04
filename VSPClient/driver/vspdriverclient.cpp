@@ -149,7 +149,7 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
         emit updateStatusLog(buffer);
         emit updateButtons(true);
         if (result != 0) {
-            emit errorOccured(result, txStatus);
+            emit errorOccured(GetSystemError(result), txStatus);
         }
         else {
             emit commandResult(                                //
@@ -164,7 +164,7 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
     t->start(150);
 }
 
-void VSPDriverClient::OnErrorOccured(int error, const char* message)
+void VSPDriverClient::OnErrorOccured(const VSPClient::TVSPSystemError& error, const char* message)
 {
     emit errorOccured(error, message);
 }

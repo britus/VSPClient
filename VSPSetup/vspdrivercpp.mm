@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: MIT
 // ********************************************************************
 #import <stdio.h>
-#import <os/log.h>
 #import <Foundation/Foundation.h>
 #import <SystemExtensions/SystemExtensions.h>
 #import <vsploadermodel.h>
@@ -31,7 +30,7 @@ static char g_message[256];
 {
     self = [super init];
     if (self) {
-        os_log(OS_LOG_DEFAULT, "[VSPDS] Setup using bundle Id: %s", dextBundleId);
+        fprintf(stderr, "[VSPDS] Setup using bundle Id: %s\n", dextBundleId);
         _loaderModel = [[VSPLoaderModel alloc]init:dextBundleId];
     }
     return self;

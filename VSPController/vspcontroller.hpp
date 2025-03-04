@@ -129,15 +129,15 @@ public:
     bool EnableChecks(const uint8_t port, const uint32_t flags = 0);
     bool EnableTrace(const uint8_t port, const uint32_t flags = 0);
     bool SetDextIdentifier(const char* name);
+    const TVSPSystemError GetSystemError(int error) const;
 
 protected:
     friend class VSPControllerPriv;
     virtual int GetConnection();
-    virtual const TVSPSystemError GetSystemError(int error) const;
     virtual void OnIOUCCallback(int result, void* data, uint32_t size) = 0;
     virtual void OnConnected() = 0;
     virtual void OnDisconnected() = 0;
-    virtual void OnErrorOccured(int error, const char* message) = 0;
+    virtual void OnErrorOccured(const VSPClient::TVSPSystemError& error, const char* message) = 0;
     virtual void OnDataReady(void*) = 0;
 
 private:

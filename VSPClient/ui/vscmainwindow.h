@@ -39,7 +39,7 @@ public:
 private slots:
     void onClientConnected();
     void onClientDisconnected();
-    void onClientError(int error, const QString& message);
+    void onClientError(const VSPClient::TVSPSystemError& error, const QString& message);
     void onUpdateStatusLog(const QByteArray& message);
     void onUpdateButtons(bool enabled = false);
     void onCommandResult(VSPClient::TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel);

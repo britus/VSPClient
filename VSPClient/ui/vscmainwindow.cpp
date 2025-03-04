@@ -253,11 +253,11 @@ void VSCMainWindow::onClientDisconnected()
     enableDefaultButton(ui->btn09Connect);
 }
 
-void VSCMainWindow::onClientError(int error, const QString& message)
+void VSCMainWindow::onClientError(const VSPClient::TVSPSystemError& error, const QString& message)
 {
-    qDebug("CTRLWIN::onClientError() error=0x%x msg=%s\n", error, qPrintable(message));
+    qDebug("CTRLWIN::onClientError() error=0x%x msg=%s\n", error.code, qPrintable(message));
 
-    m_errorStack[error] = message;
+    m_errorStack[error.code] = message;
 
     QString text = "";
 
@@ -282,7 +282,7 @@ void VSCMainWindow::onClientError(int error, const QString& message)
             m_box.setWindowTitle(windowTitle());
             m_box.setText(text);
 
-            if (!m_vsp->IsConnected() && error == kIOErrorNotFound) {
+            if (!m_vsp->IsConnected() && error.code == kIOErrorNotFound) {
                 m_box.setInformativeText(tr("You must install the VSP Driver extension first.\n"));
             }
             else {
@@ -435,7 +435,7 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             VSPDataModel::TPortLink link = data.value<VSPDataModel::TPortLink>();
             if (link.source.id == link.target.id) {
                 onClientError(
-                   0xfa100001,
+                   {0xbe, 0x04, 0x02},
                    tr("\n\nYou cannot link same ports together.\n"
                       "Any unlinked port is in loopback mode by default."));
                 goto error_exit;

@@ -5,12 +5,9 @@
 // Copyright © 2024 Apple Inc. (some copied parts)
 // SPDX-License-Identifier: MIT
 // ********************************************************************
-#import <os/log.h>
-
 #import <Foundation/Foundation.h>
 #import <SystemExtensions/SystemExtensions.h>
 #import <SystemConfiguration/SystemConfiguration.h>
-
 #import <vsploadermodel.h>
 #import <vspsmloader.h>
 
@@ -32,7 +29,7 @@ extern void onNeedsUserApproval(void);
         _state = VSPSmLoaderStateUnknown;
         _dextBundleId = [NSString stringWithCString:dextBundleId encoding:NSUTF8StringEncoding];
         if (_dextBundleId != NULL) {
-            os_log(OS_LOG_DEFAULT, "[VSPLM] Using bundle Id: %@", _dextBundleId);
+            fprintf(stdout, "[VSPLM] Using bundle Id: %s\n", _dextBundleId.UTF8String);
             // System Extension Properties Check
             if (@available(macOS 12, *)) {
                 OSSystemExtensionRequest *request = [
@@ -122,15 +119,15 @@ extern void onNeedsUserApproval(void);
                                 withExtension:(nonnull OSSystemExtensionProperties *)extension
                                 API_AVAILABLE(macos(10.15))
 {
-    os_log(OS_LOG_DEFAULT, "[VSPLM] Got the upgrade request (%@ -> %@); answering replace",
-           existing.bundleVersion, extension.bundleVersion);
+    fprintf(stdout, "[VSPLM] Got the upgrade request (%s -> %s); answering replace.\n",
+           existing.bundleVersion.UTF8String, extension.bundleVersion.UTF8String);
     return OSSystemExtensionReplacementActionReplace;
 }
 
 - (void)request:(nonnull OSSystemExtensionRequest *)request
         didFailWithError:(nonnull NSError *)error API_AVAILABLE(macos(10.15))
 {
-    os_log(OS_LOG_DEFAULT, "[VSPLM] %@", error.description);
+    fprintf(stdout, "[VSPLM] Error 0x%lx %s\n", error.code, error.description.UTF8String);
     onDidFailWithError(error.code, error.description.UTF8String);
 }
 
@@ -139,7 +136,7 @@ extern void onNeedsUserApproval(void);
         API_AVAILABLE(macos(10.15))
 {
     if (result == OSSystemExtensionRequestCompleted) {
-        os_log(OS_LOG_DEFAULT, "[VSPLM] Installation successfully.");
+        fprintf(stdout, "[VSPLM] Installation successfully.\n");
         _status |= result;
         if (result == 0) {
             onDidFinishWithResult(_status, "Driver successfully activated.");
@@ -149,12 +146,12 @@ extern void onNeedsUserApproval(void);
         }
     }
     else if (result == OSSystemExtensionRequestWillCompleteAfterReboot) {
-        os_log(OS_LOG_DEFAULT, "[VSPLM] Installation pending. Activate after reboot!");
+        fprintf(stdout, "[VSPLM] Installation pending. Activate after reboot.\n");
         _status |= result;
         onDidFinishWithResult(_status, "Activate VSP driver after reboot.");
     }
     else {
-        os_log(OS_LOG_DEFAULT, "[VSPLM] Installation status: %d", (int)result);
+        fprintf(stdout, "[VSPLM] Installation status: %d\n", (int)result);
         _status |= result;
         onDidFinishWithResult(_status, "Activate VSP driver with status.");
     }
@@ -163,7 +160,7 @@ extern void onNeedsUserApproval(void);
 - (void)requestNeedsUserApproval:(nonnull OSSystemExtensionRequest *)request
         API_AVAILABLE(macos(10.15))
 {
-    os_log(OS_LOG_DEFAULT, "[VSPLM] Require user approval.");
+    fprintf(stdout, "[VSPLM] Require user approval.\n");
     onNeedsUserApproval();
 }
 

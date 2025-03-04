@@ -46,9 +46,6 @@ public:
     void ReportError(IOReturn error, const char* message);
     // called by static DeviceAdded too
     void SetNameAndPath(const char* name, const char* path);
-    // set DEXT driver class name specified by DEXT's Info.plist
-    // section IOKitPersonalities
-    bool SetDextIdentifier(const char* name);
 
 private:
     mach_port_t m_machNotificationPort;
@@ -66,6 +63,9 @@ private:
     typedef char TDextIdentifier[128];
     TDextIdentifier m_dextClassName = {};
 
+    // set DEXT driver class name specified by DEXT's Info.plist
+    // section IOKitPersonalities
+    inline bool SetDextIdentifier(const char* name);
     inline bool UserClientSetup(void* refcon);
     inline void UserClientTeardown(void);
     inline bool DoAsyncCall(TVSPControllerData* input);
