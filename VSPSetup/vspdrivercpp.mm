@@ -5,7 +5,8 @@
 // Copyright © 2024 Apple Inc. (some copied parts)
 // SPDX-License-Identifier: MIT
 // ********************************************************************
-#include <stdio.h>
+#import <stdio.h>
+#import <os/log.h>
 #import <Foundation/Foundation.h>
 #import <SystemExtensions/SystemExtensions.h>
 #import <vsploadermodel.h>
@@ -26,10 +27,11 @@ static char g_message[256];
 
 @implementation VSPDriverSetupWrapper
 
-- (instancetype)init {
+- (instancetype)init:(const char*)dextBundleId {
     self = [super init];
     if (self) {
-        _loaderModel = [[VSPLoaderModel alloc]init];
+        os_log(OS_LOG_DEFAULT, "[VSPDS] Setup using bundle Id: %s", dextBundleId);
+        _loaderModel = [[VSPLoaderModel alloc]init:dextBundleId];
     }
     return self;
 }
@@ -60,13 +62,13 @@ static char g_message[256];
 // ---------------------------------------------------
 
 extern "C" {
-void onDidFailWithError(uint32_t code, const char* message)
+void onDidFailWithError(uint64_t code, const char* message)
 {
     snprintf(g_message, sizeof(g_message) - 1, "\n%s", message);
     g_callback->OnDidFailWithError(code, g_message);
 }
 
-void onDidFinishWithResult(uint32_t code, const char* message)
+void onDidFinishWithResult(uint64_t code, const char* message)
 {
     strncpy(g_message, message, sizeof(g_message)-1);
     g_callback->OnDidFinishWithResult(code, g_message);
@@ -83,8 +85,8 @@ void onNeedsUserApproval()
 // C++ class for external use (exported)
 // ---------------------------------------------------
 
-VSPDriverSetup::VSPDriverSetup() :
-    _loader((__bridge void*)[[VSPDriverSetupWrapper alloc] init])
+VSPDriverSetup::VSPDriverSetup(const char* dextBundleId) :
+    _loader((__bridge void*)[[VSPDriverSetupWrapper alloc] init:dextBundleId])
 {
     g_callback = this;
 }
@@ -104,12 +106,12 @@ std::string VSPDriverSetup::getDriverState() const
     return [(__bridge VSPDriverSetupWrapper*)_loader stateDescription].UTF8String;
 }
 
-void VSPDriverSetup::OnDidFailWithError(uint32_t /*code*/, const char* /*message*/)
+void VSPDriverSetup::OnDidFailWithError(uint64_t /*code*/, const char* /*message*/)
 {
     // nothing, override this method
 }
 
-void VSPDriverSetup::OnDidFinishWithResult(uint32_t /*code*/, const char* /*message*/)
+void VSPDriverSetup::OnDidFinishWithResult(uint64_t /*code*/, const char* /*message*/)
 {
     // nothing, override this method
 }

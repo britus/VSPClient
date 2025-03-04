@@ -20,8 +20,7 @@ class VSPDriverClient: public QObject, public VSPController, public VSPDriverSet
     Q_OBJECT
 
 public:
-    VSPDriverClient(QObject* parent = nullptr);
-
+    VSPDriverClient(const QByteArray& dextBundleId, const QByteArray& dextClassName, QObject* parent = nullptr);
     virtual ~VSPDriverClient();
 
     inline VSPPortListModel* portList()
@@ -107,15 +106,14 @@ public:
     }
 
     // Interface VSPSetup.framework
-    void OnDidFailWithError(uint32_t /*code*/, const char* /*message*/) override;
-
-    void OnDidFinishWithResult(uint32_t /*code*/, const char* /*message*/) override;
+    void OnDidFailWithError(uint64_t /*code*/, const char* /*message*/) override;
+    void OnDidFinishWithResult(uint64_t /*code*/, const char* /*message*/) override;
     void OnNeedsUserApproval() override;
 
 signals:
     // VSPSetup interface events
-    void didFailWithError(uint32_t code, const char* message);
-    void didFinishWithResult(uint32_t code, const char* message);
+    void didFailWithError(quint64 code, const char* message);
+    void didFinishWithResult(quint64 code, const char* message);
     void needsUserApproval();
     // VSPController interface events
     void connected();

@@ -113,91 +113,32 @@ class VSPControllerPriv;
 class VSPCONTROLLER_EXPORT VSPController
 {
 public:
-    VSPController();
+    explicit VSPController(const char* dextClassName);
     ~VSPController();
-    /** ----------------------
-     *
-     */
     bool ConnectDriver();
-    /** ----------------------
-     *
-     */
     const char* DeviceName() const;
-    /** ----------------------
-     *
-     */
     const char* DevicePath() const;
-    /** ----------------------
-     *
-     */
     bool GetStatus();
-    /** ----------------------
-     *
-     */
     bool IsConnected();
-    /** ----------------------
-     *
-     */
     bool CreatePort(TVSPPortParameters* parameters);
-    /** ----------------------
-     *
-     */
     bool RemovePort(const uint8_t id);
-    /** ----------------------
-     *
-     */
     bool GetPortList();
-    /** ----------------------
-     *
-     */
     bool GetLinkList();
-    /** ----------------------
-     *
-     */
     bool LinkPorts(const uint8_t source, const uint8_t target);
-    /** ----------------------
-     *
-     */
     bool UnlinkPorts(const uint8_t source, const uint8_t target);
-    /** ----------------------
-     *
-     */
     bool EnableChecks(const uint8_t port, const uint32_t flags = 0);
-    /** ----------------------
-     *
-     */
     bool EnableTrace(const uint8_t port, const uint32_t flags = 0);
+    bool SetDextIdentifier(const char* name);
 
 protected:
     friend class VSPControllerPriv;
-    /** ----------------------
-     *
-     */
+    virtual int GetConnection();
+    virtual const TVSPSystemError GetSystemError(int error) const;
     virtual void OnIOUCCallback(int result, void* data, uint32_t size) = 0;
-    /** ----------------------
-     *
-     */
     virtual void OnConnected() = 0;
-    /** ----------------------
-     *
-     */
     virtual void OnDisconnected() = 0;
-    /** ----------------------
-     *
-     */
     virtual void OnErrorOccured(int error, const char* message) = 0;
-    /** ----------------------
-     *
-     */
     virtual void OnDataReady(void*) = 0;
-    /** ----------------------
-     *
-     */
-    int GetConnection();
-    /** ----------------------
-     *
-     */
-    const TVSPSystemError GetSystemError(int error) const;
 
 private:
     VSPControllerPriv* p;

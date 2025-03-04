@@ -10,10 +10,10 @@
 #include <QTimer>
 #include <vspdriverclient.h>
 
-VSPDriverClient::VSPDriverClient(QObject* parent)
+VSPDriverClient::VSPDriverClient(const QByteArray& dextBundleId, const QByteArray& dextClassName, QObject* parent)
     : QObject(parent)
-    , VSPController()
-    , VSPDriverSetup()
+    , VSPController(dextClassName.constData())
+    , VSPDriverSetup(dextBundleId.constData())
     , m_portList(this)
     , m_linkList(this)
 {
@@ -38,12 +38,12 @@ void VSPDriverClient::OnDisconnected()
     emit disconnected();
 }
 
-void VSPDriverClient::OnDidFailWithError(uint32_t code, const char* message)
+void VSPDriverClient::OnDidFailWithError(quint64 code, const char* message)
 {
     emit didFailWithError(code, message);
 }
 
-void VSPDriverClient::OnDidFinishWithResult(uint32_t code, const char* message)
+void VSPDriverClient::OnDidFinishWithResult(quint64 code, const char* message)
 {
     emit didFinishWithResult(code, message);
 }

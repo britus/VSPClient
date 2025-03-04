@@ -28,6 +28,7 @@ typedef NS_ENUM(NSInteger, VSPSmLoaderState) {
 @property (nonatomic, readonly) NSString *dextLoadingState;
 @property (nonatomic)   VSPSmLoaderState state;
 
+- (instancetype)init:(const char*)dextBundleId;
 - (void)activateMyDext;
 - (void)removeMyDext;
 

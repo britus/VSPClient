@@ -39,7 +39,10 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     const QIcon icon1(":/vspclient_1");
     setWindowIcon(icon1);
 
-    m_vsp = new VSPDriverClient(this);
+    QByteArray dextClassName = "VSPDriver";
+    QByteArray dextBundleId = "org.eof.tools.VSPDriver";
+
+    m_vsp = new VSPDriverClient(dextBundleId, dextClassName, this);
     connect(m_vsp, &VSPDriverClient::didFailWithError, this, &VSCMainWindow::onSetupFailWithError);
     connect(m_vsp, &VSPDriverClient::didFinishWithResult, this, &VSCMainWindow::onSetupFinishWithResult);
     connect(m_vsp, &VSPDriverClient::needsUserApproval, this, &VSCMainWindow::onSetupNeedsUserApproval);
@@ -173,9 +176,9 @@ void VSCMainWindow::resizeEvent(QResizeEvent* event)
     updateOverlayGeometry();
 }
 
-void VSCMainWindow::onSetupFailWithError(uint32_t code, const char* message)
+void VSCMainWindow::onSetupFailWithError(quint64 code, const char* message)
 {
-    qDebug("CTRLWIN::onSetupFailWithError(): code=%d msg=%s\n", code, message);
+    qDebug("CTRLWIN::onSetupFailWithError(): code=0x%llx msg=%s\n", code, message);
 
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     ui->textBrowser->setPlainText(tr("VSP setup status #%1\n%2").arg(code).arg(message));
@@ -187,15 +190,21 @@ void VSCMainWindow::onSetupFailWithError(uint32_t code, const char* message)
     }
 }
 
-void VSCMainWindow::onSetupFinishWithResult(uint32_t code, const char* message)
+void VSCMainWindow::onSetupFinishWithResult(quint64 code, const char* message)
 {
-    qDebug("CTRLWIN::onSetupFinishWithResult(): code=%d msg=%s\n", code, message);
+    qDebug("CTRLWIN::onSetupFinishWithResult(): code=0x%llx msg=%s\n", code, message);
 
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
-    ui->textBrowser->setPlainText(tr("%1 %2").arg(code == 0 ? "" : QString::number(code), message).trimmed());
+    ui->textBrowser->setPlainText(tr("%1 Status: %2") //
+                                     .arg(
+                                        message,
+                                        code == 0 //
+                                           ? ""
+                                           : tr("0x") + QString::number(code, 16))
+                                     .trimmed());
 
-    if (code == 12) {
-        showNotification(2750, "User approval.");
+    if ((code & 0x0000ffff) == 12) {
+        showNotification(2750, "Wait for user approval.");
     }
     else {
         showNotification(2750, ui->textBrowser->toPlainText());
@@ -246,7 +255,7 @@ void VSCMainWindow::onClientDisconnected()
 
 void VSCMainWindow::onClientError(int error, const QString& message)
 {
-    qDebug("CTRLWIN::onClientError() error=%d msg=%s\n", error, qPrintable(message));
+    qDebug("CTRLWIN::onClientError() error=0x%x msg=%s\n", error, qPrintable(message));
 
     m_errorStack[error] = message;
 

@@ -45,8 +45,8 @@ private slots:
     void onCommandResult(VSPClient::TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel);
     void onComplete();
 
-    void onSetupFailWithError(uint32_t code, const char* message);
-    void onSetupFinishWithResult(uint32_t code, const char* message);
+    void onSetupFailWithError(quint64 code, const char* message);
+    void onSetupFinishWithResult(quint64 code, const char* message);
     void onSetupNeedsUserApproval();
 
     void onSelectPage();

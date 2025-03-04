@@ -8,6 +8,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOTypes.h>
+#include <os/log.h>
 #include <vspcontroller.hpp>
 #include <vspcontrollerpriv.hpp>
 
@@ -19,9 +20,9 @@
 
 namespace VSPClient {
 
-VSPController::VSPController()
+VSPController::VSPController(const char* dextClassName)
 {
-    p = new VSPControllerPriv(this);
+    p = new VSPControllerPriv(dextClassName, this);
 }
 
 VSPController::~VSPController()
@@ -120,6 +121,14 @@ bool VSPController::EnableTrace(const uint8_t port, const uint32_t flags)
 // -------------------------------------------------------------------
 //
 //
+bool VSPController::SetDextIdentifier(const char* name)
+{
+    return p->SetDextIdentifier(name);
+}
+
+// -------------------------------------------------------------------
+//
+//
 int VSPController::GetConnection()
 {
     return p->m_connection;
@@ -197,7 +206,7 @@ static inline void PrintErrorDetails(kern_return_t ret, const char* message)
     fprintf(stderr, "\tCode.....: 0x%04x\n", err_get_code(ret));
 }
 
-VSPControllerPriv::VSPControllerPriv(VSPController* parent)
+VSPControllerPriv::VSPControllerPriv(const char* dextClassName, VSPController* parent)
     : m_machNotificationPort(0L)
     , m_runLoop(NULL)
     , m_runLoopSource(NULL)
@@ -208,6 +217,7 @@ VSPControllerPriv::VSPControllerPriv(VSPController* parent)
     , m_controller(parent)
     , m_vspResponse(NULL)
 {
+    SetDextIdentifier(dextClassName);
 }
 
 VSPControllerPriv::~VSPControllerPriv()
@@ -380,6 +390,30 @@ const char* VSPControllerPriv::DevicePath() const
 }
 
 // -------------------------------------------------------------------
+// If you don't know what value to use here, it should be identical to the
+// IOUserClass value in your IOKitPersonalities. You can double check
+// by searching with the `ioreg` command in your terminal. It will be of
+// type "IOUserService" not "IOUserServer". The client Info.plist must
+// contain:
+// <key>com.apple.developer.driverkit.userclient-access</key>
+// <array>
+//     <string>VSPDriver</string>
+// </array>
+// <key>com.apple.private.driverkit.driver-access</key>
+// <array>
+//     <string>VSPDriver</string>
+// </array>
+//
+bool VSPControllerPriv::SetDextIdentifier(const char* name)
+{
+    if (name && strlen(name) < sizeof(TDextIdentifier)) {
+        strncpy(m_dextClassName, name, sizeof(TDextIdentifier));
+        return true;
+    }
+    return false;
+}
+
+// -------------------------------------------------------------------
 // MARK: Private Asynchronous Events
 // -------------------------------------------------------------------
 
@@ -525,24 +559,38 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
     m_runLoopSource = IONotificationPortGetRunLoopSource(m_notificationPort);
     if (m_runLoopSource == NULL) {
         ReportError(kIOReturnError, "Failed to initialize run loop source.");
+        UserClientTeardown();
         return false;
     }
 
     // Establish our notifications in the run loop, so we can get callbacks.
     CFRunLoopAddSource(m_runLoop, m_runLoopSource, kCFRunLoopDefaultMode);
 
+    if (!strlen(m_dextClassName)) {
+        ReportError(kIOReturnError, "DEXT Identifier is emptry, but required!");
+        UserClientTeardown();
+        return false;
+    }
+
+    os_log(OS_LOG_DEFAULT, "[VSPCTRL] Using DEXT class name: %s", m_dextClassName);
+
     /// - Tag: SetUpMatchingNotification
-    CFMutableDictionaryRef matchingDictionary = IOServiceNameMatching(dextIdentifier);
+    CFMutableDictionaryRef matchingDictionary = IOServiceNameMatching(m_dextClassName);
     if (matchingDictionary == NULL) {
         ReportError(kIOReturnError, "Failed to initialize matching dictionary.");
         UserClientTeardown();
         return false;
     }
-    matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
-    matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
 
+    // retain for callback
+    matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
     ret = IOServiceAddMatchingNotification(
-       m_notificationPort, kIOFirstMatchNotification, matchingDictionary, DeviceAdded, refcon, &m_deviceAddedIter);
+       m_notificationPort,
+       kIOFirstMatchNotification, //
+       matchingDictionary,
+       DeviceAdded,
+       refcon,
+       &m_deviceAddedIter);
     if (ret != kIOReturnSuccess) {
         ReportError(ret, "Add matching notification failed.");
         UserClientTeardown();
@@ -550,8 +598,15 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
     }
     DeviceAdded(refcon, m_deviceAddedIter);
 
+    // retain for callback
+    matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
     ret = IOServiceAddMatchingNotification(
-       m_notificationPort, kIOTerminatedNotification, matchingDictionary, DeviceRemoved, refcon, &m_deviceRemovedIter);
+       m_notificationPort,
+       kIOTerminatedNotification, //
+       matchingDictionary,
+       DeviceRemoved,
+       refcon,
+       &m_deviceRemovedIter);
     if (ret != kIOReturnSuccess) {
         ReportError(ret, "Add termination notification failed.");
         UserClientTeardown();

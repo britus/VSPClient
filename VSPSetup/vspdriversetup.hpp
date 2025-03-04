@@ -12,13 +12,13 @@
 class VSPSETUP_EXPORT VSPDriverSetup
 {
 public:
-    VSPDriverSetup();
+    VSPDriverSetup(const char* dextBundleId);
     void activateDriver();
     void deactivateDriver();
     std::string getDriverState() const;
 
-    virtual void OnDidFailWithError(uint32_t /*code*/, const char* /*message*/);
-    virtual void OnDidFinishWithResult(uint32_t /*code*/, const char* /*message*/);
+    virtual void OnDidFailWithError(uint64_t /*code*/, const char* /*message*/);
+    virtual void OnDidFinishWithResult(uint64_t /*code*/, const char* /*message*/);
     virtual void OnNeedsUserApproval();
 
 private:
