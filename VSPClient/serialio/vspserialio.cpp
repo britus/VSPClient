@@ -1,8 +1,11 @@
 #include "ui_vspserialio.h"
 #include <QDebug>
+#include <QFileDialog>
+#include <QMessageBox>
 #include <QScreen>
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include <QStandardPaths>
 #include <QThread>
 #include <QTimer>
 #include <vspserialio.h>
@@ -435,6 +438,60 @@ inline void VSPSerialIO::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
 
 void VSPSerialIO::on_btnSendFile_clicked()
 {
+    QFileDialog d;
+    d.setWindowTitle(qApp->applicationDisplayName());
+    d.setDirectory(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+    d.setNameFilters(QStringList() << "*.txt" << "*");
+    d.setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
+    d.setFileMode(QFileDialog::FileMode::ExistingFile);
+    d.setViewMode(QFileDialog::ViewMode::Detail);
+    d.setDefaultSuffix(".txt");
+    d.setOption(QFileDialog::Option::ReadOnly);
+    if (d.exec() == QFileDialog::Accepted) {
+        QStringList files = d.selectedFiles();
+        if (!files.isEmpty()) {
+            sendFile(files.at(0));
+        }
+    }
+}
+
+inline void VSPSerialIO::sendFile(const QString& fileName)
+{
+    if (!m_port->isOpen()) {
+        return;
+    }
+
+    QFile file(fileName);
+    if (!file.exists()) {
+        QMessageBox::critical(this, qApp->applicationDisplayName(), tr("Unable find file %1").arg(fileName));
+        return;
+    }
+    if (!file.open(QFile::ReadOnly)) {
+        QMessageBox::critical(this, qApp->applicationDisplayName(), tr("Unable open file %1").arg(fileName));
+        return;
+    }
+
+    QByteArray ending;
+    QByteArray endings[7] = {"\r\n", "\n", "\r", "$", "|", ":", ";"};
+    if (ui->cbxLineEnding->currentIndex() > -1 && ui->cbxLineEnding->currentIndex() < 7) {
+        ending = endings[ui->cbxLineEnding->currentIndex()];
+    }
+
+    QString buffer;
+    QTextStream stream(&file);
+    while (!stream.atEnd()) {
+        buffer = stream.readLine();
+        if (m_port->write(buffer.toUtf8()) != buffer.length()) {
+            QMessageBox::critical(this, qApp->applicationDisplayName(), tr("Unable send file %1").arg(fileName));
+            break;
+        }
+        if (!ending.isEmpty()) {
+            m_port->write(ending);
+        }
+        m_port->flush();
+    }
+
+    file.close();
 }
 
 inline void VSPSerialIO::connectPort()
@@ -616,8 +673,11 @@ void VSPSerialIO::onRTSChanged(bool set)
     }
 }
 
-void VSPSerialIO::onBreakChanged(bool)
+void VSPSerialIO::onBreakChanged(bool isBreak)
 {
+    if (isBreak && m_isLooping) {
+        m_looperStop = true;
+    }
 }
 
 void VSPSerialIO::onPortErrorOccured(QSerialPort::SerialPortError error)

@@ -2,8 +2,41 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleDisplayName</key>
+	<string>Virtual Serial Port Controller</string>
+	<key>CFBundleName</key>
+	<string>VSPClient</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.developer-tools</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>CFBundleAllowMixedLocalizations</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>VSPClient</string>
+	<key>CFBundleIconFile</key>
+	<string>vspclient.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.eof.tools.VSPClient</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<string>12.2</string>
+	<key>NOTE</key>
+	<string>Copyright © 2025 by EoF Software Labs</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
 	<key>LSUIPresentationMode</key>
 	<integer>0</integer>
 	<key>LSVisibleInClassic</key>
@@ -14,12 +47,22 @@
 	<string>vspclient.icns</string>
 	<key>NSSupportsSuddenTermination</key>
 	<true/>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Permit Virtual Serial Port to send, write or save files.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Permit Virtual Serial Port to send, write or save files.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Permit Virtual Serial Port to send, write or save files.</string>
+	<key>OSBundleUsageDescription</key>
+	<string>Permit VSP Controller to manage virtual serial ports.</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>Permit Virtual Serial Port to write data to network volume path.</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>Shows informative messages about the state of the VSP driver.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Permit VPS Controller to redirect data from serial port to a network connection.</string>
 	<key>UILaunchImageFile</key>
-	<string>vspclient_5.png</string>
-	<key>CFBundleIconFile</key>
-	<string>vspclient.icns</string>
+	<string>vspclient_512x512.png</string>
 	<key>UIPrerenderedIcon</key>
 	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
@@ -28,6 +71,22 @@
 	<true/>
 	<key>com.apple.developer.driverkit.install</key>
 	<true/>
+	<key>com.apple.developer.system-extension.install</key>
+	<true/>
+	<key>com.apple.developer.system-extension.uninstall</key>
+	<true/>
+	<key>com.apple.developer.driverkit.userclient-access</key>
+	<array>
+		<string>VSPDriver</string>
+	</array>
+	<key>com.apple.private.driverkit.driver-access</key>
+	<array>
+		<string>VSPDriver</string>
+	</array>
+	<key>com.apple.security.temporary-exception.iokit-user-client-class</key>
+	<array>
+		<string>IOUserUserClient</string>
+	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -38,22 +97,6 @@
 				<string>vspctl</string>
 			</array>
 		</dict>
-	</array>
-	<key>com.apple.developer.driverkit.userclient-access</key>
-	<array>
-		<string>VSPDriver</string>
-	</array>
-	<key>com.apple.developer.system-extension.install</key>
-	<true/>
-	<key>com.apple.developer.system-extension.uninstall</key>
-	<true/>
-	<key>com.apple.private.driverkit.driver-access</key>
-	<array>
-		<string>VSPDriver</string>
-	</array>
-	<key>com.apple.security.temporary-exception.iokit-user-client-class</key>
-	<array>
-		<string>IOUserUserClient</string>
 	</array>
 </dict>
 </plist>

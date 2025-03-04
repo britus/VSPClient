@@ -10,7 +10,9 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QIcon>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QMacToolBar>
+#endif
 #include <QMenu>
 #include <QMessageBox>
 #include <QMovie>
@@ -106,6 +108,7 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
 
     QAction* a;
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     // ---------
     QIcon tbicon(":/vspclient_2");
     QMacToolBar* toolBar = new QMacToolBar(this);
@@ -114,6 +117,7 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
         showAboutBox();
     });
     toolBar->attachToWindow(this->windowHandle());
+#endif
 
     // ---------
     if (this->menuBar()) {
@@ -695,9 +699,9 @@ inline void VSCMainWindow::showAboutBox()
     showNotification(5000, tr("Version %1").arg(qApp->applicationVersion()));
     QMessageBox::about(
        this,
-       qApp->applicationName(),                                //
-       qApp->applicationDisplayName() + "\n\n"                 //
-          + tr(COPYRIGHT) + tr("\nwritten by EoF authors\n\n") //
+       qApp->applicationName(),                //
+       qApp->applicationDisplayName() + "\n\n" //
+          + tr(COPYRIGHT) + "\n\n"             //
           + tr("Version %1").arg(qApp->applicationVersion()));
 }
 

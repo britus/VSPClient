@@ -5,7 +5,6 @@ QT += network
 QT += concurrent
 QT += serialbus
 QT += serialport
-QT += macextras
 QT += xml
 
 ## all build config
@@ -18,19 +17,19 @@ include(serialio/serialio.pri)
 include(ui/ui.pri)
 
 SOURCES += \
-	$$PWD/main.cpp \
+    $$PWD/main.cpp \
 
 RESOURCES += \
-	$$PWD/vspui.qrc
+    $$PWD/vspui.qrc
 
 TRANSLATIONS += \
-	$$PWD/vspui_en_US.ts
+    $$PWD/vspui_en_US.ts
 
 DISTFILES += \
-	$$PWD/LICENSE \
-	$$PWD/README.md \
-	$$PWD/qt-bundle-bugfix.sh \
-	$$PWD/Info-App.plist
+    $$PWD/LICENSE \
+    $$PWD/README.md \
+    $$PWD/qt-bundle-bugfix.sh \
+    $$PWD/Info-App.plist
 
 # Default rules for deployment.
 target.path = /Applications

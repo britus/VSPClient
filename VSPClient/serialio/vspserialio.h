@@ -50,6 +50,7 @@ private:
     inline void connectPort();
     inline void disconnectPort();
     inline void looperLooper();
+    inline void sendFile(const QString& fileName);
 
 private:
     Ui::VSPSerialIO* ui;
