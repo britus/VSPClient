@@ -8,6 +8,7 @@
 #import <Foundation/Foundation.h>
 #import <SystemExtensions/SystemExtensions.h>
 #import <SystemConfiguration/SystemConfiguration.h>
+#import <objc/runtime.h>
 #import <vsploadermodel.h>
 #import <vspsmloader.h>
 
@@ -121,7 +122,17 @@ extern void onNeedsUserApproval(void);
 {
     fprintf(stdout, "[VSPLM] Got the upgrade request (%s -> %s); answering replace.\n",
            existing.bundleVersion.UTF8String, extension.bundleVersion.UTF8String);
-    return OSSystemExtensionReplacementActionReplace;
+     NSComparisonResult result = [existing.bundleVersion compare:extension.bundleVersion];
+     //up- or downgrade
+     switch (result) {
+        case NSOrderedAscending:
+            return OSSystemExtensionReplacementActionReplace;
+        case NSOrderedSame:
+            return OSSystemExtensionReplacementActionCancel;
+        case NSOrderedDescending:
+            return OSSystemExtensionReplacementActionReplace;
+    }
+    return OSSystemExtensionReplacementActionCancel;
 }
 
 - (void)request:(nonnull OSSystemExtensionRequest *)request
@@ -179,5 +190,34 @@ extern void onNeedsUserApproval(void);
     fprintf(stdout, "[VSPLM] Require user approval.\n");
     onNeedsUserApproval();
 }
+
+- (void)request:(nonnull OSSystemExtensionRequest *)request
+        foundProperties:(NSArray<OSSystemExtensionProperties *> *) properties
+ API_AVAILABLE(macos(10.15))
+ {
+    fprintf(stdout, "[VSPLM] properties count: %ld\n", (unsigned long)properties.count);
+
+    for (OSSystemExtensionProperties *obj in properties) {
+        unsigned int count;
+        objc_property_t *propertyList = class_copyPropertyList([obj class], &count);
+        if (propertyList == NULL)
+            continue;
+        NSLog(@"[VSPLM] Object: %@", obj);
+        for (unsigned int i = 0; i < count; i++) {
+            if (propertyList[i] == NULL)
+                continue;
+            const char *propName = property_getName(propertyList[i]);
+            if (propName) {
+                NSString *key = [NSString stringWithUTF8String:propName];
+                if (key != NULL) {
+                    id value = [obj valueForKey:key];
+                    NSLog(@"[VSPLM] %@ = %@", key, value);
+                }
+            }
+        }
+        free(propertyList);
+    }
+ }
+
 
 @end
