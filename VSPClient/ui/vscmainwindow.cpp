@@ -180,34 +180,47 @@ void VSCMainWindow::onSetupFailWithError(quint64 code, const char* message)
 {
     qDebug("CTRLWIN::onSetupFailWithError(): code=0x%llx msg=%s\n", code, message);
 
+    QString text = tr("VSP setup status 0x%1\n%2").arg(QString::number(code, 16), message);
+    m_errorStack[code] = text;
+
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
-    ui->textBrowser->setPlainText(tr("VSP setup status #%1\n%2").arg(code).arg(message));
-    if (code == 12) {
-        showNotification(2750, tr("Wait for user approval."));
-    }
-    else {
-        showNotification(2750, ui->textBrowser->toPlainText());
-    }
+    ui->textBrowser->setPlainText(text);
+
+    showNotification(2750, ui->textBrowser->toPlainText());
+    onComplete();
 }
 
 void VSCMainWindow::onSetupFinishWithResult(quint64 code, const char* message)
 {
-    qDebug("CTRLWIN::onSetupFinishWithResult(): code=0x%llx msg=%s\n", code, message);
+    QString text;
+    quint16 status = (code & 0x0000ffff);
+    quint16 state = ((code >> 16) & 0x0000ffff);
 
-    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
-    ui->textBrowser->setPlainText(tr("%1 Status: %2") //
-                                     .arg(
-                                        message,
-                                        code == 0 //
-                                           ? ""
-                                           : tr("0x") + QString::number(code, 16))
-                                     .trimmed());
+    qDebug("CTRLWIN::onSetupFinishWithResult(): code=0x%llx status=0x%x state=0x%x msg=%s\n", code, status, state, message);
 
-    if ((code & 0x0000ffff) == 12) {
-        showNotification(2750, "Wait for user approval.");
+    if (status == 12) {
+        text = tr("Wait for user approval.");
     }
     else {
-        showNotification(2750, ui->textBrowser->toPlainText());
+        text = status == 0 //
+                  ? ""
+                  : tr("Status: 0x") + QString::number(code, 16);
+        text = tr("%1 %2").arg(message, text).trimmed();
+    }
+
+    m_errorStack[code] = text;
+
+    ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
+    ui->textBrowser->setPlainText(text);
+
+    showNotification(2750, ui->textBrowser->toPlainText());
+    if (status == 0 && !m_vsp->IsConnected() && state == 0xf100) {
+        QTimer::singleShot(1000, this, [this]() {
+            connectDriver();
+        });
+    }
+    else {
+        onComplete();
     }
 }
 
@@ -215,6 +228,7 @@ void VSCMainWindow::onSetupNeedsUserApproval()
 {
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
     ui->textBrowser->setPlainText("Wait for approval..");
+    showNotification(2750, ui->textBrowser->toPlainText());
 }
 
 void VSCMainWindow::onClientConnected()
@@ -234,6 +248,11 @@ void VSCMainWindow::onClientConnected()
     showNotification(2750, ui->textBrowser->toPlainText());
     enableDefaultButton(ui->btn01SPCreate);
     disableButton(ui->btn09Connect);
+    onComplete();
+
+    QTimer::singleShot(100, this, [this]() {
+        m_vsp->GetStatus();
+    });
 }
 
 void VSCMainWindow::onClientDisconnected()
@@ -251,6 +270,7 @@ void VSCMainWindow::onClientDisconnected()
     showNotification(1750, ui->textBrowser->toPlainText());
     enableButton(ui->btn09Connect);
     enableDefaultButton(ui->btn09Connect);
+    onComplete();
 }
 
 void VSCMainWindow::onClientError(const VSPClient::TVSPSystemError& error, const QString& message)
@@ -268,6 +288,8 @@ void VSCMainWindow::onClientError(const VSPClient::TVSPSystemError& error, const
 
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     ui->textBrowser->setPlainText(text);
+
+    onComplete();
 
     if (!m_firstStart) {
         showNotification(1750, text);
@@ -383,6 +405,21 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
 
     // reset error message stack
     m_errorStack.clear();
+
+    if (command == vspControlPingPong) {
+        if (data.toUInt() == 1) {
+            m_demoMode = true;
+            m_firstStart = false;
+            setWindowTitle(tr("%1 [DEMO MODE]").arg(windowTitle()));
+            onClientConnected();
+            onComplete();
+            return;
+        }
+        if (!connectDriver()) {
+            installDriver();
+        }
+        return;
+    }
 
     showOverlay();
 
@@ -532,31 +569,6 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             }
             break;
         }
-        case vspControlPingPong: {
-            if (!m_vsp->IsConnected()) {
-                quint64 value = data.toUInt();
-                if (value == 1) {
-                    m_demoMode = true;
-                    m_firstStart = false;
-                    setWindowTitle(tr("%1 [DEMO MODE]").arg(windowTitle()));
-                    onClientConnected();
-                    goto error_exit;
-                }
-                if (!m_vsp->ConnectDriver()) {
-                    onUpdateButtons(false);
-                    onActionInstall();
-                    m_firstStart = false;
-                    goto error_exit;
-                }
-                m_firstStart = false;
-                m_demoMode = false;
-            }
-            if (!m_vsp->GetStatus()) {
-                onUpdateButtons(false);
-                goto error_exit;
-            }
-            break;
-        }
         default: {
             break;
         }
@@ -617,14 +629,32 @@ void VSCMainWindow::updateOverlayGeometry()
         gifLabel->movie()->setScaledSize(gifLabel->size());
     }
 
-    QTimer* t;
-    if ((t = dynamic_cast<QTimer*>(sender()))) {
-        overlay->show();
-        if (t->isActive()) {
-            t->stop();
-        }
-        t->deleteLater();
+    overlay->show();
+}
+
+inline void VSCMainWindow::installDriver()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    m_firstStart = false;
+    onUpdateButtons(false);
+    onActionInstall();
+}
+
+inline bool VSCMainWindow::connectDriver()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    m_demoMode = false;
+    m_firstStart = false;
+
+    if (!m_vsp->ConnectDriver()) {
+        onUpdateButtons(false);
+        onComplete();
+        return false;
     }
+
+    return true;
 }
 
 inline void VSCMainWindow::resetDefaultButton(QWidget* view)

@@ -135,25 +135,41 @@ extern void onNeedsUserApproval(void);
         didFinishWithResult:(OSSystemExtensionRequestResult)result
         API_AVAILABLE(macos(10.15))
 {
+    _status |= result;
+
     if (result == OSSystemExtensionRequestCompleted) {
-        fprintf(stdout, "[VSPLM] Installation successfully.\n");
-        _status |= result;
+        fprintf(stdout, "[VSPLM] OS system extension request completed.\n");
         if (result == 0) {
-            onDidFinishWithResult(_status, "Driver successfully activated.");
+            if (self.state == VSPSmLoaderStateRemoval) {
+                onDidFinishWithResult(_status, "Driver successfully removed.");
+            }
+            else {
+                onDidFinishWithResult(_status, "Driver successfully activated.");
+            }
         }
         else {
             onDidFinishWithResult(_status, "Wait for VSP driver activation.");
         }
     }
     else if (result == OSSystemExtensionRequestWillCompleteAfterReboot) {
-        fprintf(stdout, "[VSPLM] Installation pending. Activate after reboot.\n");
-        _status |= result;
-        onDidFinishWithResult(_status, "Activate VSP driver after reboot.");
+        fprintf(stdout, "[VSPLM] OS system extension request will complete after reboot.\n");
+        if (self.state == VSPSmLoaderStateRemoval) {
+            fprintf(stdout, "[VSPLM] Removal pending. Removed after reboot.\n");
+            onDidFinishWithResult(_status, "Will remove VSP driver after reboot.");
+        }
+        else {
+            fprintf(stdout, "[VSPLM] Installation pending. Activate after reboot.\n");
+            onDidFinishWithResult(_status, "Activate VSP driver after reboot.");
+        }
     }
     else {
-        fprintf(stdout, "[VSPLM] Installation status: %d\n", (int)result);
-        _status |= result;
-        onDidFinishWithResult(_status, "Activate VSP driver with status.");
+        fprintf(stdout, "[VSPLM] System Extension request status: %d\n", (int)result);
+        if (self.state == VSPSmLoaderStateRemoval) {
+            onDidFinishWithResult(_status, "Remove VSP driver with status.");
+        }
+        else {
+            onDidFinishWithResult(_status, "Activate VSP driver with status.");
+        }
     }
 }
 

@@ -217,8 +217,7 @@ VSPControllerPriv::~VSPControllerPriv()
 //
 bool VSPControllerPriv::ConnectDriver()
 {
-    UserClientSetup(this);
-    return IsConnected();
+    return UserClientSetup(this);
 }
 
 // -------------------------------------------------------------------
@@ -393,10 +392,13 @@ const char* VSPControllerPriv::DevicePath() const
 //
 inline bool VSPControllerPriv::SetDextIdentifier(const char* name)
 {
+    fprintf(stdout, "[VSPCTL] Using DEXT identifier: %s\n", name);
+
     if (name && strlen(name) < sizeof(TDextIdentifier)) {
         strncpy(m_dextClassName, name, sizeof(TDextIdentifier));
         return true;
     }
+
     return false;
 }
 
@@ -413,18 +415,20 @@ static void DeviceAdded(void* refcon, io_iterator_t iterator)
     kern_return_t ret = kIOReturnNotFound;
     io_connect_t connection = IO_OBJECT_NULL;
     io_service_t device = IO_OBJECT_NULL;
-    bool clientFound = false;
     io_name_t deviceName = {};
     io_name_t devicePath = {};
 
+    p->SetConnection(IO_OBJECT_NULL);
+
     while ((device = IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
-        // attemptedToMatchDevice = true;
         if ((ret = IORegistryEntryGetName(device, deviceName)) != kIOReturnSuccess) {
             p->ReportError(ret, "Get service registry name failed.");
         }
         if ((ret = IORegistryEntryGetPath(device, kIOServicePlane, devicePath)) != kIOReturnSuccess) {
             p->ReportError(ret, "Get service registry path failed.");
         }
+
+        fprintf(stdout, "[VSPCTL] Extension: %s: %s\n", deviceName, devicePath);
         if (strlen(deviceName) > 0 && strlen(devicePath) > 0) {
             p->SetNameAndPath(deviceName, devicePath);
         }
@@ -443,16 +447,12 @@ static void DeviceAdded(void* refcon, io_iterator_t iterator)
         }
 
         IOObjectRelease(device);
-
-        //-> SwiftDeviceAdded(refcon, connection);
         p->SetConnection(connection);
-
-        clientFound = true;
-        ret = kIOReturnSuccess;
+        break;
     }
 
-    if (!clientFound) {
-        p->ReportError(kIOReturnNotFound, "Unable to find VSPDriver extensions.");
+    if (!p->IsConnected()) {
+        fprintf(stderr, "[VSPCTL] System extension not found.\n");
     }
 }
 
@@ -570,7 +570,7 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
         return false;
     }
 
-    fprintf(stdout, "[VSPCTRL] Using DEXT class name: %s\n", m_dextClassName);
+    fprintf(stdout, "[VSPCTL] Connecting DEXT identifier: %s\n", m_dextClassName);
 
     /// - Tag: SetUpMatchingNotification
     CFMutableDictionaryRef matchingDictionary = IOServiceNameMatching(m_dextClassName);
@@ -582,13 +582,10 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
 
     // retain for callback
     matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
+    matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
+
     ret = IOServiceAddMatchingNotification(
-       m_notificationPort,
-       kIOFirstMatchNotification, //
-       matchingDictionary,
-       DeviceAdded,
-       refcon,
-       &m_deviceAddedIter);
+       m_notificationPort, kIOFirstMatchNotification, matchingDictionary, DeviceAdded, refcon, &m_deviceAddedIter);
     if (ret != kIOReturnSuccess) {
         ReportError(ret, "Add matching notification failed.");
         UserClientTeardown();
@@ -597,14 +594,8 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
     DeviceAdded(refcon, m_deviceAddedIter);
 
     // retain for callback
-    matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
     ret = IOServiceAddMatchingNotification(
-       m_notificationPort,
-       kIOTerminatedNotification, //
-       matchingDictionary,
-       DeviceRemoved,
-       refcon,
-       &m_deviceRemovedIter);
+       m_notificationPort, kIOTerminatedNotification, matchingDictionary, DeviceRemoved, refcon, &m_deviceRemovedIter);
     if (ret != kIOReturnSuccess) {
         ReportError(ret, "Add termination notification failed.");
         UserClientTeardown();
@@ -714,13 +705,13 @@ inline bool VSPControllerPriv::DoAsyncCall(TVSPControllerData* input)
 //
 void VSPControllerPriv::SetConnection(io_connect_t connection)
 {
-    if (connection == 0) {
-        m_connection = 0L;
-        m_controller->OnDisconnected();
-        return;
-    }
-
     if (connection != m_connection) {
+        if (connection == 0) {
+            m_controller->OnDisconnected();
+            m_connection = 0L;
+            return;
+        }
+
         m_connection = connection;
         m_controller->OnConnected();
     }
