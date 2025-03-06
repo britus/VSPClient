@@ -40,10 +40,17 @@ VSPSerialIO::VSPSerialIO(QWidget* parent)
     ui->cbxDtr->setChecked(false);
     if (!ui->cbxDtr->property("init").toBool()) {
         ui->cbxDtr->setProperty("init", QVariant::fromValue(true));
+
 #if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         connect(ui->cbxDtr, qOverload<bool>(&QCheckBox::clicked), this, [this](bool state) {
-            if (m_port) {
+            if (m_port && m_port->isOpen()) {
                 m_port->setDataTerminalReady(state);
+            }
+        });
+#else
+        connect(ui->cbxDtr, &QCheckBox::clicked, this, [this]() {
+            if (m_port && m_port->isOpen()) {
+                m_port->setDataTerminalReady(ui->cbxDtr->isChecked());
             }
         });
 #endif
@@ -54,8 +61,14 @@ VSPSerialIO::VSPSerialIO(QWidget* parent)
         ui->cbxRts->setProperty("init", QVariant::fromValue(true));
 #if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         connect(ui->cbxRts, qOverload<bool>(&QCheckBox::clicked), this, [this](bool state) {
-            if (m_port) {
+            if (m_port && m_port->isOpen()) {
                 m_port->setRequestToSend(state);
+            }
+        });
+#else
+        connect(ui->cbxRts, &QCheckBox::clicked, this, [this]() {
+            if (m_port && m_port->isOpen()) {
+                m_port->setRequestToSend(ui->cbxRts->isChecked());
             }
         });
 #endif
@@ -66,9 +79,14 @@ VSPSerialIO::VSPSerialIO(QWidget* parent)
         ui->cbxCts->setProperty("init", QVariant::fromValue(true));
 #if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         connect(ui->cbxCts, qOverload<bool>(&QCheckBox::clicked), this, [this](bool state) {
-            // TODO: onClickEvent()
             Q_UNUSED(this)
             Q_UNUSED(state)
+        });
+#else
+        connect(ui->cbxCts, &QCheckBox::clicked, this, [this]() {
+            if (m_port && m_port->isOpen()) {
+                //
+            }
         });
 #endif
     }
@@ -78,9 +96,14 @@ VSPSerialIO::VSPSerialIO(QWidget* parent)
         ui->cbxDSR->setProperty("init", QVariant::fromValue(true));
 #if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         connect(ui->cbxDSR, qOverload<bool>(&QCheckBox::clicked), this, [this](bool state) {
-            // TODO: onClickEvent()
             Q_UNUSED(this)
             Q_UNUSED(state)
+        });
+#else
+        connect(ui->cbxDSR, &QCheckBox::clicked, this, [this]() {
+            if (m_port && m_port->isOpen()) {
+                //
+            }
         });
 #endif
     }
@@ -155,6 +178,19 @@ inline void VSPSerialIO::initComboSerialPort(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(selection)
         Q_UNUSED(vsel)
     });
+#else
+    connect(cbx, &QComboBox::activated, this, [this, cbx, link](int index) {
+        const QSerialPortInfo spi = cbx->itemData(index).value<QSerialPortInfo>();
+        const int selection = (!link ? 0 : link->currentIndex());
+        const QVariant vsel = (!link ? QVariant() : link->itemData(selection));
+        Q_UNUSED(this)
+        Q_UNUSED(cbx)
+        Q_UNUSED(link)
+        Q_UNUSED(index)
+        Q_UNUSED(spi)
+        Q_UNUSED(selection)
+        Q_UNUSED(vsel)
+    });
 #endif
 }
 
@@ -214,6 +250,19 @@ inline void VSPSerialIO::initComboBaudRate(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(vsel)
         Q_UNUSED(value)
     });
+#else
+    connect(cbx, &QComboBox::activated, this, [this, cbx, link](int index) {
+        const QSerialPortInfo spi = cbx->itemData(index).value<QSerialPortInfo>();
+        const int selection = (!link ? 0 : link->currentIndex());
+        const QVariant vsel = (!link ? QVariant() : link->itemData(selection));
+        Q_UNUSED(this)
+        Q_UNUSED(cbx)
+        Q_UNUSED(link)
+        Q_UNUSED(index)
+        Q_UNUSED(spi)
+        Q_UNUSED(selection)
+        Q_UNUSED(vsel)
+    });
 #endif
 }
 
@@ -268,6 +317,19 @@ inline void VSPSerialIO::initComboDataBits(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(selection)
         Q_UNUSED(vsel)
         Q_UNUSED(value)
+    });
+#else
+    connect(cbx, &QComboBox::activated, this, [this, cbx, link](int index) {
+        const QSerialPortInfo spi = cbx->itemData(index).value<QSerialPortInfo>();
+        const int selection = (!link ? 0 : link->currentIndex());
+        const QVariant vsel = (!link ? QVariant() : link->itemData(selection));
+        Q_UNUSED(this)
+        Q_UNUSED(cbx)
+        Q_UNUSED(link)
+        Q_UNUSED(index)
+        Q_UNUSED(spi)
+        Q_UNUSED(selection)
+        Q_UNUSED(vsel)
     });
 #endif
 }
@@ -379,6 +441,19 @@ inline void VSPSerialIO::initComboParity(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(vsel)
         Q_UNUSED(value)
     });
+#else
+    connect(cbx, &QComboBox::activated, this, [this, cbx, link](int index) {
+        const QSerialPortInfo spi = cbx->itemData(index).value<QSerialPortInfo>();
+        const int selection = (!link ? 0 : link->currentIndex());
+        const QVariant vsel = (!link ? QVariant() : link->itemData(selection));
+        Q_UNUSED(this)
+        Q_UNUSED(cbx)
+        Q_UNUSED(link)
+        Q_UNUSED(index)
+        Q_UNUSED(spi)
+        Q_UNUSED(selection)
+        Q_UNUSED(vsel)
+    });
 #endif
 }
 
@@ -432,6 +507,19 @@ inline void VSPSerialIO::initComboFlowCtrl(QComboBox* cbx, QComboBox* link)
         Q_UNUSED(selection)
         Q_UNUSED(vsel)
         Q_UNUSED(value)
+    });
+#else
+    connect(cbx, &QComboBox::activated, this, [this, cbx, link](int index) {
+        const QSerialPortInfo spi = cbx->itemData(index).value<QSerialPortInfo>();
+        const int selection = (!link ? 0 : link->currentIndex());
+        const QVariant vsel = (!link ? QVariant() : link->itemData(selection));
+        Q_UNUSED(this)
+        Q_UNUSED(cbx)
+        Q_UNUSED(link)
+        Q_UNUSED(index)
+        Q_UNUSED(spi)
+        Q_UNUSED(selection)
+        Q_UNUSED(vsel)
     });
 #endif
 }
@@ -507,6 +595,8 @@ inline void VSPSerialIO::connectPort()
                 return;
             }
             m_port->flush();
+            m_port->setDataTerminalReady(ui->cbxDtr->isChecked());
+            m_port->setRequestToSend(ui->cbxRts->isChecked());
 
             ui->gbxOutput->setEnabled(true);
             ui->btnConnect->setText("Disconnect");
@@ -551,8 +641,6 @@ void VSPSerialIO::on_btnConnect_clicked()
         m_port->setStopBits(ui->cbxStopBits->currentData().value<QSerialPort::StopBits>());
         m_port->setParity(ui->cbxParity->currentData().value<QSerialPort::Parity>());
         m_port->setFlowControl(ui->cbxFlowControl->currentData().value<QSerialPort::FlowControl>());
-        m_port->setRequestToSend(ui->cbxRts->isChecked());
-        m_port->setDataTerminalReady(ui->cbxDtr->isChecked());
         connect(m_port, &QSerialPort::errorOccurred, this, &VSPSerialIO::onPortErrorOccured);
         connect(m_port, &QSerialPort::bytesWritten, this, &VSPSerialIO::onPortBytesWritten);
         connect(m_port, &QSerialPort::aboutToClose, this, &VSPSerialIO::onPortClosed);
@@ -593,7 +681,7 @@ void VSPSerialIO::on_btnSendLine_clicked()
     if (m_port && m_port->isOpen()) {
         ui->txInputView->setPlainText(">: " + out);
 
-        qDebug() << "VSPTester: SND:" << out.toHex().constData();
+        qDebug("VSPSerialIO[%s]: <SND> %s", qPrintable(m_port->portName()), qPrintable(out.toHex()));
 
         if (m_port->write(out) != out.length()) {
             m_port->close();
@@ -605,7 +693,7 @@ void VSPSerialIO::looperLooper()
 {
     const QString chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
-    if (m_looperStop) {
+    if (m_looperStop || m_port->isBreakEnabled()) {
         return;
     }
 
@@ -622,7 +710,6 @@ void VSPSerialIO::looperLooper()
 
     m_looper = new QThread();
     connect(m_looper, &QThread::started, this, [this]() {
-        qDebug() << "th started";
         QTimer::singleShot(1000, this, [this]() {
             on_btnSendLine_clicked();
             m_looperCount++;
@@ -631,11 +718,10 @@ void VSPSerialIO::looperLooper()
         m_looper->exit(0);
     });
     connect(m_looper, &QThread::finished, this, [this]() {
-        qDebug() << "th finished";
         m_looper->deleteLater();
     });
     connect(m_looper, &QSerialPort::destroyed, this, [](QObject*) {
-        qDebug() << "th removed";
+        //
     });
     m_looper->setObjectName("looper");
     m_looper->start(QThread::NormalPriority);
@@ -676,6 +762,9 @@ void VSPSerialIO::onRTSChanged(bool set)
 void VSPSerialIO::onBreakChanged(bool isBreak)
 {
     if (isBreak && m_isLooping) {
+        ui->btnLooper->setText("Looper");
+        ui->btnLooper->setChecked(false);
+        m_isLooping = false;
         m_looperStop = true;
     }
 }
@@ -695,12 +784,9 @@ void VSPSerialIO::onPortBytesWritten(qint64 bytes)
 {
     m_outTotal += bytes;
 
-    ui->txOutputInfo->setText(tr( //
-                                 "Written: %1 Total: %2")
-                                 .arg(bytes)
-                                 .arg(m_outTotal));
+    ui->txOutputInfo->setText(tr("Written: %1 Total: %2").arg(bytes).arg(m_outTotal));
 
-    qDebug() << "VSPTester:" << ui->txOutputInfo->text().toUtf8().constData();
+    qDebug("VSPSerialIO[%s]: %s", qPrintable(m_port->portName()), qPrintable(ui->txOutputInfo->text()));
 }
 
 void VSPSerialIO::onPortReadyRead()
@@ -710,7 +796,7 @@ void VSPSerialIO::onPortReadyRead()
 
     QByteArray inbuf = m_port->readAll();
 
-    qDebug() << "VSPTester: RCV:" << inbuf.toHex().constData();
+    qDebug("VSPSerialIO[%s]: <RCV> %s", qPrintable(m_port->portName()), qPrintable(inbuf.toHex()));
 
     QString buffer = ui->txInputView->toPlainText();
     buffer += "<: " + inbuf;

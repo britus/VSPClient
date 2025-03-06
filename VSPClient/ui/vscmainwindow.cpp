@@ -178,7 +178,7 @@ void VSCMainWindow::resizeEvent(QResizeEvent* event)
 
 void VSCMainWindow::onSetupFailWithError(quint64 code, const char* message)
 {
-    qDebug("CTRLWIN::onSetupFailWithError(): code=0x%llx msg=%s\n", code, message);
+    qDebug("[CTRLUI] onSetupFailWithError(): code=0x%llx msg=%s", code, message);
 
     QString text = tr("VSP setup status 0x%1\n%2").arg(QString::number(code, 16), message);
     m_errorStack[code] = text;
@@ -196,7 +196,12 @@ void VSCMainWindow::onSetupFinishWithResult(quint64 code, const char* message)
     quint16 status = (code & 0x0000ffff);
     quint16 state = ((code >> 16) & 0x0000ffff);
 
-    qDebug("CTRLWIN::onSetupFinishWithResult(): code=0x%llx status=0x%x state=0x%x msg=%s\n", code, status, state, message);
+    qDebug(
+       "[CTRLUI] onSetupFinishWithResult(): code=0x%llx status=0x%x state=0x%x msg=%s", //
+       code,
+       status,
+       state,
+       message);
 
     if (status == 12) {
         text = tr("Wait for user approval.");
@@ -214,6 +219,7 @@ void VSCMainWindow::onSetupFinishWithResult(quint64 code, const char* message)
     ui->textBrowser->setPlainText(text);
 
     showNotification(2750, ui->textBrowser->toPlainText());
+
     if (status == 0 && !m_vsp->IsConnected() && state == 0xf100) {
         QTimer::singleShot(1000, this, [this]() {
             connectDriver();
@@ -227,13 +233,13 @@ void VSCMainWindow::onSetupFinishWithResult(quint64 code, const char* message)
 void VSCMainWindow::onSetupNeedsUserApproval()
 {
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
-    ui->textBrowser->setPlainText("Wait for approval..");
+    ui->textBrowser->setPlainText("Wait for user approval...");
     showNotification(2750, ui->textBrowser->toPlainText());
 }
 
 void VSCMainWindow::onClientConnected()
 {
-    qDebug("CTRLWIN::onClientConnected()\n");
+    qDebug("[CTRLUI] onClientConnected()");
 
     resetDefaultButton(ui->pnlButtons);
     onUpdateButtons(true);
@@ -250,14 +256,16 @@ void VSCMainWindow::onClientConnected()
     disableButton(ui->btn09Connect);
     onComplete();
 
-    QTimer::singleShot(100, this, [this]() {
-        m_vsp->GetStatus();
-    });
+    if (!m_demoMode) {
+        QTimer::singleShot(100, this, [this]() {
+            m_vsp->GetStatus();
+        });
+    }
 }
 
 void VSCMainWindow::onClientDisconnected()
 {
-    qDebug("CTRLWIN::onClientDisconnected()\n");
+    qDebug("[CTRLUI] onClientDisconnected()");
 
     resetDefaultButton(ui->pnlButtons);
     onUpdateButtons(false);
@@ -275,7 +283,7 @@ void VSCMainWindow::onClientDisconnected()
 
 void VSCMainWindow::onClientError(const VSPClient::TVSPSystemError& error, const QString& message)
 {
-    qDebug("CTRLWIN::onClientError() error=0x%x msg=%s\n", error.code, qPrintable(message));
+    qDebug("[CTRLUI] onClientError() error=0x%x msg=%s", error.code, qPrintable(message));
 
     m_errorStack[error.code] = message;
 
@@ -293,24 +301,16 @@ void VSCMainWindow::onClientError(const VSPClient::TVSPSystemError& error, const
 
     if (!m_firstStart) {
         showNotification(1750, text);
-        QTimer::singleShot(50, this, [this, error, text]() {
+        QTimer::singleShot(50, this, [this, text]() {
             if (windowIcon().isNull()) {
                 m_box.setIcon(QMessageBox::Critical);
             }
             else {
-                m_box.setIconPixmap(windowIcon().pixmap(QSize(32, 32)));
+                m_box.setIconPixmap(windowIcon().pixmap(QSize(48, 48)));
             }
-
             m_box.setWindowTitle(windowTitle());
             m_box.setText(text);
-
-            if (!m_vsp->IsConnected() && error.code == kIOErrorNotFound) {
-                m_box.setInformativeText(tr("You must install the VSP Driver extension first.\n"));
-            }
-            else {
-                m_box.setInformativeText("");
-            }
-
+            m_box.setInformativeText("");
             m_box.show();
         });
     }
@@ -318,7 +318,7 @@ void VSCMainWindow::onClientError(const VSPClient::TVSPSystemError& error, const
 
 void VSCMainWindow::onUpdateStatusLog(const QByteArray& message)
 {
-    qDebug("CTRLWIN::onUpdateStatusLog(): %s\n", qPrintable(message));
+    qDebug("[CTRLUI] onUpdateStatusLog(): %s", qPrintable(message));
 
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
     ui->textBrowser->setPlainText(message);
@@ -326,7 +326,7 @@ void VSCMainWindow::onUpdateStatusLog(const QByteArray& message)
 
 void VSCMainWindow::onUpdateButtons(bool enabled)
 {
-    qDebug("CTRLWIN::onUpdateButtons(): enabled=%d\n", enabled);
+    qDebug("[CTRLUI] onUpdateButtons(): enabled=%d", enabled);
 
     if (!enabled) {
         disableButton(
@@ -358,7 +358,7 @@ void VSCMainWindow::onUpdateButtons(bool enabled)
 
 void VSCMainWindow::onCommandResult(TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel)
 {
-    qDebug("CTRLWIN::onCommandResult(): cmd=%d\n", command);
+    qDebug("[CTRLUI] onCommandResult(): cmd=%d", command);
 
     VSPAbstractPage* page;
     if ((page = dynamic_cast<VSPAbstractPage*>(ui->stackedWidget->currentWidget())) == nullptr) {
@@ -370,7 +370,7 @@ void VSCMainWindow::onCommandResult(TVSPControlCommand command, VSPPortListModel
 
 void VSCMainWindow::onComplete()
 {
-    qDebug("CTRLWIN::onComplete():\n");
+    qDebug("[CTRLUI] onComplete()");
     removeOverlay();
 }
 
@@ -382,7 +382,7 @@ void VSCMainWindow::onSelectPage()
         return;
     }
 
-    qDebug("CTRLWIN::onSelectPage(): button=%s\n", qPrintable(button->text()));
+    qDebug("[CTRLUI] onSelectPage(): button=%s", qPrintable(button->text()));
 
     VSPAbstractPage* page;
     if (!(page = m_buttonMap[button])) {
@@ -401,7 +401,7 @@ void VSCMainWindow::onSelectPage()
 
 void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVariant& data)
 {
-    qDebug("CTRLWIN::onActionExecute(): cmd=%d\n", command);
+    qDebug("[CTRLUI] onActionExecute(): cmd=%d", command);
 
     // reset error message stack
     m_errorStack.clear();
@@ -634,7 +634,7 @@ void VSCMainWindow::updateOverlayGeometry()
 
 inline void VSCMainWindow::installDriver()
 {
-    qDebug() << Q_FUNC_INFO;
+    qDebug() << "[CTRLUI] installDriver()";
 
     m_firstStart = false;
     onUpdateButtons(false);
@@ -643,7 +643,7 @@ inline void VSCMainWindow::installDriver()
 
 inline bool VSCMainWindow::connectDriver()
 {
-    qDebug() << Q_FUNC_INFO;
+    qDebug() << "[CTRLUI] connectDriver()";
 
     m_demoMode = false;
     m_firstStart = false;
@@ -796,7 +796,7 @@ inline void VSCMainWindow::showOverlay()
     QWidget* overlay;
     QLabel* gifLabel;
 
-    qDebug("CTRLWIN::showOverlay():\n");
+    qDebug("[CTRLUI] showOverlay()");
 
     // Overlay-Widget erstellen
     overlay = new QWidget(centralWidget());
@@ -838,7 +838,7 @@ inline void VSCMainWindow::removeOverlay()
         return;
     }
 
-    qDebug("CTRLWIN::removeOverlay():\n");
+    qDebug("[CTRLUI] removeOverlay()");
 
     QWidget* overlay;
     if (!(overlay = v.value<QWidget*>())) {
