@@ -20,7 +20,7 @@
    <string>Virtual Serial Port Controller</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../vspui.qrc">
+   <iconset>
     <normaloff>:/assets/png/vspclient_7.png</normaloff>:/assets/png/vspclient_7.png</iconset>
   </property>
   <property name="documentMode">
@@ -60,6 +60,12 @@
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
+         </property>
          <property name="text">
           <string>Create Serial Port</string>
          </property>
@@ -69,6 +75,12 @@
         <widget class="QPushButton" name="btn02SPRemove">
          <property name="enabled">
           <bool>false</bool>
+         </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
          </property>
          <property name="text">
           <string>Remove Serial Port</string>
@@ -86,6 +98,12 @@
            <height>0</height>
           </size>
          </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
+         </property>
          <property name="text">
           <string>Create Port Link</string>
          </property>
@@ -101,6 +119,12 @@
            <width>150</width>
            <height>0</height>
           </size>
+         </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
          </property>
          <property name="text">
           <string>Remove Port Link</string>
@@ -118,6 +142,12 @@
            <height>0</height>
           </size>
          </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
+         </property>
          <property name="text">
           <string>Get Port List</string>
          </property>
@@ -127,6 +157,12 @@
         <widget class="QPushButton" name="btn06LinkList">
          <property name="enabled">
           <bool>false</bool>
+         </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
          </property>
          <property name="text">
           <string>Get Link List</string>
@@ -144,6 +180,12 @@
            <height>0</height>
           </size>
          </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
+         </property>
          <property name="text">
           <string>Enable Checks</string>
          </property>
@@ -160,6 +202,12 @@
            <height>0</height>
           </size>
          </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
+         </property>
          <property name="text">
           <string>Enable Traces</string>
          </property>
@@ -170,6 +218,12 @@
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
+         </property>
          <property name="text">
           <string>Serial I/O Test</string>
          </property>
@@ -177,6 +231,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn09Connect">
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
+         </property>
          <property name="text">
           <string>Connect</string>
          </property>
@@ -190,6 +250,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn10Close">
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="tabletTracking">
+          <bool>true</bool>
+         </property>
          <property name="text">
           <string>Close</string>
          </property>
@@ -242,9 +308,12 @@
            <widget class="QToolButton" name="toolButton">
             <property name="maximumSize">
              <size>
-              <width>14</width>
-              <height>14</height>
+              <width>12</width>
+              <height>12</height>
              </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
             </property>
             <property name="text">
              <string/>
@@ -329,11 +398,17 @@
           </property>
           <item>
            <widget class="QStackedWidget" name="stackedWidget">
+            <property name="mouseTracking">
+             <bool>true</bool>
+            </property>
+            <property name="tabletTracking">
+             <bool>true</bool>
+            </property>
             <property name="frameShape">
              <enum>QFrame::NoFrame</enum>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="PGSPCreate" name="pg01SPCreate"/>
             <widget class="PGSPRemove" name="pg02SPRemove"/>
@@ -380,6 +455,12 @@
               <family>Menlo</family>
               <bold>true</bold>
              </font>
+            </property>
+            <property name="mouseTracking">
+             <bool>false</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
             </property>
             <property name="autoFormatting">
              <set>QTextEdit::AutoNone</set>
@@ -485,11 +566,10 @@
   <tabstop>btn11SerialIO</tabstop>
   <tabstop>btn09Connect</tabstop>
   <tabstop>btn10Close</tabstop>
+  <tabstop>toolButton</tabstop>
   <tabstop>textBrowser</tabstop>
  </tabstops>
- <resources>
-  <include location="../vspui.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>btn10Close</sender>

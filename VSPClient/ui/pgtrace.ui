@@ -62,6 +62,12 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="mouseTracking">
+         <bool>true</bool>
+        </property>
+        <property name="tabletTracking">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="1" column="0" colspan="2">
@@ -84,6 +90,12 @@
          </property>
          <item row="0" column="0">
           <widget class="QCheckBox" name="cbxTraceRX">
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>Trace RX</string>
            </property>
@@ -91,6 +103,12 @@
          </item>
          <item row="1" column="0">
           <widget class="QCheckBox" name="cbxTraceTX">
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>Trace TX</string>
            </property>
@@ -98,6 +116,12 @@
          </item>
          <item row="0" column="1">
           <widget class="QCheckBox" name="cbxTraceCmd">
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>Trace commands</string>
            </property>
@@ -144,6 +168,12 @@
              <width>110</width>
              <height>0</height>
             </size>
+           </property>
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Save</string>

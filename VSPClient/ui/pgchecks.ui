@@ -73,6 +73,9 @@
            <property name="text">
             <string>Serial Port:</string>
            </property>
+           <property name="buddy">
+            <cstring>cbPorts</cstring>
+           </property>
           </widget>
          </item>
          <item>
@@ -82,6 +85,12 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -108,6 +117,12 @@
          </property>
          <item row="0" column="0">
           <widget class="QCheckBox" name="cbxBaudRate">
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>Baud rate</string>
            </property>
@@ -115,6 +130,12 @@
          </item>
          <item row="0" column="1">
           <widget class="QCheckBox" name="cbxDataBits">
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>Data bits</string>
            </property>
@@ -122,6 +143,12 @@
          </item>
          <item row="0" column="2">
           <widget class="QCheckBox" name="cbxStopBits">
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>Stop bits</string>
            </property>
@@ -129,6 +156,12 @@
          </item>
          <item row="1" column="0">
           <widget class="QCheckBox" name="cbxParity">
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>Parity</string>
            </property>
@@ -136,6 +169,12 @@
          </item>
          <item row="1" column="1">
           <widget class="QCheckBox" name="cbxFlowCtrl">
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>Flow control</string>
            </property>
@@ -196,6 +235,12 @@
              <height>0</height>
             </size>
            </property>
+           <property name="mouseTracking">
+            <bool>true</bool>
+           </property>
+           <property name="tabletTracking">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>Save</string>
            </property>
@@ -210,11 +255,12 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>cbPorts</tabstop>
   <tabstop>cbxBaudRate</tabstop>
-  <tabstop>cbxDataBits</tabstop>
-  <tabstop>cbxStopBits</tabstop>
   <tabstop>cbxParity</tabstop>
+  <tabstop>cbxDataBits</tabstop>
   <tabstop>cbxFlowCtrl</tabstop>
+  <tabstop>cbxStopBits</tabstop>
   <tabstop>btnUpdate</tabstop>
  </tabstops>
  <resources/>

@@ -5,8 +5,11 @@ QT += network
 QT += concurrent
 QT += serialbus
 QT += serialport
-QT += macextras
 QT += xml
+
+lessThan(QT_MAJOR_VERSION, 6) {
+QT += macextras
+}
 
 ## all build config
 include(VSPClient.config.pri)
