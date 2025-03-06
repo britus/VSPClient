@@ -22,7 +22,7 @@ INCLUDEPATH += $$PWD
 
 OBJECTIVE_SOURCES += $$PWD/vsploadermodel.m
 OBJECTIVE_SOURCES += $$PWD/vspsmloader.m
-OBJECTIVE_SOURCES += $$PWD/vspdrivercpp.mm
+OBJECTIVE_SOURCES += $$PWD/vspdriversetup.mm
 
 OBJECTIVE_HEADERS += $$PWD/vspsetup_global.h
 OBJECTIVE_HEADERS += $$PWD/vspdriversetup.hpp

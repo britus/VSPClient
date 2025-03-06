@@ -1,5 +1,5 @@
 // ********************************************************************
-// VSPSmLoader.h - VSPDriver user setup/install
+// vspsmloader.h - VSPDriver loader model states
 //
 // Copyright © 2025 by EoF Software Labs
 // Copyright © 2024 Apple Inc. (some copied parts)

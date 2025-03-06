@@ -1,5 +1,5 @@
 // ********************************************************************
-// VSPLoadModel.h - VSPDriver user setup/install
+// vsploadmodel.h - VSPDriver install/uninstall
 //
 // Copyright © 2025 by EoF Software Labs
 // Copyright © 2024 Apple Inc. (some copied parts)

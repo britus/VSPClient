@@ -1,5 +1,5 @@
 // ********************************************************************
-// VSPDriverSetup.cpp - Interface to install VSPDriver DEXT
+// vspdriversetup.cpp - Interface to install/uninstall VSPDriver Dext
 //
 // Copyright © 2025 by EoF Software Labs
 // Copyright © 2024 Apple Inc. (some copied parts)
@@ -16,6 +16,7 @@ public:
     void activateDriver();
     void deactivateDriver();
 
+    // override this methods to get events
     virtual void OnDidFailWithError(uint64_t /*code*/, const char* /*message*/);
     virtual void OnDidFinishWithResult(uint64_t /*code*/, const char* /*message*/);
     virtual void OnNeedsUserApproval();

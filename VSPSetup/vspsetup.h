@@ -1,10 +1,10 @@
+// ********************************************************************
+// vspsetup.h - VSPDriver install/uninstall
 //
-//  VSPSetup.h
-//  VSPSetup
-//
-//  Created by Björn Eschrich on 15.02.25.
-//
-
+// Copyright © 2025 by EoF Software Labs
+// Copyright © 2024 Apple Inc. (some copied parts)
+// SPDX-License-Identifier: MIT
+// ********************************************************************
 #import <Foundation/Foundation.h>
 
 //! Project version number for VSPSetup.

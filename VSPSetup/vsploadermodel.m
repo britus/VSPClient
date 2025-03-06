@@ -1,5 +1,5 @@
 // ********************************************************************
-// VSPLoadModel.m - VSPDriver Dext load and unload
+// vsploadmodel.m - VSPDriver Dext load/unload
 //
 // Copyright © 2025 by EoF Software Labs
 // Copyright © 2024 Apple Inc. (some copied parts)
