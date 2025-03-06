@@ -1,5 +1,5 @@
 // ********************************************************************
-// VSPLoadModel.m - VSPDriver user setup/install
+// VSPLoadModel.m - VSPDriver Dext load and unload
 //
 // Copyright © 2025 by EoF Software Labs
 // Copyright © 2024 Apple Inc. (some copied parts)
@@ -12,6 +12,7 @@
 #import <vsploadermodel.h>
 #import <vspsmloader.h>
 
+// callbacks for VSPDriverSetup C++ class
 extern void onDidFailWithError(uint64_t code, const char* message);
 extern void onDidFinishWithResult(uint64_t code, const char* message);
 extern void onNeedsUserApproval(void);
@@ -22,6 +23,8 @@ extern void onNeedsUserApproval(void);
     NSString* m_dextBundleId;
 }
 
+// -----------------------------------------------------------------------
+// Constructor - called by VSPDriverSetupWrapper class
 - (instancetype)init:(const char*)dextBundleId
 {
     self = [super init];
@@ -52,16 +55,22 @@ extern void onNeedsUserApproval(void);
     return self;
 }
 
+// -----------------------------------------------------------------------
+// Short: Install embedded Dext - called by VSPDriverSetupWrapper class
 - (void)activateMyDext
 {
     [self activateExtension:m_dextBundleId];
 }
 
+// -----------------------------------------------------------------------
+// Short: Remove existing Dext - called by VSPDriverSetupWrapper class
 - (void)removeMyDext
 {
     [self deactivateExtension:m_dextBundleId];
 }
 
+// -----------------------------------------------------------------------
+// Install embedded Dext
 - (void)activateExtension:(NSString *)dextBundleId
 {
     self.status = 0xf1000000;
@@ -80,6 +89,8 @@ extern void onNeedsUserApproval(void);
     }
 }
 
+// -----------------------------------------------------------------------
+// Remove existing Dext
 - (void)deactivateExtension:(NSString *)dextBundleId
 {
     self.status = 0xf2000000;
@@ -102,6 +113,9 @@ extern void onNeedsUserApproval(void);
 // Implement OSSystemExtensionRequestDelegate methods...
 // -----------------------------------------------------------
 
+// -----------------------------------------------------------------------
+// Event raised to inform the OS what we want to do in the Dext
+// installation process
 - (OSSystemExtensionReplacementAction)request:(nonnull OSSystemExtensionRequest *)request
                   actionForReplacingExtension:(nonnull OSSystemExtensionProperties *)existing
                                 withExtension:(nonnull OSSystemExtensionProperties *)extension API_AVAILABLE(macos(10.15))
@@ -125,6 +139,9 @@ extern void onNeedsUserApproval(void);
     return OSSystemExtensionReplacementActionCancel;
 }
 
+// -----------------------------------------------------------------------
+// Event raised if OS tell us something is wrong. Mostly security or
+// entitlements problems :)
 - (void)request:(nonnull OSSystemExtensionRequest *)request didFailWithError:(nonnull NSError *)error API_AVAILABLE(macos(10.15))
 {
     NSLog(@"[VSPDLM] Error 0x%lx %@\n", error.code, error.description);
@@ -132,6 +149,8 @@ extern void onNeedsUserApproval(void);
     onDidFailWithError(error.code, error.description.UTF8String);
 }
 
+// -----------------------------------------------------------------------
+// Event raised if OS has been installed/removed the Dext
 - (void)request:(nonnull OSSystemExtensionRequest *)request didFinishWithResult:(OSSystemExtensionRequestResult)result API_AVAILABLE(macos(10.15))
 {
     self.status |= result;
@@ -177,6 +196,8 @@ extern void onNeedsUserApproval(void);
     }
 }
 
+// -----------------------------------------------------------------------
+// Event raised if user approval is required to install/remove the Dext
 - (void)requestNeedsUserApproval:(nonnull OSSystemExtensionRequest *)request API_AVAILABLE(macos(10.15))
 {
     NSLog(@"[VSPDLM] Require user approval.\n");
@@ -184,6 +205,8 @@ extern void onNeedsUserApproval(void);
     onNeedsUserApproval();
 }
 
+// -----------------------------------------------------------------------
+// Shows installed/known versions of the VSP Dext in the OS
 - (void)request:(nonnull OSSystemExtensionRequest *)request foundProperties:(NSArray<OSSystemExtensionProperties *> *) properties API_AVAILABLE(macos(10.15))
 {
     NSLog(@"[VSPDLM] properties count: %ld\n", (unsigned long)properties.count);
