@@ -200,7 +200,7 @@ VSPControllerPriv::VSPControllerPriv(const char* dextClassName, VSPController* p
     , m_deviceAddedIter(IO_OBJECT_NULL)
     , m_deviceRemovedIter(IO_OBJECT_NULL)
     , m_notificationPort(NULL)
-    , m_connection(0L)
+    , m_connection(IO_OBJECT_NULL)
     , m_controller(parent)
     , m_vspResponse(NULL)
 {
@@ -225,7 +225,7 @@ bool VSPControllerPriv::ConnectDriver()
 //
 bool VSPControllerPriv::IsConnected()
 {
-    return (m_connection != 0L);
+    return (m_connection != IO_OBJECT_NULL);
 }
 
 // -------------------------------------------------------------------
@@ -483,7 +483,6 @@ static void DeviceRemoved(void* refcon, io_iterator_t iterator)
 // refcon will be the value you placed in asyncRef[kIOAsyncCalloutRefconIndex]
 static void AsyncCallback(void* refcon, IOReturn result, void** args, UInt32 numArgs)
 {
-    //-> App API callback SwiftAsyncCallback(refcon, result, args, numArgs);
     VSPControllerPriv* p = (VSPControllerPriv*) refcon;
     p->AsyncCallback(result, args, numArgs);
 }
@@ -580,7 +579,7 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
         return false;
     }
 
-    // retain for callback
+    // retain for each callback
     matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
     matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
 

@@ -6,8 +6,8 @@
 // SPDX-License-Identifier: MIT
 // ********************************************************************
 #pragma once
-#include <string>
-#include <vspsetup_global.h>
+#include "vspsetup_global.h"
+#include <inttypes.h>
 
 class VSPSETUP_EXPORT VSPDriverSetup
 {
@@ -15,7 +15,6 @@ public:
     VSPDriverSetup(const char* dextBundleId);
     void activateDriver();
     void deactivateDriver();
-    std::string getDriverState() const;
 
     virtual void OnDidFailWithError(uint64_t /*code*/, const char* /*message*/);
     virtual void OnDidFinishWithResult(uint64_t /*code*/, const char* /*message*/);

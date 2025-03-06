@@ -17,7 +17,6 @@
 
 - (void) activate;
 - (void) deactivate;
-- (NSString *) stateDescription;
 
 @end
 
@@ -50,11 +49,6 @@ static char g_message[256];
 - (void) deactivate
 {
     [_loaderModel removeMyDext];
-}
-
-- (NSString *) stateDescription
-{
-    return [_loaderModel dextLoadingState];
 }
 
 @end
@@ -101,11 +95,6 @@ void VSPDriverSetup::activateDriver()
 void VSPDriverSetup::deactivateDriver()
 {
     [(__bridge VSPDriverSetupWrapper*)_loader deactivate];
-}
-
-std::string VSPDriverSetup::getDriverState() const
-{
-    return [(__bridge VSPDriverSetupWrapper*)_loader stateDescription].UTF8String;
 }
 
 void VSPDriverSetup::OnDidFailWithError(uint64_t /*code*/, const char* /*message*/)

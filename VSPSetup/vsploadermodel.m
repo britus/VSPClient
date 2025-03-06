@@ -16,28 +16,36 @@ extern void onDidFailWithError(uint64_t code, const char* message);
 extern void onDidFinishWithResult(uint64_t code, const char* message);
 extern void onNeedsUserApproval(void);
 
+#define OS_ERROR_STR "At least MacOS 10.15 or later required."
+
 @implementation VSPLoaderModel {
-    NSString* _dextBundleId;
-    BOOL      _isUserUnload;
-    uint64_t  _status;
+    NSString* m_dextBundleId;
 }
 
 - (instancetype)init:(const char*)dextBundleId
 {
     self = [super init];
-    if (self) {
-        _status = 0xf0000000;
-        _state = VSPSmLoaderStateUnknown;
-        _dextBundleId = [NSString stringWithCString:dextBundleId encoding:NSUTF8StringEncoding];
-        if (_dextBundleId != NULL) {
-            fprintf(stdout, "[VSPLM] Using bundle Id: %s\n", _dextBundleId.UTF8String);
+    if (self)
+    {
+        self.state     = VSPSmLoaderStateUnknown;
+        self.status    = 0xf0000000;
+        m_dextBundleId = [NSString stringWithCString:dextBundleId encoding:NSUTF8StringEncoding];
+
+        if (m_dextBundleId != NULL)
+        {
+            NSLog(@"[VSPDLM] Using bundle Id: %@\n", m_dextBundleId);
+
             // System Extension Properties Check
             if (@available(macOS 12, *)) {
                 OSSystemExtensionRequest *request = [
-                    OSSystemExtensionRequest propertiesRequestForExtension:_dextBundleId
+                    OSSystemExtensionRequest propertiesRequestForExtension:m_dextBundleId
                         queue:dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0)];
                 request.delegate = self;
+
                 [[OSSystemExtensionManager sharedManager] submitRequest:request];
+            }
+            else {
+                onDidFailWithError(0xe1001015, OS_ERROR_STR);
             }
         }
     }
@@ -46,178 +54,167 @@ extern void onNeedsUserApproval(void);
 
 - (void)activateMyDext
 {
-    [self activateExtension:_dextBundleId];
-}
-- (void)removeMyDext
-{
-    [self deactivateExtension:_dextBundleId];
+    [self activateExtension:m_dextBundleId];
 }
 
-// State descriptions analogous to Swift version
-- (NSString *)dextLoadingState
+- (void)removeMyDext
 {
-    switch (self.state) {
-        case VSPSmLoaderStateUnknown:
-            return @"VSPSmLoaderStateUnknown";
-        case VSPSmLoaderStateUnloaded:
-            return @"VSPSmLoaderStateUnloaded";
-        case VSPSmLoaderStateActivating:
-            return @"VSPSmLoaderStateActivating";
-        case VSPSmLoaderStateNeedsApproval:
-            return @"VSPSmLoaderStateNeedsApproval";
-        case VSPSmLoaderStateActivated:
-            return @"VSPSmLoaderStateActivated";
-        case VSPSmLoaderStateActivationError:
-            return @"VSPSmLoaderStateActivationError";
-        case VSPSmLoaderStateRemoval:
-            return @"VSPSmLoaderStateRemoval";
-    }
+    [self deactivateExtension:m_dextBundleId];
 }
 
 - (void)activateExtension:(NSString *)dextBundleId
 {
-    _isUserUnload = NO;
-    _status = 0xf1000000;
+    self.status = 0xf1000000;
 
     if (@available(macOS 10.15, *)) {
-        OSSystemExtensionRequest *request = [
-        OSSystemExtensionRequest activationRequestForExtension:dextBundleId
-                                 queue:dispatch_get_main_queue()];
+        OSSystemExtensionRequest *request;
+        request = [OSSystemExtensionRequest activationRequestForExtension:dextBundleId queue:dispatch_get_main_queue()];
         request.delegate = self;
-        [[OSSystemExtensionManager sharedManager] submitRequest:request];
+        self.state = [VSPSmLoader processState:self.state withEvent:VSPSmLoaderEventActivationStarted];
 
-        self.state = [VSPSmLoader processState:self.state
-                                     withEvent:VSPSmLoaderEventActivationStarted];
-    } else {
-        onDidFailWithError(0xe1001015, "At least MacOS 10.15 or later required.");
+        [[OSSystemExtensionManager sharedManager] submitRequest:request];
+    }
+    else {
+        onDidFailWithError(0xe1001015, OS_ERROR_STR);
         return;
     }
 }
 
 - (void)deactivateExtension:(NSString *)dextBundleId
 {
-    _isUserUnload = YES;
-    _status = 0xf2000000;
+    self.status = 0xf2000000;
 
     if (@available(macOS 10.15, *)) {
-        OSSystemExtensionRequest *request = [
-        OSSystemExtensionRequest deactivationRequestForExtension:dextBundleId
-                                 queue:dispatch_get_main_queue()];
+        OSSystemExtensionRequest *request;
+        request = [OSSystemExtensionRequest deactivationRequestForExtension:dextBundleId queue:dispatch_get_main_queue()];
         request.delegate = self;
+        self.state = [VSPSmLoader processState:self.state withEvent:VSPSmLoaderEventUninstallStarted];
+
         [[OSSystemExtensionManager sharedManager] submitRequest:request];
-        self.state = [VSPSmLoader processState:self.state
-                                     withEvent:VSPSmLoaderEventUninstallStarted];
-    } else {
-        onDidFailWithError(0xe1001015, "At least MacOS 10.15 or later required.");
+    }
+    else {
+        onDidFailWithError(0xe1001015, OS_ERROR_STR);
         return;
     }
 }
 
+// -----------------------------------------------------------
 // Implement OSSystemExtensionRequestDelegate methods...
+// -----------------------------------------------------------
 
 - (OSSystemExtensionReplacementAction)request:(nonnull OSSystemExtensionRequest *)request
                   actionForReplacingExtension:(nonnull OSSystemExtensionProperties *)existing
-                                withExtension:(nonnull OSSystemExtensionProperties *)extension
-                                API_AVAILABLE(macos(10.15))
+                                withExtension:(nonnull OSSystemExtensionProperties *)extension API_AVAILABLE(macos(10.15))
 {
-    fprintf(stdout, "[VSPLM] Got the upgrade request (%s -> %s); answering replace.\n",
-           existing.bundleVersion.UTF8String, extension.bundleVersion.UTF8String);
+
+    NSLog(@"[VSPDLM] Got the upgrade request (%@ -> %@); answering replace.\n",
+           existing.bundleVersion, extension.bundleVersion);
+
      NSComparisonResult result = [existing.bundleVersion compare:extension.bundleVersion];
-     //up- or downgrade
+
+     // up- or downgrade
      switch (result) {
         case NSOrderedAscending:
             return OSSystemExtensionReplacementActionReplace;
-        case NSOrderedSame:
-            return OSSystemExtensionReplacementActionCancel;
         case NSOrderedDescending:
             return OSSystemExtensionReplacementActionReplace;
+        case NSOrderedSame:
+            return OSSystemExtensionReplacementActionReplace;
     }
+
     return OSSystemExtensionReplacementActionCancel;
 }
 
-- (void)request:(nonnull OSSystemExtensionRequest *)request
-        didFailWithError:(nonnull NSError *)error API_AVAILABLE(macos(10.15))
+- (void)request:(nonnull OSSystemExtensionRequest *)request didFailWithError:(nonnull NSError *)error API_AVAILABLE(macos(10.15))
 {
-    fprintf(stdout, "[VSPLM] Error 0x%lx %s\n", error.code, error.description.UTF8String);
+    NSLog(@"[VSPDLM] Error 0x%lx %@\n", error.code, error.description);
+
     onDidFailWithError(error.code, error.description.UTF8String);
 }
 
-- (void)request:(nonnull OSSystemExtensionRequest *)request
-        didFinishWithResult:(OSSystemExtensionRequestResult)result
-        API_AVAILABLE(macos(10.15))
+- (void)request:(nonnull OSSystemExtensionRequest *)request didFinishWithResult:(OSSystemExtensionRequestResult)result API_AVAILABLE(macos(10.15))
 {
-    _status |= result;
+    self.status |= result;
 
-    if (result == OSSystemExtensionRequestCompleted) {
-        fprintf(stdout, "[VSPLM] OS system extension request completed.\n");
+    if (result == OSSystemExtensionRequestCompleted)
+    {
+        NSLog(@"[VSPDLM] OS system extension request completed.\n");
+
         if (result == 0) {
             if (self.state == VSPSmLoaderStateRemoval) {
-                onDidFinishWithResult(_status, "Driver successfully removed.");
+                onDidFinishWithResult(self.status, "Driver successfully removed.");
             }
             else {
-                onDidFinishWithResult(_status, "Driver successfully activated.");
+                onDidFinishWithResult(self.status, "Driver successfully activated.");
             }
         }
         else {
-            onDidFinishWithResult(_status, "Wait for VSP driver activation.");
+            onDidFinishWithResult(self.status, "Wait for VSP driver activation.");
         }
     }
-    else if (result == OSSystemExtensionRequestWillCompleteAfterReboot) {
-        fprintf(stdout, "[VSPLM] OS system extension request will complete after reboot.\n");
+    else if (result == OSSystemExtensionRequestWillCompleteAfterReboot)
+    {
+        NSLog(@"[VSPDLM] OS system extension request will complete after reboot.\n");
+
         if (self.state == VSPSmLoaderStateRemoval) {
-            fprintf(stdout, "[VSPLM] Removal pending. Removed after reboot.\n");
-            onDidFinishWithResult(_status, "Will remove VSP driver after reboot.");
+            NSLog(@"[VSPDLM] Removal pending. Removed after reboot.\n");
+            onDidFinishWithResult(self.status, "Will remove VSP driver after reboot.");
         }
         else {
-            fprintf(stdout, "[VSPLM] Installation pending. Activate after reboot.\n");
-            onDidFinishWithResult(_status, "Activate VSP driver after reboot.");
+            NSLog(@"[VSPDLM] Installation pending. Activate after reboot.\n");
+            onDidFinishWithResult(self.status, "Activate VSP driver after reboot.");
         }
     }
     else {
-        fprintf(stdout, "[VSPLM] System Extension request status: %d\n", (int)result);
+        NSLog(@"[VSPDLM] System Extension request status: %d\n", (int)result);
+
         if (self.state == VSPSmLoaderStateRemoval) {
-            onDidFinishWithResult(_status, "Remove VSP driver with status.");
+            onDidFinishWithResult(self.status, "Remove VSP driver with status.");
         }
         else {
-            onDidFinishWithResult(_status, "Activate VSP driver with status.");
+            onDidFinishWithResult(self.status, "Activate VSP driver with status.");
         }
     }
 }
 
-- (void)requestNeedsUserApproval:(nonnull OSSystemExtensionRequest *)request
-        API_AVAILABLE(macos(10.15))
+- (void)requestNeedsUserApproval:(nonnull OSSystemExtensionRequest *)request API_AVAILABLE(macos(10.15))
 {
-    fprintf(stdout, "[VSPLM] Require user approval.\n");
+    NSLog(@"[VSPDLM] Require user approval.\n");
+
     onNeedsUserApproval();
 }
 
-- (void)request:(nonnull OSSystemExtensionRequest *)request
-        foundProperties:(NSArray<OSSystemExtensionProperties *> *) properties
- API_AVAILABLE(macos(10.15))
- {
-    fprintf(stdout, "[VSPLM] properties count: %ld\n", (unsigned long)properties.count);
+- (void)request:(nonnull OSSystemExtensionRequest *)request foundProperties:(NSArray<OSSystemExtensionProperties *> *) properties API_AVAILABLE(macos(10.15))
+{
+    NSLog(@"[VSPDLM] properties count: %ld\n", (unsigned long)properties.count);
 
     for (OSSystemExtensionProperties *obj in properties) {
         unsigned int count;
+
         objc_property_t *propertyList = class_copyPropertyList([obj class], &count);
         if (propertyList == NULL)
             continue;
-        NSLog(@"[VSPLM] Object: %@", obj);
+
+        NSLog(@"[VSPDLM] Object: %@", obj);
+
         for (unsigned int i = 0; i < count; i++) {
             if (propertyList[i] == NULL)
                 continue;
+
             const char *propName = property_getName(propertyList[i]);
             if (propName) {
                 NSString *key = [NSString stringWithUTF8String:propName];
                 if (key != NULL) {
                     id value = [obj valueForKey:key];
-                    NSLog(@"[VSPLM] %@ = %@", key, value);
+
+                    NSLog(@"[VSPDLM] %@ = %@", key, value);
                 }
             }
         }
+
         free(propertyList);
     }
- }
+}
 
 
 @end

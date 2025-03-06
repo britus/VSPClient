@@ -7,10 +7,5 @@ driver for MacOS.
 
 ### Dependencies
 
-To compile this project you have to checkout first the [VSPDriver](https://github.com/britus/VSPDriver) project.
-
-This project uses a the contoller library and the setup framework 
-from [VSPDriver](https://github.com/britus/VSPDriver) project.
-
-
- 
+- QT framework and its dependencies.
+- [VSPDriver project](https://github.com/britus/VSPDriver)

@@ -25,8 +25,8 @@ typedef NS_ENUM(NSInteger, VSPSmLoaderState) {
 
 @interface VSPLoaderModel : NSObject <OSSystemExtensionRequestDelegate>
 
-@property (nonatomic, readonly) NSString *dextLoadingState;
-@property (nonatomic)   VSPSmLoaderState state;
+@property (nonatomic) VSPSmLoaderState  state;
+@property (nonatomic)         uint64_t  status;
 
 - (instancetype)init:(const char*)dextBundleId;
 - (void)activateMyDext;
