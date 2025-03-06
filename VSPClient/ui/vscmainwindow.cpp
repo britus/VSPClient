@@ -396,6 +396,8 @@ void VSCMainWindow::onSelectPage()
 
     // force data model update
     onActionExecute(vspControlGetStatus, {});
+
+    button->setFocus(Qt::TabFocusReason);
 }
 
 void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVariant& data)

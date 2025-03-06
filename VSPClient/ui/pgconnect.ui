@@ -70,8 +70,17 @@
          </property>
          <item>
           <widget class="QTextBrowser" name="textBrowser">
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
            <property name="styleSheet">
             <string notr="true">background-color: transparent;</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
            </property>
            <property name="html">
             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -86,6 +95,9 @@ hr { height: 1px; border-width: 0; }
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;After the extension has been activated, a connection to the  extension is automatically established.&lt;br /&gt;&lt;br /&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Using demo mode &lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Click the button &lt;span style=&quot; font-weight:700;&quot;&gt;Demo Mode&lt;/span&gt;. This mode allows you to try the app without the driver extension. Also, you cannot send or receive data to or from a Virtual Serial Port in this mode.&lt;br /&gt;&lt;br /&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Serial I/O Demo Mode&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;To use serial I/O in &lt;span style=&quot; font-weight:700;&quot;&gt;Demo Mode&lt;/span&gt;, you need a physical connection between a device that supports a serial port, your computer with a serial port, and a null modem cable.&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="openExternalLinks">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -157,6 +169,11 @@ hr { height: 1px; border-width: 0; }
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>btnInstall</tabstop>
+  <tabstop>btnDemo</tabstop>
+  <tabstop>textBrowser</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
