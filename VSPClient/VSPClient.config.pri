@@ -91,7 +91,6 @@ vsp_app {
 
 	QMAKE_INFO_PLIST += \
 		$$PWD/Info.plist
-		$$PWD/VSPClient.entitlements
 
 	#QMAKE_PRE_LINK +=
 
@@ -99,8 +98,8 @@ vsp_app {
 		$$PWD/qt-bundle-bugfix.sh $${TARGET} app VSPController && \
 		$$PWD/qt-bundle-bugfix.sh $${TARGET} app VSPSetup
 
-	CODE_SIGN_ENTITLEMENTS=$$PWD/VSPClient.entitlements
-	CODE_SIGN_IDENTITY='Mac Developer'
+	#CODE_SIGN_ENTITLEMENTS=$$PWD/VSPClient.entitlements
+	#CODE_SIGN_IDENTITY='Mac Developer'
 }
 
 # Generate framework bundle
@@ -139,5 +138,5 @@ vsp_library {
 	CONFIG += lib_version_first
 
 	# Important for the App with embedded framework
-	QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
+	QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../lib/
 }

@@ -11,7 +11,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>LSUIElement</key>
-	<true/>
+	<false/>
 	<key>CFBundleAllowMixedLocalizations</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -67,26 +67,6 @@
 	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<key>com.apple.developer.driverkit</key>
-	<true/>
-	<key>com.apple.developer.driverkit.install</key>
-	<true/>
-	<key>com.apple.developer.system-extension.install</key>
-	<true/>
-	<key>com.apple.developer.system-extension.uninstall</key>
-	<true/>
-	<key>com.apple.developer.driverkit.userclient-access</key>
-	<array>
-		<string>VSPDriver</string>
-	</array>
-	<key>com.apple.private.driverkit.driver-access</key>
-	<array>
-		<string>VSPDriver</string>
-	</array>
-	<key>com.apple.security.temporary-exception.iokit-user-client-class</key>
-	<array>
-		<string>IOUserUserClient</string>
-	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
