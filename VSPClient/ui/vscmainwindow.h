@@ -77,12 +77,11 @@ private:
     inline bool connectDriver();
     inline void showDemoMessage(const QString& message);
     inline void showNotification(int ms, const QString& text);
-    inline void resetDefaultButton(QWidget* view);
-    inline void enableDefaultButton(QPushButton* button);
-    inline void disableDefaultButton(QPushButton* button);
-    inline void enableButton(QList<QPushButton*> buttons);
+    inline void resetDefaultButtons();
+    inline void setDefaultButton(QPushButton* button, bool isDefault = true);
+    inline void enableButton(const QList<QPushButton*>& buttons);
     inline void enableButton(QPushButton* button);
-    inline void disableButton(QList<QPushButton*> buttons);
+    inline void disableButton(const QList<QPushButton*>& buttons);
     inline void disableButton(QPushButton* button);
     inline void showOverlay();
     inline void removeOverlay();

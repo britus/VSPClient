@@ -71,14 +71,14 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     m_buttonMap[ui->btn08Traces] = ui->pg08Traces;
     m_buttonMap[ui->btn09Connect] = ui->pg09Connect;
 
+    /* Driver installation / removal */
+    connect(ui->pg09Connect, &PGConnect::installDriver, this, &VSCMainWindow::onActionInstall);
+    connect(ui->pg09Connect, &PGConnect::uninstallDriver, this, &VSCMainWindow::onActionUninstall);
+
     const QList<VSPAbstractPage*> pages = m_buttonMap.values();
     foreach (auto page, pages) {
         connect(page, &VSPAbstractPage::execute, this, &VSCMainWindow::onActionExecute);
     }
-
-    /* Driver installation / removal */
-    connect(ui->pg09Connect, &PGConnect::installDriver, this, &VSCMainWindow::onActionInstall);
-    connect(ui->pg09Connect, &PGConnect::uninstallDriver, this, &VSCMainWindow::onActionUninstall);
 
     const QList<QPushButton*> buttons = m_buttonMap.keys();
     foreach (auto button, buttons) {
@@ -155,7 +155,7 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     ui->stackedWidget->setCurrentWidget(ui->pg09Connect);
 
     // try to install VSPDriver and/or connect driver UC instance
-    enableDefaultButton(ui->btn09Connect);
+    setDefaultButton(ui->btn09Connect);
     onActionExecute(vspControlPingPong, {});
 }
 
@@ -241,7 +241,7 @@ void VSCMainWindow::onClientConnected()
 {
     qDebug("[CTRLUI] onClientConnected()");
 
-    resetDefaultButton(ui->pnlButtons);
+    resetDefaultButtons();
     onUpdateButtons(true);
 
     QString dn = (m_demoMode ? tr("Demo") : m_vsp->DeviceName());
@@ -252,7 +252,7 @@ void VSCMainWindow::onClientConnected()
     ui->stackedWidget->setCurrentWidget(ui->pg01SPCreate);
 
     showNotification(2750, ui->textBrowser->toPlainText());
-    enableDefaultButton(ui->btn01SPCreate);
+    setDefaultButton(ui->btn01SPCreate);
     disableButton(ui->btn09Connect);
     onComplete();
 
@@ -267,7 +267,7 @@ void VSCMainWindow::onClientDisconnected()
 {
     qDebug("[CTRLUI] onClientDisconnected()");
 
-    resetDefaultButton(ui->pnlButtons);
+    resetDefaultButtons();
     onUpdateButtons(false);
 
     ui->stackedWidget->setCurrentWidget(ui->pg09Connect);
@@ -277,7 +277,7 @@ void VSCMainWindow::onClientDisconnected()
 
     showNotification(1750, ui->textBrowser->toPlainText());
     enableButton(ui->btn09Connect);
-    enableDefaultButton(ui->btn09Connect);
+    setDefaultButton(ui->btn09Connect);
     onComplete();
 }
 
@@ -389,8 +389,7 @@ void VSCMainWindow::onSelectPage()
         return;
     }
 
-    resetDefaultButton(ui->pnlButtons);
-    enableDefaultButton(button);
+    setDefaultButton(button);
 
     // show selected page
     ui->stackedWidget->setCurrentWidget(page);
@@ -657,34 +656,16 @@ inline bool VSCMainWindow::connectDriver()
     return true;
 }
 
-inline void VSCMainWindow::resetDefaultButton(QWidget* view)
+inline void VSCMainWindow::enableButton(QPushButton* button)
 {
-    QPushButton* b;
-    foreach (auto w, view->children()) {
-        if ((b = dynamic_cast<QPushButton*>(w)) != nullptr) {
-            b->setAutoDefault(false);
-            b->setDefault(false);
-        }
-    }
+    button->setEnabled(true);
 }
 
-inline void VSCMainWindow::enableButton(QList<QPushButton*> buttons)
+inline void VSCMainWindow::enableButton(const QList<QPushButton*>& buttons)
 {
     foreach (auto button, buttons) {
         button->setEnabled(true);
     }
-}
-
-inline void VSCMainWindow::disableButton(QList<QPushButton*> buttons)
-{
-    foreach (auto button, buttons) {
-        button->setEnabled(false);
-    }
-}
-
-inline void VSCMainWindow::enableButton(QPushButton* button)
-{
-    button->setEnabled(true);
 }
 
 inline void VSCMainWindow::disableButton(QPushButton* button)
@@ -692,16 +673,34 @@ inline void VSCMainWindow::disableButton(QPushButton* button)
     button->setEnabled(false);
 }
 
-inline void VSCMainWindow::enableDefaultButton(QPushButton* button)
+inline void VSCMainWindow::disableButton(const QList<QPushButton*>& buttons)
 {
-    button->setAutoDefault(true);
-    button->setDefault(true);
+    foreach (auto button, buttons) {
+        button->setEnabled(false);
+    }
 }
 
-inline void VSCMainWindow::disableDefaultButton(QPushButton* button)
+inline void VSCMainWindow::resetDefaultButtons()
 {
-    button->setAutoDefault(false);
-    button->setDefault(false);
+    QPushButton* b;
+    foreach (auto o, ui->pnlButtons->children()) {
+        if ((b = dynamic_cast<QPushButton*>(o))) {
+            if (b->autoDefault()) {
+                b->setAutoDefault(false);
+            }
+            if (b->isDefault()) {
+                b->setDefault(false);
+            }
+        }
+    }
+}
+
+inline void VSCMainWindow::setDefaultButton(QPushButton* button, bool isDefault)
+{
+    resetDefaultButtons();
+
+    button->setAutoDefault(isDefault);
+    button->setDefault(isDefault);
 }
 
 inline void VSCMainWindow::showDemoMessage(const QString& message)
