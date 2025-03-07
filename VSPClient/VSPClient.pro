@@ -23,11 +23,7 @@ include(session/session.pri)
 include(ui/ui.pri)
 
 SOURCES += \
-	$$PWD/main.cpp \
-	vscsession.cpp
-
-HEADERS += \
-	vscsession.h
+	$$PWD/main.cpp
 
 RESOURCES += \
 	$$PWD/vspui.qrc
