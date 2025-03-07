@@ -25,6 +25,7 @@ vsp_app {
 
 # disables all the APIs deprecated before Qt 6.0.0
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
+DEFINES += VSP_TARGET_NAME=$$shell_quote('$$TARGET')
 
 INCLUDEPATH += $$OUT_PWD/../../VSPController
 INCLUDEPATH += $$OUT_PWD/../../VSPSetup
@@ -58,17 +59,21 @@ vsp_app {
 	QMAKE_RPATHDIR += @executable_path/../Frameworks
 	QMAKE_RPATHDIR += @executable_path/lib
 
-	translations_en.files = $$PWD/assets/en.lproj/InfoPlist.strings
-	translations_en.path = Contents/Resources/en.lproj
-	QMAKE_BUNDLE_DATA += translations_en
-
-	translations_de.files = $$PWD/assets/de.lproj/InfoPlist.strings
-	translations_de.path = Contents/Resources/de.lproj
-	QMAKE_BUNDLE_DATA += translations_de
-
 	LICENSE.files = $$PWD/LICENSE
 	LICENSE.path = Contents/Resources
 	QMAKE_BUNDLE_DATA += LICENSE
+
+	translations_en.files = \
+		$$PWD/assets/en.lproj/InfoPlist.strings \
+		$$PWD/i18n/vspui_en_US.qm
+	translations_en.path = Contents/Resources/en.lproj
+	QMAKE_BUNDLE_DATA += translations_en
+
+	translations_de.files = \
+		$$PWD/assets/de.lproj/InfoPlist.strings \
+		$$PWD/i18n/vspui_de_DE.qm
+	translations_de.path = Contents/Resources/de.lproj
+	QMAKE_BUNDLE_DATA += translations_de
 
 	icons.files = \
 		$$PWD/assets/icns/vspclient.icns \
@@ -123,8 +128,24 @@ vsp_framework {
 	LICENSE.path = Resources
 	QMAKE_BUNDLE_DATA += LICENSE
 
+	translations_en.version = Versions
+	translations_en.files = \
+		$$PWD/assets/en.lproj/InfoPlist.strings \
+		$$PWD/i18n/vspui_en_US.qm
+	translations_en.path = Resources/en.lproj
+	QMAKE_BUNDLE_DATA += translations_en
+
+	translations_de.version = Versions
+	translations_de.files = \
+		$$PWD/assets/de.lproj/InfoPlist.strings \
+		$$PWD/i18n/vspui_de_DE.qm
+	translations_de.path = Resources/de.lproj
+	QMAKE_BUNDLE_DATA += translations_de
+
 	icons.version = Versions
-	icons.files = $$PWD/assets/icns/vspclient.icns
+	icons.files = \
+		$$PWD/assets/icns/vspclient.icns \
+		$$PWD/assets/png/vspclient_512x512.png
 	icons.path = Resources
 	QMAKE_BUNDLE_DATA += icons
 }

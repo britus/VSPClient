@@ -176,6 +176,16 @@ void VSCMainWindow::resizeEvent(QResizeEvent* event)
     updateOverlayGeometry();
 }
 
+void VSCMainWindow::changeEvent(QEvent* event)
+{
+    if (event->type() == QEvent::LanguageChange) {
+        ui->retranslateUi(this);
+        // retranslate();
+        // setLanguage();
+    }
+    QMainWindow::changeEvent(event);
+}
+
 void VSCMainWindow::onSetupFailWithError(quint64 code, const char* message)
 {
     qDebug("[CTRLUI] onSetupFailWithError(): code=0x%llx msg=%s", code, message);
@@ -473,9 +483,8 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             VSPDataModel::TPortLink link = data.value<VSPDataModel::TPortLink>();
             if (link.source.id == link.target.id) {
                 onClientError(
-                   {0xbe, 0x04, 0x02},
-                   tr("\n\nYou cannot link same ports together.\n"
-                      "Any unlinked port is in loopback mode by default."));
+                   {0xbe, 0x04, 0x02}, //
+                   tr("\n\nYou cannot link same ports together. Any unlinked port is in loopback mode by default."));
                 goto error_exit;
             }
             if (!m_demoMode) {
