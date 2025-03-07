@@ -36,7 +36,19 @@ public:
 
     void closeEvent(QCloseEvent* event) override Q_OVERRIDE(QMainWindow);
 
+public slots:
+    // UI to VSP event
+    void onActionExecute(const VSPClient::TVSPControlCommand command, const QVariant& data);
+
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+
+protected slots:
+    // Main window overlay event
+    virtual void updateOverlayGeometry();
+
 private slots:
+    // VSPController events
     void onClientConnected();
     void onClientDisconnected();
     void onClientError(const VSPClient::TVSPSystemError& error, const QString& message);
@@ -44,21 +56,14 @@ private slots:
     void onUpdateButtons(bool enabled = false);
     void onCommandResult(VSPClient::TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel);
     void onComplete();
-
+    // VSPSetup events
     void onSetupFailWithError(quint64 code, const char* message);
     void onSetupFinishWithResult(quint64 code, const char* message);
     void onSetupNeedsUserApproval();
-
+    // Main window events
     void onSelectPage();
-    void onActionExecute(const VSPClient::TVSPControlCommand command, const QVariant& data);
     void onActionInstall();
     void onActionUninstall();
-
-protected:
-    void resizeEvent(QResizeEvent* event) override;
-
-protected slots:
-    virtual void updateOverlayGeometry();
 
 private:
     Ui::VSCMainWindow* ui;

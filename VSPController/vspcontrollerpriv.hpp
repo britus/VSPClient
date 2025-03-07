@@ -10,7 +10,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOTypes.h>
-#include <vspcontroller.hpp>
+#include "vspcontroller.hpp"
 
 namespace VSPClient {
 
@@ -48,13 +48,13 @@ public:
     void SetNameAndPath(const char* name, const char* path);
 
 private:
-    mach_port_t m_machNotificationPort;
+    mach_port_t m_machPort;
     CFRunLoopRef m_runLoop = NULL;
     CFRunLoopSourceRef m_runLoopSource = NULL;
     io_iterator_t m_deviceAddedIter = IO_OBJECT_NULL;
     io_iterator_t m_deviceRemovedIter = IO_OBJECT_NULL;
     IONotificationPortRef m_notificationPort = NULL;
-    io_connect_t m_connection = 0;
+    io_connect_t m_drv = 0;
     VSPController* m_controller = NULL;
     io_name_t m_deviceName;
     io_name_t m_devicePath;

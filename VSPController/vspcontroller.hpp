@@ -12,7 +12,7 @@ extern "C" {
 #include <stdlib.h>
 }
 
-#include <vspcontroller_global.h>
+#include "vspcontroller_global.h"
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)

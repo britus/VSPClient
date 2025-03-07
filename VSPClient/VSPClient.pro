@@ -18,10 +18,16 @@ include(VSPClient.config.pri)
 include(driver/driver.pri)
 include(model/model.pri)
 include(serialio/serialio.pri)
+include(themes/themes.pri)
+include(session/session.pri)
 include(ui/ui.pri)
 
 SOURCES += \
 	$$PWD/main.cpp \
+	vscsession.cpp
+
+HEADERS += \
+	vscsession.h
 
 RESOURCES += \
 	$$PWD/vspui.qrc
