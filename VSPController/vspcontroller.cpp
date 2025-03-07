@@ -193,15 +193,95 @@ static inline void PrintStruct(const char* ctx, const TVSPControllerData* ptr)
 }
 #endif
 
+static void DeviceAdded(void* refcon, io_iterator_t iterator)
+{
+    VSPControllerPriv* p = (VSPControllerPriv*) refcon;
+    kern_return_t ret = kIOReturnNotFound;
+    io_connect_t connection = IO_OBJECT_NULL;
+    io_service_t device = IO_OBJECT_NULL;
+    io_name_t deviceName = {};
+    io_name_t devicePath = {};
+
+    fprintf(stdout, "[VSPCTL] DeviceAdded(): ref=0x%llx\n", (uint64_t) refcon);
+
+    // reset, emit disconnect if m_drv is not null
+    p->SetConnection(IO_OBJECT_NULL);
+
+    while ((device = IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
+        if ((ret = IORegistryEntryGetName(device, deviceName)) != kIOReturnSuccess) {
+            p->ReportError(ret, "Get service registry name failed.");
+        }
+        if ((ret = IORegistryEntryGetPath(device, kIOServicePlane, devicePath)) != kIOReturnSuccess) {
+            p->ReportError(ret, "Get service registry path failed.");
+        }
+
+        fprintf(stdout, "[VSPCTL] Open service: %s: %s\n", deviceName, devicePath);
+        if (strlen(deviceName) > 0 && strlen(devicePath) > 0) {
+            p->SetNameAndPath(deviceName, devicePath);
+        }
+
+        // Open a connection to this user client as a server
+        // to that client, and store the instance in "service"
+        if ((ret = IOServiceOpen(device, mach_task_self_, 0, &connection)) != kIOReturnSuccess) {
+            if (ret == kIOReturnNotPermitted) {
+                p->ReportError(ret, "Operation 'IOServiceOpen' not permitted.");
+            }
+            else {
+                p->ReportError(ret, "Open service failed.");
+            }
+            IOObjectRelease(device);
+            continue;
+        }
+
+        p->SetConnection(connection);
+
+        IOObjectRelease(device);
+        break;
+    }
+}
+
+static void DeviceRemoved(void* refcon, io_iterator_t iterator)
+{
+    VSPControllerPriv* p = (VSPControllerPriv*) refcon;
+    io_service_t device = IO_OBJECT_NULL;
+
+    fprintf(stdout, "[VSPCTL] DeviceRemoved(): ref=0x%llx\n", (uint64_t) refcon);
+
+    while ((device = IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
+        IOObjectRelease(device);
+        p->SetConnection(0L);
+    }
+}
+
+// -------------------------------------------------------------------
+// For more detail on this callback format, view the format of:
+// IOAsyncCallback, IOAsyncCallback0, IOAsyncCallback1, IOAsyncCallback2
+// Note that the variant of IOAsyncCallback called is based on the
+// number of arguments being returned
+// 0  - IOAsyncCallback0
+// 1  - IOAsyncCallback1
+// 2  - IOAsyncCallback2
+// 3+ - IOAsyncCallback
+// This is an example of the "IOAsyncCallback" format.
+// refcon will be the value you placed in asyncRef[kIOAsyncCalloutRefconIndex]
+static void AsyncCallback(void* refcon, IOReturn result, void** args, UInt32 numArgs)
+{
+    VSPControllerPriv* p = (VSPControllerPriv*) refcon;
+    p->AsyncCallback(result, args, numArgs);
+}
+
+// -------------------------------------------------------------------
+//
+//
 VSPControllerPriv::VSPControllerPriv(const char* dextClassName, VSPController* parent)
-    : m_machPort(0L)
+    : m_controller(parent)
+    , m_machPort(0L)
     , m_runLoop(NULL)
     , m_runLoopSource(NULL)
     , m_deviceAddedIter(IO_OBJECT_NULL)
     , m_deviceRemovedIter(IO_OBJECT_NULL)
     , m_notificationPort(NULL)
     , m_drv(IO_OBJECT_NULL)
-    , m_controller(parent)
     , m_vspResponse(NULL)
 {
     SetDextIdentifier(dextClassName);
@@ -217,7 +297,18 @@ VSPControllerPriv::~VSPControllerPriv()
 //
 bool VSPControllerPriv::ConnectDriver()
 {
-    return UserClientSetup(this);
+    // already connected ?
+    if (m_drv != 0)
+        return true;
+
+    // client setup up?
+    if (!m_deviceAddedIter) {
+        return UserClientSetup(this);
+    }
+
+    // find and connect extension
+    DeviceAdded(this, m_deviceAddedIter);
+    return m_drv != 0;
 }
 
 // -------------------------------------------------------------------
@@ -403,95 +494,6 @@ inline bool VSPControllerPriv::SetDextIdentifier(const char* name)
 }
 
 // -------------------------------------------------------------------
-// MARK: Private Asynchronous Events
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-//
-//
-static void DeviceAdded(void* refcon, io_iterator_t iterator)
-{
-    VSPControllerPriv* p = (VSPControllerPriv*) refcon;
-    kern_return_t ret = kIOReturnNotFound;
-    io_connect_t connection = IO_OBJECT_NULL;
-    io_service_t device = IO_OBJECT_NULL;
-    io_name_t deviceName = {};
-    io_name_t devicePath = {};
-
-    p->SetConnection(IO_OBJECT_NULL);
-
-    while ((device = IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
-        if ((ret = IORegistryEntryGetName(device, deviceName)) != kIOReturnSuccess) {
-            p->ReportError(ret, "Get service registry name failed.");
-        }
-        if ((ret = IORegistryEntryGetPath(device, kIOServicePlane, devicePath)) != kIOReturnSuccess) {
-            p->ReportError(ret, "Get service registry path failed.");
-        }
-
-        fprintf(stdout, "[VSPCTL] Open service: %s: %s\n", deviceName, devicePath);
-        if (strlen(deviceName) > 0 && strlen(devicePath) > 0) {
-            p->SetNameAndPath(deviceName, devicePath);
-        }
-
-        // Open a connection to this user client as a server
-        // to that client, and store the instance in "service"
-        if ((ret = IOServiceOpen(device, mach_task_self_, 0, &connection)) != kIOReturnSuccess) {
-            if (ret == kIOReturnNotPermitted) {
-                p->ReportError(ret, "Operation 'IOServiceOpen' not permitted.");
-            }
-            else {
-                p->ReportError(ret, "Open service failed.");
-            }
-            IOObjectRelease(device);
-            continue;
-        }
-
-        IOObjectRelease(device);
-        p->SetConnection(connection);
-        break;
-    }
-
-    if (!p->IsConnected()) {
-        fprintf(stderr, "[VSPCTL] System extension not found.\n");
-    }
-}
-
-// -------------------------------------------------------------------
-//
-//
-static void DeviceRemoved(void* refcon, io_iterator_t iterator)
-{
-    VSPControllerPriv* p = (VSPControllerPriv*) refcon;
-    io_service_t device = IO_OBJECT_NULL;
-
-    while ((device = IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
-        IOObjectRelease(device);
-        p->SetConnection(0L);
-    }
-}
-
-// -------------------------------------------------------------------
-// For more detail on this callback format, view the format of:
-// IOAsyncCallback, IOAsyncCallback0, IOAsyncCallback1, IOAsyncCallback2
-// Note that the variant of IOAsyncCallback called is based on the
-// number of arguments being returned
-// 0  - IOAsyncCallback0
-// 1  - IOAsyncCallback1
-// 2  - IOAsyncCallback2
-// 3+ - IOAsyncCallback
-// This is an example of the "IOAsyncCallback" format.
-// refcon will be the value you placed in asyncRef[kIOAsyncCalloutRefconIndex]
-static void AsyncCallback(void* refcon, IOReturn result, void** args, UInt32 numArgs)
-{
-    VSPControllerPriv* p = (VSPControllerPriv*) refcon;
-    p->AsyncCallback(result, args, numArgs);
-}
-
-// -------------------------------------------------------------------
-// MARK: Private API Implementation
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
 //
 //
 void VSPControllerPriv::ReportError(IOReturn error, const char* message)
@@ -571,7 +573,7 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
         return false;
     }
 
-    fprintf(stdout, "[VSPCTL] Connecting DEXT identifier: %s\n", m_dextClassName);
+    fprintf(stdout, "[VSPCTL] Lookup DEXT identifier: %s\n", m_dextClassName);
 
     /// - Tag: SetUpMatchingNotification
     CFMutableDictionaryRef matchingDictionary = IOServiceNameMatching(m_dextClassName);
@@ -585,15 +587,6 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
     matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
     matchingDictionary = (CFMutableDictionaryRef) CFRetain(matchingDictionary);
 
-    ret = IOServiceAddMatchingNotification(
-       m_notificationPort, kIOFirstMatchNotification, matchingDictionary, DeviceAdded, refcon, &m_deviceAddedIter);
-    if (ret != kIOReturnSuccess) {
-        ReportError(ret, "Add matching notification failed.");
-        UserClientTeardown();
-        return false;
-    }
-    DeviceAdded(refcon, m_deviceAddedIter);
-
     // retain for callback
     ret = IOServiceAddMatchingNotification(
        m_notificationPort, kIOTerminatedNotification, matchingDictionary, DeviceRemoved, refcon, &m_deviceRemovedIter);
@@ -604,7 +597,16 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
     }
     DeviceRemoved(refcon, m_deviceRemovedIter);
 
-    return true;
+    ret = IOServiceAddMatchingNotification(
+       m_notificationPort, kIOFirstMatchNotification, matchingDictionary, DeviceAdded, refcon, &m_deviceAddedIter);
+    if (ret != kIOReturnSuccess) {
+        ReportError(ret, "Add matching notification failed.");
+        UserClientTeardown();
+        return false;
+    }
+    DeviceAdded(refcon, m_deviceAddedIter);
+
+    return (ret == kIOReturnSuccess) && (m_drv != 0);
 }
 
 // -------------------------------------------------------------------
@@ -625,7 +627,6 @@ inline void VSPControllerPriv::UserClientTeardown(void)
     if (m_notificationPort) {
         IONotificationPortDestroy(m_notificationPort);
         m_notificationPort = NULL;
-        m_notificationPort = 0;
     }
 
     if (m_runLoop) {
@@ -736,7 +737,7 @@ void VSPControllerPriv::SetConnection(io_connect_t connection)
     if (connection != m_drv) {
         if (connection == 0) {
             m_controller->OnDisconnected();
-            m_drv = 0L;
+            m_drv = 0;
             return;
         }
 

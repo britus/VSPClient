@@ -12,7 +12,7 @@ CONFIG += global_init_link_order
 CONFIG += incremental
 CONFIG += nostrip
 CONFIG += debug
-#CONFIG += lrelease
+CONFIG += lrelease
 
 # Build lib framework or app
 #CONFIG += vsp_library
@@ -65,13 +65,13 @@ vsp_app {
 
 	translations_en.files = \
 		$$PWD/assets/en.lproj/InfoPlist.strings \
-		$$PWD/i18n/vspui_en_US.qm
+		$$PWD/vspui_en_US.qm
 	translations_en.path = Contents/Resources/en.lproj
 	QMAKE_BUNDLE_DATA += translations_en
 
 	translations_de.files = \
 		$$PWD/assets/de.lproj/InfoPlist.strings \
-		$$PWD/i18n/vspui_de_DE.qm
+		$$PWD/vspui_de_DE.qm
 	translations_de.path = Contents/Resources/de.lproj
 	QMAKE_BUNDLE_DATA += translations_de
 
@@ -131,14 +131,14 @@ vsp_framework {
 	translations_en.version = Versions
 	translations_en.files = \
 		$$PWD/assets/en.lproj/InfoPlist.strings \
-		$$PWD/i18n/vspui_en_US.qm
+		$$PWD/vspui_en_US.qm
 	translations_en.path = Resources/en.lproj
 	QMAKE_BUNDLE_DATA += translations_en
 
 	translations_de.version = Versions
 	translations_de.files = \
 		$$PWD/assets/de.lproj/InfoPlist.strings \
-		$$PWD/i18n/vspui_de_DE.qm
+		$$PWD/vspui_de_DE.qm
 	translations_de.path = Resources/de.lproj
 	QMAKE_BUNDLE_DATA += translations_de
 

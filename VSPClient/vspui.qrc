@@ -15,7 +15,7 @@
         <file>assets/png/vspclient_512x512@2x.png</file>
     </qresource>
     <qresource prefix="/i18n">
-        <file alias="vspui_en_US">i18n/vspui_en_US.ts</file>
-        <file alias="vspui_de_DE">i18n/vspui_de_DE.ts</file>
+        <file alias="vspui_de_DE">vspui_de_DE.ts</file>
+        <file alias="vspui_en_US">vspui_en_US.ts</file>
     </qresource>
 </RCC>
