@@ -42,6 +42,7 @@ public slots:
 
 protected:
     void resizeEvent(QResizeEvent* event) override;
+    void changeEvent(QEvent* event) override;
 
 protected slots:
     // Main window overlay event

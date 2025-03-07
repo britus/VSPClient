@@ -29,13 +29,21 @@ RESOURCES += \
 	$$PWD/vspui.qrc
 
 TRANSLATIONS += \
-	$$PWD/vspui_en_US.ts
+	$$PWD/i18n/vspui_en_US.ts \
+	$$PWD/i18n/vspui_de_DE.ts
 
 DISTFILES += \
 	$$PWD/LICENSE \
 	$$PWD/README.md \
 	$$PWD/qt-bundle-bugfix.sh \
-	$$PWD/VSPClient.entitlements
+	$$PWD/VSPClient.entitlements \
+	$$PWD/makelocales.sh
+
+# Update translation files
+localegen.files = $$TRANSLATIONS
+localegen.commands = $$PWD/makelocales.sh $$shell_quote($$PWD)
+QMAKE_EXTRA_TARGETS += localegen    #'.NOTPARALLEL'
+PRE_TARGETDEPS += localegen
 
 # Default rules for deployment.
 target.path = /Applications
