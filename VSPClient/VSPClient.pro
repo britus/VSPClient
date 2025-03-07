@@ -29,8 +29,8 @@ RESOURCES += \
 	$$PWD/vspui.qrc
 
 TRANSLATIONS += \
-	$$PWD/i18n/vspui_en_US.ts \
-	$$PWD/i18n/vspui_de_DE.ts
+	$$PWD/vspui_en_US.ts \
+	$$PWD/vspui_de_DE.ts
 
 DISTFILES += \
 	$$PWD/LICENSE \

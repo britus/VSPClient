@@ -6,12 +6,12 @@
     <message>
         <location filename="ui/pgchecks.ui" line="14"/>
         <source>Form</source>
-        <translation>Parameter Prüfung der Schnittstelle</translation>
+        <translation>Parameter Prüfung der virtuellen Schnittstelle</translation>
     </message>
     <message>
         <location filename="ui/pgchecks.ui" line="35"/>
         <source>Serial Port Parameter Checks</source>
-        <translation>Parameter Prüfung der Schnittstelle</translation>
+        <translation>Parameter Prüfung der virtuellen Schnittstelle</translation>
     </message>
     <message>
         <location filename="ui/pgchecks.ui" line="74"/>
@@ -21,27 +21,27 @@
     <message>
         <location filename="ui/pgchecks.ui" line="127"/>
         <source>Baud rate</source>
-        <translation>Baudrate:</translation>
+        <translation>Baudrate</translation>
     </message>
     <message>
         <location filename="ui/pgchecks.ui" line="140"/>
         <source>Data bits</source>
-        <translation>Datenbits:</translation>
+        <translation>Datenbits</translation>
     </message>
     <message>
         <location filename="ui/pgchecks.ui" line="153"/>
         <source>Stop bits</source>
-        <translation>Stoppbits:</translation>
+        <translation>Stoppbits</translation>
     </message>
     <message>
         <location filename="ui/pgchecks.ui" line="166"/>
         <source>Parity</source>
-        <translation>Parität:s</translation>
+        <translation>Parität</translation>
     </message>
     <message>
         <location filename="ui/pgchecks.ui" line="179"/>
         <source>Flow control</source>
-        <translation>Flusssteuerung:</translation>
+        <translation>Flusssteuerung</translation>
     </message>
     <message>
         <location filename="ui/pgchecks.ui" line="245"/>
@@ -54,12 +54,12 @@
     <message>
         <location filename="ui/pgconnect.ui" line="14"/>
         <source>Form</source>
-        <translation>VSP Extension installieren/verbinden</translation>
+        <translation>VSP Treiber installieren/verbinden</translation>
     </message>
     <message>
         <location filename="ui/pgconnect.ui" line="26"/>
         <source>Connect VSP Driver</source>
-        <translation>VSP Extension installieren/verbinden</translation>
+        <translation>VSP Treiber installieren/verbinden</translation>
     </message>
     <message>
         <location filename="ui/pgconnect.ui" line="86"/>
@@ -80,12 +80,12 @@ hr { height: 1px; border-width: 0; }
     <message>
         <location filename="ui/pgconnect.ui" line="143"/>
         <source>Install Driver</source>
-        <translation>Extension installieren</translation>
+        <translation>Installieren</translation>
     </message>
     <message>
         <location filename="ui/pgconnect.ui" line="163"/>
         <source>Demo Mode</source>
-        <translation>Simulation aktivieren</translation>
+        <translation>Simulation</translation>
     </message>
 </context>
 <context>
@@ -636,7 +636,7 @@ Sie können nicht dieselben Ports miteinander verknüpfen. Alle nicht verknüpft
     <message>
         <location filename="driver/vspdriverclient.cpp" line="80"/>
         <source>Driver callback result:</source>
-        <translation>Ergebnis des Treiber-Callbacks:</translation>
+        <translation>Ergebnis der Treiberdaten:</translation>
     </message>
     <message>
         <location filename="driver/vspdriverclient.cpp" line="81"/>

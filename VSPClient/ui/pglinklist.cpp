@@ -42,15 +42,15 @@ void PGLinkList::update(TVSPControlCommand command, VSPPortListModel* portModel,
                     break;
                 }
                 case 1: {
-                    ui->tableView->setColumnWidth(i, 280);
+                    ui->tableView->setColumnWidth(i, 250);
                     break;
                 }
                 case 2: {
-                    ui->tableView->setColumnWidth(i, 80);
+                    ui->tableView->setColumnWidth(i, 100);
                     break;
                 }
                 case 3: {
-                    ui->tableView->setColumnWidth(i, 80);
+                    ui->tableView->setColumnWidth(i, 100);
                     break;
                 }
             }

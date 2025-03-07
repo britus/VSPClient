@@ -39,8 +39,8 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     const QIcon icon1(":/vspclient_1");
     setWindowIcon(icon1);
 
-    QByteArray dextClassName = "VSPDriver";
-    QByteArray dextBundleId = "org.eof.tools.VSPDriver";
+    QByteArray dextBundleId("org.eof.tools.VSPDriver");
+    QByteArray dextClassName("VSPDriver");
 
     m_vsp = new VSPDriverClient(dextBundleId, dextClassName, this);
     connect(m_vsp, &VSPDriverClient::didFailWithError, this, &VSCMainWindow::onSetupFailWithError);
@@ -58,7 +58,7 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     ui->pnlContent->layout()->addWidget(splitter);
     splitter->addWidget(ui->stackedWidget);
     splitter->addWidget(ui->groupBox);
-    splitter->setHandleWidth(4);
+    splitter->setHandleWidth(8);
     splitter->setSizes(QList<int>() << 280 << 0);
 
     m_buttonMap[ui->btn01SPCreate] = ui->pg01SPCreate;
@@ -231,7 +231,7 @@ void VSCMainWindow::onSetupFinishWithResult(quint64 code, const char* message)
     showNotification(2750, ui->textBrowser->toPlainText());
 
     if (status == 0 && !m_vsp->IsConnected() && state == 0xf100) {
-        QTimer::singleShot(1000, this, [this]() {
+        QTimer::singleShot(1600, this, [this]() {
             connectDriver();
         });
     }
@@ -417,21 +417,6 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
     // reset error message stack
     m_errorStack.clear();
 
-    if (command == vspControlPingPong) {
-        if (data.toUInt() == 1) {
-            m_demoMode = true;
-            m_firstStart = false;
-            setWindowTitle(tr("%1 [DEMO MODE]").arg(windowTitle()));
-            onClientConnected();
-            onComplete();
-            return;
-        }
-        if (!connectDriver()) {
-            installDriver();
-        }
-        return;
-    }
-
     showOverlay();
 
     switch (command) {
@@ -579,6 +564,19 @@ void VSCMainWindow::onActionExecute(const TVSPControlCommand command, const QVar
             }
             break;
         }
+        case vspControlPingPong: {
+            if (data.toUInt() == 1) {
+                m_demoMode = true;
+                m_firstStart = false;
+                setWindowTitle(tr("%1 [DEMO MODE]").arg(windowTitle()));
+                onClientConnected();
+                return;
+            }
+            if (!connectDriver()) {
+                installDriver();
+            }
+            return;
+        }
         default: {
             break;
         }
@@ -646,25 +644,28 @@ inline void VSCMainWindow::installDriver()
 {
     qDebug() << "[CTRLUI] installDriver()";
 
-    m_firstStart = false;
+    removeOverlay();
     onUpdateButtons(false);
     onActionInstall();
 }
 
 inline bool VSCMainWindow::connectDriver()
 {
+    bool ok = true;
+
     qDebug() << "[CTRLUI] connectDriver()";
+
+    removeOverlay();
+
+    if (!m_vsp->IsConnected()) {
+        if (!(ok = m_vsp->ConnectDriver())) {
+            onUpdateButtons(false);
+        }
+    }
 
     m_demoMode = false;
     m_firstStart = false;
-
-    if (!m_vsp->ConnectDriver()) {
-        onUpdateButtons(false);
-        onComplete();
-        return false;
-    }
-
-    return true;
+    return ok;
 }
 
 inline void VSCMainWindow::enableButton(QPushButton* button)
