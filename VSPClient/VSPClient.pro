@@ -5,7 +5,7 @@ QT += network
 QT += concurrent
 QT += serialbus
 QT += serialport
-QT += macextras
+#QT += macextras
 QT += xml
 
 ## all build config
