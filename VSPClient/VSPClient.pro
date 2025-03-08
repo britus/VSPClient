@@ -25,6 +25,9 @@ include(ui/ui.pri)
 SOURCES += \
 	$$PWD/main.cpp
 
+OBJECTIVE_SOURCES += \
+	$$PWD/vspversion.mm
+
 RESOURCES += \
 	$$PWD/vspui.qrc
 

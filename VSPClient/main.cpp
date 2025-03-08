@@ -7,6 +7,11 @@
 #include <QTranslator>
 #include <vscmainwindow.h>
 
+extern "C" {
+    extern const char* GetBundleVersion();
+    extern const char* GetBuildNumber();
+}
+
 class ApplicationStyle: public QProxyStyle
 {
 public:
@@ -44,6 +49,9 @@ extern "C" bool qt_main(int argc, char* argv[])
 int main(int argc, char* argv[])
 #endif
 {
+    QString bversion = GetBundleVersion();
+    QString bnumber = GetBuildNumber();
+
     // must be set before QApplication instance
     QApplication::setAttribute(Qt::AA_NativeWindows, true);
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL, true);
@@ -56,7 +64,7 @@ int main(int argc, char* argv[])
     QApplication::setOrganizationDomain(QStringLiteral("org.eof.tools"));
     QApplication::setApplicationDisplayName(QStringLiteral("Virtual Serial Port Controller"));
     QApplication::setApplicationName(QStringLiteral("VSP Controller"));
-    QApplication::setApplicationVersion(QStringLiteral("1.7.22"));
+    QApplication::setApplicationVersion(QStringLiteral("%1.%2").arg(bversion, bnumber));
     QApplication::setQuitOnLastWindowClosed(true);
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)

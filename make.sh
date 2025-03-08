@@ -1,28 +1,26 @@
 #!/bin/bash
 
+PWDIR=`pwd`
 COPYDIR=${1}
-PWD_DIR=`pwd`
 
-mkdir -p ${PWD_DIR}/build
+mkdir -p ${PWDIR}/build
 
 # clean binary
-rm -fR ${PWD_DIR}/build/VSPController/VSPController.framework
-rm -fR ${PWD_DIR}/build/VSPController/Makefile
+rm -fR ${PWDIR}/build/VSPController/VSPController.framework
+rm -fR ${PWDIR}/build/VSPController/Makefile
 
-rm -fR ${PWD_DIR}/build/VSPSetup/VSPSetup.framework
-rm -fR ${PWD_DIR}/build/VSPSetup/Makefile
+rm -fR ${PWDIR}/build/VSPSetup/VSPSetup.framework
+rm -fR ${PWDIR}/build/VSPSetup/Makefile
 
-rm -fR ${PWD_DIR}/build/VSPClient/VSPClient*
-rm -fR ${PWD_DIR}/build/VSPClient/Makefile
+rm -fR ${PWDIR}/build/VSPClient/VSPClient*
+rm -fR ${PWDIR}/build/VSPClient/Makefile
 
 # generate localization profile
 lprodump -pro VSPClient.pro -out VSPClient.json
 
-cd ${PWD_DIR}/VSPClient
-bash makelocales.sh ${PWD_DIR}/VSPClient
-cd ..
+cd ${PWDIR}/build
 
-cd ${PWD_DIR}/build
+${PWDIR}/VSPClient/makelocales.sh ${PWDIR}/build
 ${QTDIR}/bin/qmake -recursive ../VSPClient.pro
 
 cd VSPController && make -j8 && cd ..
@@ -33,32 +31,32 @@ if [ "x${COPYDIR}" != "x" ] ; then
 	mkdir -vp ${COPYDIR}
 
 	## ------------ Framework --------------
-	if [ -d ${PWD_DIR}/build/VSPClient/VSPClientUI.framework ] ; then
+	if [ -d ${PWDIR}/build/VSPClient/VSPClientUI.framework ] ; then
 		rm -fR ${COPYDIR}/VSPClientUI.framework && \
-			cp -Rv ${PWD_DIR}/build/VSPClient/VSPClientUI.framework ${COPYDIR}/
+			cp -Rv ${PWDIR}/build/VSPClient/VSPClientUI.framework ${COPYDIR}/
 	fi
-	if [ -d ${PWD_DIR}/build/VSPController/VSPController.framework ] ; then
+	if [ -d ${PWDIR}/build/VSPController/VSPController.framework ] ; then
 		rm -fR ${COPYDIR}/VSPController.framework && \
-			cp -Rv ${PWD_DIR}/build/VSPController/VSPController.framework ${COPYDIR}/
+			cp -Rv ${PWDIR}/build/VSPController/VSPController.framework ${COPYDIR}/
 	fi
-	if [ -d ${PWD_DIR}/build/VSPSetup/VSPSetup.framework ] ; then
+	if [ -d ${PWDIR}/build/VSPSetup/VSPSetup.framework ] ; then
 		rm -fR ${COPYDIR}/VSPSetup.framework && \
-			cp -Rv ${PWD_DIR}/build/VSPSetup/VSPSetup.framework ${COPYDIR}/
+			cp -Rv ${PWDIR}/build/VSPSetup/VSPSetup.framework ${COPYDIR}/
 	fi
 
 	## ------------ Libraries --------------
-	if [ -e ${PWD_DIR}/build/VSPClient/libVSPClient.dylib ] ; then
+	if [ -e ${PWDIR}/build/VSPClient/libVSPClient.dylib ] ; then
 		rm -fR ${COPYDIR}/libVSPClient* && \
-			cp -Rv ${PWD_DIR}/build/VSPClient/libVSPClient* ${COPYDIR}/
+			cp -Rv ${PWDIR}/build/VSPClient/libVSPClient* ${COPYDIR}/
 	fi
-	if [ -e ${PWD_DIR}/build/VSPController/libVSPController.dylib ] ; then
+	if [ -e ${PWDIR}/build/VSPController/libVSPController.dylib ] ; then
 		rm -fR ${COPYDIR}/libVSPController* && \
-			cp -Rv ${PWD_DIR}/build/VSPController/libVSPController* ${COPYDIR}/
+			cp -Rv ${PWDIR}/build/VSPController/libVSPController* ${COPYDIR}/
 	fi
-	if [ -e ${PWD_DIR}/build/VSPSetup/libVSPSetup.dylib ] ; then
+	if [ -e ${PWDIR}/build/VSPSetup/libVSPSetup.dylib ] ; then
 		rm -fR ${COPYDIR}/libVSPSetup* && \
-			cp -Rv ${PWD_DIR}/build/VSPSetup/libVSPSetup* ${COPYDIR}/
+			cp -Rv ${PWDIR}/build/VSPSetup/libVSPSetup* ${COPYDIR}/
 	fi
 fi
 
-cd ${PWD_DIR}
+cd ${PWDIR}
