@@ -15,9 +15,6 @@ rm -fR ${PWDIR}/build/VSPSetup/Makefile
 rm -fR ${PWDIR}/build/VSPClient/VSPClient*
 rm -fR ${PWDIR}/build/VSPClient/Makefile
 
-# generate localization profile
-lprodump -pro VSPClient.pro -out VSPClient.json
-
 cd ${PWDIR}/build
 
 ${PWDIR}/VSPClient/makelocales.sh ${PWDIR}/build

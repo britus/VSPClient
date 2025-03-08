@@ -6,11 +6,15 @@ CONFIG -= qt
 CONFIG += c++17
 CONFIG += sdk_no_version_check
 CONFIG += shared
-CONFIG += nostrip
-CONFIG += debug
+#CONFIG += nostrip
+CONFIG += debug_and_release
+CONFIG += force_debug_info
+CONFIG += separate_debug_info
+CONFIG += lrelease
+CONFIG += release
 CONFIG += lrelease
 CONFIG += embed_translations
-CONFIG += create_prl
+CONFIG -= create_prl
 CONFIG += incremental
 CONFIG += global_init_link_order
 CONFIG += lib_version_first
@@ -37,7 +41,14 @@ QMAKE_CFLAGS   += -mmacosx-version-min=12.2
 QMAKE_CXXFLAGS += -mmacosx-version-min=12.2
 QMAKE_CXXFLAGS += -fno-omit-frame-pointer
 QMAKE_CXXFLAGS += -funwind-tables
-QMAKE_CXXFLAGS += -ggdb3
+
+release {
+	QMAKE_LFLAGS += -s
+}
+debug {
+	QMAKE_CXXFLAGS += -ggdb3
+}
+
 
 vsp_framework {
 	CONFIG += embed_libraries
@@ -73,4 +84,4 @@ LIBS += -framework CoreFoundation
 LIBS += -framework IOKit
 LIBS += -liconv
 
-message("Build: $${TARGET}")
+#message("Build: $${TARGET}")

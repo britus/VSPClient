@@ -10,8 +10,11 @@ CONFIG += c++20
 CONFIG += sdk_no_version_check
 CONFIG += global_init_link_order
 CONFIG += incremental
-CONFIG += nostrip
-CONFIG += debug
+CONFIG -= create_prl
+#CONFIG += nostrip
+CONFIG += debug_and_release
+CONFIG += force_debug_info
+CONFIG += separate_debug_info
 CONFIG += lrelease
 
 # Build lib framework or app
@@ -37,7 +40,13 @@ QMAKE_CFLAGS += -mmacosx-version-min=12.2
 QMAKE_CXXFLAGS += -mmacosx-version-min=12.2
 QMAKE_CXXFLAGS += -fno-omit-frame-pointer
 QMAKE_CXXFLAGS += -funwind-tables
-QMAKE_CXXFLAGS += -ggdb3
+
+release {
+	QMAKE_LFLAGS += -s
+}
+debug {
+	QMAKE_CXXFLAGS += -ggdb3
+}
 
 #otool -L
 LIBS += -dead_strip
@@ -113,7 +122,7 @@ vsp_framework {
 	DEFINES	+= VSPCLIENT_LIBRARY
 	CONFIG += lib_bundle
 	CONFIG += embed_libraries
-	CONFIG += create_prl
+	CONFIG -= create_prl
 
 	QMAKE_FRAMEWORK_BUNDLE_NAME = $${TARGET}
 	QMAKE_FRAMEWORK_VERSION = A

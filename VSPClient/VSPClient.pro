@@ -58,4 +58,4 @@ DISTFILES += \
 target.path = /Applications
 INSTALLS += target
 
-message("Build: $${TARGET}")
+#message("Build: $${TARGET}")
