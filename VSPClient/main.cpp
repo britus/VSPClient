@@ -59,8 +59,11 @@ int main(int argc, char* argv[])
     QApplication::setApplicationVersion(QStringLiteral("1.7.22"));
     QApplication::setQuitOnLastWindowClosed(true);
 
-    a.setAutoSipEnabled(true);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     a.setFallbackSessionManagementEnabled(true);
+#endif
+
+    a.setAutoSipEnabled(true);
     a.connect(&a, &QApplication::lastWindowClosed, &a, &QApplication::quit);
 
     /* Override commandline style with our fixed
