@@ -17,6 +17,7 @@
 #include <vspabstractpage.h>
 #include <vspdatamodel.h>
 #include <vspdriverclient.h>
+#include <vspsession.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -49,6 +50,9 @@ protected slots:
     virtual void updateOverlayGeometry();
 
 private slots:
+    void onCommitSession(QSessionManager&);
+    void onSaveSession(QSessionManager&);
+    void onAppQuit();
     // VSPController events
     void onClientConnected();
     void onClientDisconnected();
@@ -69,6 +73,7 @@ private slots:
 private:
     Ui::VSCMainWindow* ui;
     VSPDriverClient* m_vsp;
+    VSPSession m_session;
     QMap<QPushButton*, VSPAbstractPage*> m_buttonMap;
     QMap<uint, QString> m_errorStack;
     QMessageBox m_box;
@@ -85,10 +90,10 @@ private:
     inline void showNotification(int ms, const QString& text);
     inline void resetDefaultButtons();
     inline void setDefaultButton(QPushButton* button, bool isDefault = true);
-    inline void enableButton(const QList<QPushButton*>& buttons);
-    inline void enableButton(QPushButton* button);
-    inline void disableButton(const QList<QPushButton*>& buttons);
-    inline void disableButton(QPushButton* button);
+    inline void createVspController();
+    inline void connectVspController();
+    inline void addToolbarAndMenus();
+    inline void connectUiEvents();
     inline void showOverlay();
     inline void removeOverlay();
 };

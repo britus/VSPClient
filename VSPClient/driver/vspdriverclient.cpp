@@ -10,10 +10,11 @@
 #include <QTimer>
 #include <vspdriverclient.h>
 
-VSPDriverClient::VSPDriverClient(const QByteArray& dextBundleId, const QByteArray& dextClassName, QObject* parent)
+VSPDriverClient::VSPDriverClient(const QByteArray& dextBundleId, const QByteArray& dextClassName, VSPSession* session, QObject* parent)
     : QObject(parent)
     , VSPController(dextClassName.constData())
     , VSPDriverSetup(dextBundleId.constData())
+    , m_session(session)
     , m_portList(this)
     , m_linkList(this)
 {
@@ -26,15 +27,20 @@ VSPDriverClient::~VSPDriverClient()
 
 void VSPDriverClient::OnConnected()
 {
-    m_linkList.resetModel();
     m_portList.resetModel();
+    m_linkList.resetModel();
+    restoreDriverSession();
     emit connected();
 }
 
 void VSPDriverClient::OnDisconnected()
 {
-    m_linkList.resetModel();
+    m_portList.saveModel(m_session->settings());
     m_portList.resetModel();
+
+    m_linkList.saveModel(m_session->settings());
+    m_linkList.resetModel();
+
     emit disconnected();
 }
 
@@ -167,4 +173,41 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
 void VSPDriverClient::OnErrorOccured(const VSPClient::TVSPSystemError& error, const char* message)
 {
     emit errorOccured(error, message);
+}
+
+bool VSPDriverClient::saveDriverSession()
+{
+    m_portList.saveModel(m_session->settings());
+    m_linkList.saveModel(m_session->settings());
+    return m_session->saveSession();
+}
+
+inline bool VSPDriverClient::restoreDriverSession()
+{
+    TVSPControllerData data = {};
+
+    data.context = vspContextPing;
+    data.command = vspControlPingPong;
+    data.parameter.flags = 0xff08;
+
+    if (m_portList.loadModel(m_session->settings())) {
+        data.ports.count = m_portList.rowCount();
+        for (quint8 i = 0; i < data.ports.count && i < MAX_SERIAL_PORTS; i++) {
+            const VSPDataModel::TDataRecord r = m_portList.at(i).value<VSPDataModel::TDataRecord>();
+            strncpy(data.ports.list[i].name, qPrintable(r.port.name), MAX_PORT_NAME - 1);
+            data.ports.list[i].id = r.port.id;
+        }
+    }
+
+    if (m_linkList.loadModel(m_session->settings())) {
+        data.links.count = m_linkList.rowCount();
+        for (quint8 i = 0; i < data.links.count && i < MAX_PORT_LINKS; i++) {
+            const VSPDataModel::TDataRecord r = m_linkList.at(i).value<VSPDataModel::TDataRecord>();
+            data.links.list[i] = ((r.link.id << 16) & 0xff0000);
+            data.links.list[i] |= ((r.link.source.id << 8) & 0xff00);
+            data.links.list[i] |= ((r.link.target.id) & 0x00ff);
+        }
+    }
+
+    return SendData(data);
 }

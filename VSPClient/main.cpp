@@ -44,18 +44,23 @@ extern "C" bool qt_main(int argc, char* argv[])
 int main(int argc, char* argv[])
 #endif
 {
+    // must be set before QApplication instance
     QApplication::setAttribute(Qt::AA_NativeWindows, true);
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL, true);
     QApplication::setAttribute(Qt::AA_Use96Dpi, true);
+    QApplication::setDesktopSettingsAware(true);
 
+    // --
     QApplication a(argc, argv);
     QApplication::setOrganizationName(QStringLiteral("EoF Software Labs"));
+    QApplication::setOrganizationDomain(QStringLiteral("org.eof.tools"));
     QApplication::setApplicationDisplayName(QStringLiteral("Virtual Serial Port Controller"));
     QApplication::setApplicationName(QStringLiteral("VSP Controller"));
     QApplication::setApplicationVersion(QStringLiteral("1.7.22"));
-    QApplication::setDesktopSettingsAware(true);
     QApplication::setQuitOnLastWindowClosed(true);
 
+    a.setAutoSipEnabled(true);
+    a.setFallbackSessionManagementEnabled(true);
     a.connect(&a, &QApplication::lastWindowClosed, &a, &QApplication::quit);
 
     /* Override commandline style with our fixed
@@ -100,7 +105,7 @@ int main(int argc, char* argv[])
     const QString lprojPath = QStringLiteral( //
        "%1/../Frameworks/" xstr(VSP_TARGET_NAME) ".framework/Resources/%2.lproj");
 #else
-    const QString resPath = QStringLiteral("%1/../Contents/Resources/%2.lproj");
+    const QString lprojPath = QStringLiteral("%1/../Resources/%2.lproj");
 #endif
 
     /* Available locales */

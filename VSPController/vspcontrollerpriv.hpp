@@ -36,6 +36,7 @@ public:
     bool UnlinkPorts(const uint8_t source, const uint8_t target);
     bool EnableChecks(const uint8_t port, const uint32_t flags);
     bool EnableTrace(const uint8_t port, const uint32_t flags);
+    bool SendData(const TVSPControllerData& data);
     const char* DeviceName() const;
     const char* DevicePath() const;
     // called by static DeviceAdded and DeviceRemoved to set connection object

@@ -1,6 +1,10 @@
 #pragma once
 
 #include <QAbstractItemModel>
+#include <QSettings>
+
+class VSPPortListModel;
+class VSPLinkListModel;
 
 class VSPDataModel: public QAbstractTableModel
 {
@@ -34,6 +38,9 @@ public:
 
     explicit VSPDataModel(QObject* parent = nullptr);
 
+    bool loadModel(QSettings* settings);
+    void saveModel(QSettings* settings);
+
     // Basic functionality:
     QModelIndex parent(const QModelIndex& index) const override;
 
@@ -58,14 +65,20 @@ public:
 
 protected:
     virtual TDataType dataType() const = 0;
+    virtual bool load(const QString& group, QSettings* settings) = 0;
+    virtual void save(const QString& group, QSettings* settings) = 0;
 
 private:
+    friend class VSPPortListModel;
+    friend class VSPLinkListModel;
     QList<TDataRecord> m_records;
 };
 Q_DECLARE_METATYPE(VSPDataModel::TPortItem)
 Q_DECLARE_METATYPE(VSPDataModel::TPortLink)
 Q_DECLARE_METATYPE(VSPDataModel::TDataRecord)
 Q_DECLARE_METATYPE(VSPDataModel::TDataType)
+
+// ---------------------------------------------------------
 
 class VSPPortListModel: public VSPDataModel
 {
@@ -77,11 +90,17 @@ public:
     {
     }
 
-    TDataType dataType() const
+protected:
+    inline TDataType dataType() const override
     {
         return TDataType::PortItem;
     }
+
+    bool load(const QString& group, QSettings* settings) override;
+    void save(const QString& group, QSettings* settings) override;
 };
+
+// ---------------------------------------------------------
 
 class VSPLinkListModel: public VSPDataModel
 {
@@ -93,8 +112,12 @@ public:
     {
     }
 
-    TDataType dataType() const
+protected:
+    inline TDataType dataType() const override
     {
         return TDataType::PortLink;
     }
+
+    bool load(const QString& group, QSettings* settings) override;
+    void save(const QString& group, QSettings* settings) override;
 };

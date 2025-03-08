@@ -29,113 +29,76 @@ VSPController::~VSPController()
     delete p;
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::ConnectDriver()
 {
     return p->ConnectDriver();
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::GetStatus()
 {
     return p->GetStatus();
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::IsConnected()
 {
     return p->IsConnected();
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::CreatePort(TVSPPortParameters* parameters)
 {
     return p->CreatePort(parameters);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::RemovePort(const uint8_t id)
 {
     return p->RemovePort(id);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::GetPortList()
 {
     return p->GetPortList();
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::GetLinkList()
 {
     return p->GetLinkList();
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::LinkPorts(const uint8_t source, const uint8_t target)
 {
     return p->LinkPorts(source, target);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::UnlinkPorts(const uint8_t source, const uint8_t target)
 {
     return p->UnlinkPorts(source, target);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::EnableChecks(const uint8_t port, const uint32_t flags)
 {
     return p->EnableChecks(port, flags);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::EnableTrace(const uint8_t port, const uint32_t flags)
 {
     return p->EnableTrace(port, flags);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPController::SetDextIdentifier(const char* name)
 {
     return p->SetDextIdentifier(name);
 }
 
-// -------------------------------------------------------------------
-//
-//
+bool VSPController::SendData(const TVSPControllerData& data)
+{
+    return p->SendData(data);
+}
+
 int VSPController::GetConnection()
 {
     return p->m_drv;
 }
 
-// -------------------------------------------------------------------
-//
-//
 const TVSPSystemError VSPController::GetSystemError(int error) const
 {
     return {
@@ -145,17 +108,11 @@ const TVSPSystemError VSPController::GetSystemError(int error) const
     };
 }
 
-// -------------------------------------------------------------------
-//
-//
 const char* VSPController::DeviceName() const
 {
     return p->DeviceName();
 }
 
-// -------------------------------------------------------------------
-//
-//
 const char* VSPController::DevicePath() const
 {
     return p->DevicePath();
@@ -271,8 +228,7 @@ static void AsyncCallback(void* refcon, IOReturn result, void** args, UInt32 num
 }
 
 // -------------------------------------------------------------------
-//
-//
+
 VSPControllerPriv::VSPControllerPriv(const char* dextClassName, VSPController* parent)
     : m_controller(parent)
     , m_machPort(0L)
@@ -292,9 +248,6 @@ VSPControllerPriv::~VSPControllerPriv()
     UserClientTeardown();
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::ConnectDriver()
 {
     // already connected ?
@@ -311,17 +264,11 @@ bool VSPControllerPriv::ConnectDriver()
     return m_drv != 0;
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::IsConnected()
 {
     return (m_drv != IO_OBJECT_NULL);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::GetStatus()
 {
     TVSPControllerData input = {};
@@ -331,9 +278,6 @@ bool VSPControllerPriv::GetStatus()
     return DoAsyncCall(&input);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::CreatePort(TVSPPortParameters* parameters)
 {
     if (!parameters)
@@ -354,9 +298,6 @@ bool VSPControllerPriv::CreatePort(TVSPPortParameters* parameters)
     return DoAsyncCall(&input);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::RemovePort(const uint8_t id)
 {
     TVSPControllerData input = {};
@@ -368,9 +309,6 @@ bool VSPControllerPriv::RemovePort(const uint8_t id)
     return DoAsyncCall(&input);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::GetPortList()
 {
     TVSPControllerData input = {};
@@ -380,9 +318,6 @@ bool VSPControllerPriv::GetPortList()
     return DoAsyncCall(&input);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::GetLinkList()
 {
     TVSPControllerData input = {};
@@ -392,9 +327,6 @@ bool VSPControllerPriv::GetLinkList()
     return DoAsyncCall(&input);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::LinkPorts(const uint8_t source, const uint8_t target)
 {
     TVSPControllerData input = {};
@@ -406,9 +338,6 @@ bool VSPControllerPriv::LinkPorts(const uint8_t source, const uint8_t target)
     return DoAsyncCall(&input);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::UnlinkPorts(const uint8_t source, const uint8_t target)
 {
     TVSPControllerData input = {};
@@ -420,9 +349,6 @@ bool VSPControllerPriv::UnlinkPorts(const uint8_t source, const uint8_t target)
     return DoAsyncCall(&input);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::EnableChecks(const uint8_t port, const uint32_t flags)
 {
     TVSPControllerData input = {};
@@ -435,9 +361,6 @@ bool VSPControllerPriv::EnableChecks(const uint8_t port, const uint32_t flags)
     return DoAsyncCall(&input);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::EnableTrace(const uint8_t port, const uint32_t flags)
 {
     TVSPControllerData input = {};
@@ -450,17 +373,17 @@ bool VSPControllerPriv::EnableTrace(const uint8_t port, const uint32_t flags)
     return DoAsyncCall(&input);
 }
 
-// -------------------------------------------------------------------
-//
-//
+bool VSPControllerPriv::SendData(const TVSPControllerData& data)
+{
+    TVSPControllerData input = data;
+    return DoAsyncCall(&input);
+}
+
 const char* VSPControllerPriv::DeviceName() const
 {
     return m_deviceName;
 }
 
-// -------------------------------------------------------------------
-//
-//
 const char* VSPControllerPriv::DevicePath() const
 {
     return m_devicePath;
@@ -493,9 +416,6 @@ inline bool VSPControllerPriv::SetDextIdentifier(const char* name)
     return false;
 }
 
-// -------------------------------------------------------------------
-//
-//
 void VSPControllerPriv::ReportError(IOReturn error, const char* message)
 {
     const TVSPSystemError m_errorInfo = {
@@ -513,18 +433,12 @@ void VSPControllerPriv::ReportError(IOReturn error, const char* message)
     m_controller->OnErrorOccured(m_errorInfo, message);
 }
 
-// -------------------------------------------------------------------
-//
-//
 void VSPControllerPriv::SetNameAndPath(const char* name, const char* path)
 {
     strncpy(m_deviceName, name, sizeof(m_deviceName) - 1);
     strncpy(m_devicePath, path, sizeof(m_devicePath) - 1);
 }
 
-// -------------------------------------------------------------------
-//
-//
 bool VSPControllerPriv::UserClientSetup(void* refcon)
 {
     kern_return_t ret = kIOReturnSuccess;
@@ -609,9 +523,6 @@ bool VSPControllerPriv::UserClientSetup(void* refcon)
     return (ret == kIOReturnSuccess) && (m_drv != 0);
 }
 
-// -------------------------------------------------------------------
-//
-//
 inline void VSPControllerPriv::UserClientTeardown(void)
 {
     if (m_vspResponse) {
@@ -639,9 +550,6 @@ inline void VSPControllerPriv::UserClientTeardown(void)
     m_drv = IO_OBJECT_NULL;
 }
 
-// -------------------------------------------------------------------
-//
-//
 inline bool VSPControllerPriv::DoAsyncCall(TVSPControllerData* input)
 {
     kern_return_t ret = kIOReturnSuccess;
@@ -729,9 +637,6 @@ inline bool VSPControllerPriv::DoAsyncCall(TVSPControllerData* input)
     return true;
 }
 
-// -------------------------------------------------------------------
-//
-//
 void VSPControllerPriv::SetConnection(io_connect_t connection)
 {
     if (connection != m_drv) {
@@ -746,9 +651,6 @@ void VSPControllerPriv::SetConnection(io_connect_t connection)
     }
 }
 
-// -------------------------------------------------------------------
-//
-//
 void VSPControllerPriv::AsyncCallback(IOReturn result, void** args, UInt32 numArgs)
 {
     const int64_t* msg = (const int64_t*) args;
@@ -777,7 +679,7 @@ void VSPControllerPriv::AsyncCallback(IOReturn result, void** args, UInt32 numAr
         m_controller->OnIOUCCallback(result, m_vspResponse, sizeof(TVSPControllerData));
     }
     else {
-        ReportError(kIOReturnNotResponding, "[UC] No async result buffer.");
+        ReportError(kIOReturnNotResponding, "[UC] No VSP async results.");
     }
 }
 

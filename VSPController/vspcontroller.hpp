@@ -129,6 +129,7 @@ public:
     bool EnableChecks(const uint8_t port, const uint32_t flags = 0);
     bool EnableTrace(const uint8_t port, const uint32_t flags = 0);
     bool SetDextIdentifier(const char* name);
+    bool SendData(const TVSPControllerData& data);
     const TVSPSystemError GetSystemError(int error) const;
 
 protected:

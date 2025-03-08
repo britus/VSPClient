@@ -10,6 +10,7 @@
 #include <vspcontroller.hpp>
 #include <vspdatamodel.h>
 #include <vspdriversetup.hpp>
+#include <vspsession.h>
 
 #define kIOErrorNotFound -536870160
 
@@ -20,7 +21,7 @@ class VSPDriverClient: public QObject, public VSPController, public VSPDriverSet
     Q_OBJECT
 
 public:
-    VSPDriverClient(const QByteArray& dextBundleId, const QByteArray& dextClassName, QObject* parent = nullptr);
+    VSPDriverClient(const QByteArray& dextBundleId, const QByteArray& dextClassName, VSPSession* session, QObject* parent = nullptr);
     virtual ~VSPDriverClient();
 
     inline VSPPortListModel* portList()
@@ -110,6 +111,8 @@ public:
     void OnDidFinishWithResult(uint64_t /*code*/, const char* /*message*/) override;
     void OnNeedsUserApproval() override;
 
+    bool saveDriverSession();
+
 signals:
     // VSPSetup interface events
     void didFailWithError(quint64 code, const char* message);
@@ -118,15 +121,11 @@ signals:
     // VSPController interface events
     void connected();
     void disconnected();
+    void commandResult(VSPClient::TVSPControlCommand command, VSPPortListModel* portModel, VSPLinkListModel* linkModel);
     void errorOccured(const VSPClient::TVSPSystemError& error, const QString& message);
     void updateStatusLog(const QByteArray& message);
     void updateButtons(bool enabled = false);
     void complete();
-    // --
-    void commandResult(
-       VSPClient::TVSPControlCommand command, //
-       VSPPortListModel* portModel,
-       VSPLinkListModel* linkModel);
 
 protected:
     // Interface VSPController.framework
@@ -137,8 +136,12 @@ protected:
     void OnDataReady(void* data) override;
 
 private:
+    VSPSession* m_session;
     VSPPortListModel m_portList;
     VSPLinkListModel m_linkList;
+
+private:
+    inline bool restoreDriverSession();
 };
 Q_DECLARE_METATYPE(TVSPControllerData)
 Q_DECLARE_METATYPE(TVSPPortParameters)

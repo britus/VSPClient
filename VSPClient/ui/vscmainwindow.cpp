@@ -29,37 +29,13 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::VSCMainWindow)
     , m_vsp(nullptr)
+    , m_session(this)
     , m_buttonMap()
     , m_box(this)
     , m_firstStart(true)
     , m_demoMode(false)
 {
     ui->setupUi(this);
-
-    const QIcon icon1(":/vspclient_1");
-    setWindowIcon(icon1);
-
-    QByteArray dextBundleId("org.eof.tools.VSPDriver");
-    QByteArray dextClassName("VSPDriver");
-
-    m_vsp = new VSPDriverClient(dextBundleId, dextClassName, this);
-    connect(m_vsp, &VSPDriverClient::didFailWithError, this, &VSCMainWindow::onSetupFailWithError);
-    connect(m_vsp, &VSPDriverClient::didFinishWithResult, this, &VSCMainWindow::onSetupFinishWithResult);
-    connect(m_vsp, &VSPDriverClient::needsUserApproval, this, &VSCMainWindow::onSetupNeedsUserApproval);
-    connect(m_vsp, &VSPDriverClient::connected, this, &VSCMainWindow::onClientConnected);
-    connect(m_vsp, &VSPDriverClient::disconnected, this, &VSCMainWindow::onClientDisconnected);
-    connect(m_vsp, &VSPDriverClient::errorOccured, this, &VSCMainWindow::onClientError);
-    connect(m_vsp, &VSPDriverClient::updateStatusLog, this, &VSCMainWindow::onUpdateStatusLog);
-    connect(m_vsp, &VSPDriverClient::updateButtons, this, &VSCMainWindow::onUpdateButtons);
-    connect(m_vsp, &VSPDriverClient::commandResult, this, &VSCMainWindow::onCommandResult);
-    connect(m_vsp, &VSPDriverClient::complete, this, &VSCMainWindow::onComplete);
-
-    QSplitter* splitter = new QSplitter(Qt::Vertical, ui->pnlContent);
-    ui->pnlContent->layout()->addWidget(splitter);
-    splitter->addWidget(ui->stackedWidget);
-    splitter->addWidget(ui->groupBox);
-    splitter->setHandleWidth(8);
-    splitter->setSizes(QList<int>() << 280 << 0);
 
     m_buttonMap[ui->btn01SPCreate] = ui->pg01SPCreate;
     m_buttonMap[ui->btn02SPRemove] = ui->pg02SPRemove;
@@ -71,92 +47,27 @@ VSCMainWindow::VSCMainWindow(QWidget* parent)
     m_buttonMap[ui->btn08Traces] = ui->pg08Traces;
     m_buttonMap[ui->btn09Connect] = ui->pg09Connect;
 
-    /* Driver installation / removal */
-    connect(ui->pg09Connect, &PGConnect::installDriver, this, &VSCMainWindow::onActionInstall);
-    connect(ui->pg09Connect, &PGConnect::uninstallDriver, this, &VSCMainWindow::onActionUninstall);
+    QSplitter* splitter = new QSplitter(Qt::Vertical, ui->pnlContent);
+    ui->pnlContent->layout()->addWidget(splitter);
+    splitter->addWidget(ui->stackedWidget);
+    splitter->addWidget(ui->groupBox);
+    splitter->setHandleWidth(8);
+    splitter->setSizes(QList<int>() << 280 << 0);
 
-    const QList<VSPAbstractPage*> pages = m_buttonMap.values();
-    foreach (auto page, pages) {
-        connect(page, &VSPAbstractPage::execute, this, &VSCMainWindow::onActionExecute);
-    }
-
-    const QList<QPushButton*> buttons = m_buttonMap.keys();
-    foreach (auto button, buttons) {
-        connect(button, &QPushButton::clicked, this, &VSCMainWindow::onSelectPage);
-    }
-
-    connect(ui->btn11SerialIO, &QPushButton::clicked, this, [this]() {
-        VSPSerialIO* d = new VSPSerialIO(this);
-        d->setVisible(true);
-        d->raise();
-    });
-
-    connect(qApp, &QGuiApplication::saveStateRequest, this, [](QSessionManager&) {
-        // -- saveSettings();
-    });
-
-    connect(qApp, &QGuiApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
-        if (state != Qt::ApplicationActive) {
-            // dummy
-            QTimer::singleShot(1000, this, [this]() {
-                if (this->hasFocus()) {
-                }
-            });
-        }
-    });
+    setWindowIcon(QIcon(":/vspclient_2"));
 
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         setupSystemTray();
     }
 
-    QAction* a;
+    createVspController();
+    addToolbarAndMenus();
+    connectUiEvents();
+    connectVspController();
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    // ---------
-    QIcon tbicon(":/vspclient_2");
-    QMacToolBar* toolBar = new QMacToolBar(this);
-    QMacToolBarItem* item = toolBar->addItem(tbicon, tr("About"));
-    connect(item, &QMacToolBarItem::activated, this, [this]() {
-        showAboutBox();
-    });
-    toolBar->attachToWindow(this->windowHandle());
-#endif
-
-    // ---------
-    if (this->menuBar()) {
-        QMenu* appMenu = new QMenu(this);
-        a = appMenu->addAction(tr("About..."));
-        a->setMenuRole(QAction::ApplicationSpecificRole);
-        connect(a, &QAction::triggered, this, [this]() {
-            showAboutBox();
-        });
-        appMenu->addSeparator();
-        this->menuBar()->addMenu(appMenu);
+    if (!qApp->isSessionRestored()) {
+        qApp->isSavingSession();
     }
-
-    // ---------
-    PopupMenu* menu = new PopupMenu(ui->toolButton, this);
-
-    a = new QAction(tr("Activate VSP Driver"));
-    connect(a, &QAction::triggered, this, [this]() {
-        m_vsp->activateDriver();
-    });
-    menu->addAction(a);
-
-    a = new QAction(tr("Deactivate VSP Driver"));
-    connect(a, &QAction::triggered, this, [this]() {
-        m_vsp->deactivateDriver();
-    });
-    menu->addAction(a);
-
-    ui->toolButton->setMenu(menu);
-
-    // show inital driver connection page
-    ui->stackedWidget->setCurrentWidget(ui->pg09Connect);
-
-    // try to install VSPDriver and/or connect driver UC instance
-    setDefaultButton(ui->btn09Connect);
-    onActionExecute(vspControlPingPong, {});
 }
 
 VSCMainWindow::~VSCMainWindow()
@@ -184,6 +95,54 @@ void VSCMainWindow::changeEvent(QEvent* event)
         // setLanguage();
     }
     QMainWindow::changeEvent(event);
+}
+
+void VSCMainWindow::onAppQuit()
+{
+    m_vsp->saveDriverSession();
+}
+
+void VSCMainWindow::onSaveSession(QSessionManager& manager)
+{
+    qDebug("[CTRLUI] onSaveSession(): isp2=%d", manager.isPhase2());
+
+    m_vsp->saveDriverSession();
+}
+
+void VSCMainWindow::onCommitSession(QSessionManager& manager)
+{
+    qDebug("[CTRLUI] onCommitSession(): isp2=%d", manager.isPhase2());
+
+    if (!manager.allowsInteraction()) {
+        // manager.release();
+        m_vsp->saveDriverSession();
+        return;
+    }
+
+    int ret = QMessageBox::question(
+       this,
+       qApp->applicationDisplayName(), //
+       tr("Do you want to quit now?"),
+       QMessageBox::Yes | QMessageBox::Discard | QMessageBox::Cancel);
+
+    switch (ret) {
+        case QMessageBox::Yes: {
+            manager.release();
+            if (!m_vsp->saveDriverSession())
+                manager.cancel();
+            break;
+        }
+        case QMessageBox::Discard: {
+            break;
+        }
+        case QMessageBox::Cancel: {
+            manager.cancel();
+            break;
+        }
+        default: {
+            manager.cancel();
+        }
+    }
 }
 
 void VSCMainWindow::onSetupFailWithError(quint64 code, const char* message)
@@ -260,14 +219,14 @@ void VSCMainWindow::onClientConnected()
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     ui->textBrowser->setPlainText(tr("Connected. [%1: %2]").arg(dn, dp));
     ui->stackedWidget->setCurrentWidget(ui->pg01SPCreate);
+    ui->btn09Connect->setEnabled(false);
 
     showNotification(2750, ui->textBrowser->toPlainText());
     setDefaultButton(ui->btn01SPCreate);
-    disableButton(ui->btn09Connect);
     onComplete();
 
     if (!m_demoMode) {
-        QTimer::singleShot(100, this, [this]() {
+        QTimer::singleShot(25, this, [this]() {
             m_vsp->GetStatus();
         });
     }
@@ -280,14 +239,13 @@ void VSCMainWindow::onClientDisconnected()
     resetDefaultButtons();
     onUpdateButtons(false);
 
+    ui->btn09Connect->setEnabled(true);
     ui->stackedWidget->setCurrentWidget(ui->pg09Connect);
-
     ui->textBrowser->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
     ui->textBrowser->setPlainText(tr("Disconnected."));
 
-    showNotification(1750, ui->textBrowser->toPlainText());
-    enableButton(ui->btn09Connect);
     setDefaultButton(ui->btn09Connect);
+    showNotification(1750, ui->textBrowser->toPlainText());
     onComplete();
 }
 
@@ -337,32 +295,19 @@ void VSCMainWindow::onUpdateStatusLog(const QByteArray& message)
 void VSCMainWindow::onUpdateButtons(bool enabled)
 {
     qDebug("[CTRLUI] onUpdateButtons(): enabled=%d", enabled);
-
-    if (!enabled) {
-        disableButton(
-           QList<QPushButton*>() //
-           << ui->btn01SPCreate  //
-           << ui->btn02SPRemove  //
-           << ui->btn03LKCreate  //
-           << ui->btn04LKRemove  //
-           << ui->btn05PortList  //
-           << ui->btn06LinkList  //
-           << ui->btn07Checks    //
-           << ui->btn08Traces    //
-           << ui->btn11SerialIO);
-    }
-    else {
-        enableButton(
-           QList<QPushButton*>() //
-           << ui->btn01SPCreate  //
-           << ui->btn02SPRemove  //
-           << ui->btn03LKCreate  //
-           << ui->btn04LKRemove  //
-           << ui->btn05PortList  //
-           << ui->btn06LinkList  //
-           << ui->btn07Checks    //
-           << ui->btn08Traces    //
-           << ui->btn11SerialIO);
+    const QList<QPushButton*> buttons = //
+       QList<QPushButton*>()            //
+       << ui->btn01SPCreate             //
+       << ui->btn02SPRemove             //
+       << ui->btn03LKCreate             //
+       << ui->btn04LKRemove             //
+       << ui->btn05PortList             //
+       << ui->btn06LinkList             //
+       << ui->btn07Checks               //
+       << ui->btn08Traces               //
+       << ui->btn11SerialIO;
+    foreach (auto button, buttons) {
+        button->setEnabled(enabled);
     }
 }
 
@@ -668,30 +613,6 @@ inline bool VSCMainWindow::connectDriver()
     return ok;
 }
 
-inline void VSCMainWindow::enableButton(QPushButton* button)
-{
-    button->setEnabled(true);
-}
-
-inline void VSCMainWindow::enableButton(const QList<QPushButton*>& buttons)
-{
-    foreach (auto button, buttons) {
-        button->setEnabled(true);
-    }
-}
-
-inline void VSCMainWindow::disableButton(QPushButton* button)
-{
-    button->setEnabled(false);
-}
-
-inline void VSCMainWindow::disableButton(const QList<QPushButton*>& buttons)
-{
-    foreach (auto button, buttons) {
-        button->setEnabled(false);
-    }
-}
-
 inline void VSCMainWindow::resetDefaultButtons()
 {
     QPushButton* b;
@@ -757,7 +678,7 @@ inline void VSCMainWindow::showAboutBox()
 
 inline void VSCMainWindow::setupSystemTray()
 {
-    stIcon.setIcon(QIcon(":/vspclient_4"));
+    stIcon.setIcon(QIcon(":/vspclient_2"));
     stIcon.setToolTip(qApp->applicationDisplayName() + " \n\n" + tr(COPYRIGHT));
 
     connect(&stIcon, &QSystemTrayIcon::messageClicked, this, []() {
@@ -862,6 +783,119 @@ inline void VSCMainWindow::removeOverlay()
 
     ui->pnlContent->setEnabled(true);
     ui->pnlButtons->setEnabled(true);
+}
+
+inline void VSCMainWindow::addToolbarAndMenus()
+{
+    QAction* a;
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    // ---------
+    QIcon tbicon(":/vspclient_2");
+    QMacToolBar* toolBar = new QMacToolBar(this);
+    QMacToolBarItem* item = toolBar->addItem(tbicon, tr("About"));
+    connect(item, &QMacToolBarItem::activated, this, [this]() {
+        showAboutBox();
+    });
+    toolBar->attachToWindow(this->windowHandle());
+#endif
+
+    // ---------
+    if (this->menuBar()) {
+        QMenu* appMenu = new QMenu(this);
+        a = appMenu->addAction(tr("About..."));
+        a->setMenuRole(QAction::ApplicationSpecificRole);
+        connect(a, &QAction::triggered, this, [this]() {
+            showAboutBox();
+        });
+        appMenu->addSeparator();
+        this->menuBar()->addMenu(appMenu);
+    }
+
+    // ---------
+    PopupMenu* menu = new PopupMenu(ui->toolButton, this);
+
+    a = new QAction(tr("Activate VSP Driver"));
+    connect(a, &QAction::triggered, this, [this]() {
+        m_vsp->activateDriver();
+    });
+    menu->addAction(a);
+
+    a = new QAction(tr("Deactivate VSP Driver"));
+    connect(a, &QAction::triggered, this, [this]() {
+        m_vsp->deactivateDriver();
+    });
+    menu->addAction(a);
+
+    ui->toolButton->setMenu(menu);
+}
+
+inline void VSCMainWindow::connectUiEvents()
+{
+    connect(qApp, &QApplication::commitDataRequest, this, &VSCMainWindow::onCommitSession, Qt::DirectConnection);
+    connect(qApp, &QApplication::saveStateRequest, this, &VSCMainWindow::onSaveSession, Qt::DirectConnection);
+    connect(qApp, &QApplication::aboutToQuit, this, &VSCMainWindow::onAppQuit, Qt::DirectConnection);
+
+#if 0
+    connect(qApp, &QGuiApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
+        if (state != Qt::ApplicationActive) {
+            // dummy
+            QTimer::singleShot(1000, this, [this]() {
+                if (this->hasFocus()) {
+                }
+            });
+        }
+    });
+#endif
+
+    const QList<VSPAbstractPage*> pages = m_buttonMap.values();
+    foreach (auto page, pages) {
+        connect(page, &VSPAbstractPage::execute, this, &VSCMainWindow::onActionExecute);
+    }
+
+    const QList<QPushButton*> buttons = m_buttonMap.keys();
+    foreach (auto button, buttons) {
+        connect(button, &QPushButton::clicked, this, &VSCMainWindow::onSelectPage);
+    }
+
+    /* Driver installation / removal */
+    connect(ui->pg09Connect, &PGConnect::installDriver, this, &VSCMainWindow::onActionInstall);
+    connect(ui->pg09Connect, &PGConnect::uninstallDriver, this, &VSCMainWindow::onActionUninstall);
+
+    connect(ui->btn11SerialIO, &QPushButton::clicked, this, [this]() {
+        VSPSerialIO* d = new VSPSerialIO(this);
+        d->setVisible(true);
+        d->raise();
+    });
+}
+
+// ---------------------------------------------------------
+// VSP Driver Controller part
+inline void VSCMainWindow::createVspController()
+{
+    QByteArray dextBundleId("org.eof.tools.VSPDriver");
+    QByteArray dextClassName("VSPDriver");
+
+    m_vsp = new VSPDriverClient(dextBundleId, dextClassName, &m_session, this);
+    connect(m_vsp, &VSPDriverClient::didFailWithError, this, &VSCMainWindow::onSetupFailWithError);
+    connect(m_vsp, &VSPDriverClient::didFinishWithResult, this, &VSCMainWindow::onSetupFinishWithResult);
+    connect(m_vsp, &VSPDriverClient::needsUserApproval, this, &VSCMainWindow::onSetupNeedsUserApproval);
+    connect(m_vsp, &VSPDriverClient::connected, this, &VSCMainWindow::onClientConnected);
+    connect(m_vsp, &VSPDriverClient::disconnected, this, &VSCMainWindow::onClientDisconnected);
+    connect(m_vsp, &VSPDriverClient::errorOccured, this, &VSCMainWindow::onClientError);
+    connect(m_vsp, &VSPDriverClient::updateStatusLog, this, &VSCMainWindow::onUpdateStatusLog);
+    connect(m_vsp, &VSPDriverClient::updateButtons, this, &VSCMainWindow::onUpdateButtons);
+    connect(m_vsp, &VSPDriverClient::commandResult, this, &VSCMainWindow::onCommandResult);
+    connect(m_vsp, &VSPDriverClient::complete, this, &VSCMainWindow::onComplete);
+}
+
+inline void VSCMainWindow::connectVspController()
+{
+    // show inital driver connection page
+    setDefaultButton(ui->btn09Connect);
+    ui->stackedWidget->setCurrentWidget(ui->pg09Connect);
+    // try to install VSPDriver and/or connect driver UC instance
+    onActionExecute(vspControlPingPong, {});
 }
 
 // ------------------------------------------------------------------

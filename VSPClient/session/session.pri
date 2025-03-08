@@ -2,7 +2,7 @@
 INCLUDEPATH += $$PWD
 
 SOURCES += \
-	$$PWD/vscsession.cpp
+	$$PWD/vspsession.cpp
 
 HEADERS += \
-	$$PWD/vscsession.h
+	$$PWD/vspsession.h

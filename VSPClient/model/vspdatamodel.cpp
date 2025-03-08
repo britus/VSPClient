@@ -203,3 +203,193 @@ QVariant VSPDataModel::at(int index) const
     }
     return QVariant::fromValue(m_records.at(index));
 }
+
+bool VSPDataModel::loadModel(QSettings* settings)
+{
+    switch (dataType()) {
+        case PortItem: {
+            return load(QStringLiteral("ports"), settings);
+            break;
+        }
+        case PortLink: {
+            return load(QStringLiteral("links"), settings);
+            break;
+        }
+    }
+    return false;
+}
+
+void VSPDataModel::saveModel(QSettings* settings)
+{
+    switch (dataType()) {
+        case PortItem: {
+            save(QStringLiteral("ports"), settings);
+            break;
+        }
+        case PortLink: {
+            save(QStringLiteral("links"), settings);
+            break;
+        }
+    }
+}
+
+// -------------------------------------------
+
+inline static bool __setId(quint8* id, const QString& value)
+{
+    bool ok;
+    (*id) = value.toUInt(&ok);
+    if (!ok || !(*id)) {
+        return false;
+    }
+    return true;
+}
+
+inline static bool __setName(QString* name, const QString& value)
+{
+    (*name) = value;
+    if (name->isEmpty()) {
+        return false;
+    }
+    return true;
+}
+
+// -------------------------------------------
+
+bool VSPPortListModel::load(const QString& group, QSettings* settings)
+{
+    uint count;
+    QString value;
+
+    settings->beginGroup(group);
+    count = settings->value("count").toUInt();
+    for (uint i = 0; i < count; i++) {
+        value = settings->value(QStringLiteral("port_%1").arg(i)).toString();
+        if (value.isEmpty())
+            continue;
+        VSPDataModel::TPortItem p = {};
+        QStringList items = value.split("|");
+        for (int j = 0; j < items.size(); j++) {
+            switch (j) {
+                case 0: {
+                    if (!__setId(&p.id, items[j])) {
+                        goto error_exit;
+                    }
+                    break;
+                }
+                case 1: {
+                    if (!__setName(&p.name, items[j])) {
+                        goto error_exit;
+                    }
+                    break;
+                }
+            }
+        }
+        append(p);
+    }
+    settings->endGroup();
+
+    return m_records.size() > 0;
+
+error_exit:
+    m_records.clear();
+    return false;
+}
+
+void VSPPortListModel::save(const QString& group, QSettings* settings)
+{
+    settings->beginGroup(group);
+    settings->setValue("count", m_records.size());
+    for (quint8 i = 0; i < m_records.size(); i++) {
+        const VSPDataModel::TDataRecord r = m_records.at(i);
+        const QString key = QStringLiteral("port_%1").arg(i);
+        const QString value = QStringLiteral("%1|%2").arg(r.port.id).arg(r.port.name);
+        settings->setValue(key, value);
+    }
+    settings->endGroup();
+}
+
+// -------------------------------------------
+
+bool VSPLinkListModel::load(const QString& group, QSettings* settings)
+{
+    uint count;
+    QString value;
+
+    settings->beginGroup(group);
+    count = settings->value("count").toUInt();
+    for (uint i = 0; i < count; i++) {
+        value = settings->value(QStringLiteral("link_%1").arg(i)).toString();
+        if (value.isEmpty())
+            continue;
+        VSPDataModel::TPortLink l = {};
+        QStringList items = value.split("|");
+        for (int j = 0; j < items.size(); j++) {
+            switch (j) {
+                case 0: {
+                    if (!__setId(&l.id, items[j])) {
+                        goto error_exit;
+                    }
+                    break;
+                }
+                case 1: {
+                    if (!__setName(&l.name, items[j])) {
+                        goto error_exit;
+                    }
+                    break;
+                }
+                case 2: {
+                    if (!__setId(&l.source.id, items[j])) {
+                        goto error_exit;
+                    }
+                    break;
+                }
+                case 3: {
+                    if (!__setName(&l.source.name, items[j])) {
+                        goto error_exit;
+                    }
+                    break;
+                }
+                case 4: {
+                    if (!__setId(&l.target.id, items[j])) {
+                        goto error_exit;
+                    }
+                    break;
+                }
+                case 5: {
+                    if (!__setName(&l.target.name, items[j])) {
+                        goto error_exit;
+                    }
+                    break;
+                }
+            }
+        }
+        append(l);
+    }
+    settings->endGroup();
+
+    return m_records.size() > 0;
+
+error_exit:
+    m_records.clear();
+    return false;
+}
+
+void VSPLinkListModel::save(const QString& group, QSettings* settings)
+{
+    settings->beginGroup(group);
+    settings->setValue("count", m_records.size());
+    for (quint8 i = 0; i < m_records.size(); i++) {
+        const VSPDataModel::TDataRecord r = m_records.at(i);
+        const QString key = QStringLiteral("link_%1").arg(i);
+        const QString value = QStringLiteral("%1|%2|%3|%4|%5|%6") //
+                                 .arg(r.link.id)
+                                 .arg(r.link.name)
+                                 .arg(r.link.source.id)
+                                 .arg(r.link.source.name)
+                                 .arg(r.link.target.id)
+                                 .arg(r.link.target.name);
+        settings->setValue(key, value);
+    }
+    settings->endGroup();
+}
