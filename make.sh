@@ -3,20 +3,26 @@
 COPYDIR=${1}
 PWD_DIR=`pwd`
 
-mkdir -p build
+mkdir -p ${PWD_DIR}/build
 
 # clean binary
-rm -fR build/VSPController/VSPController.framework
-rm -fR build/VSPController/Makefile
+rm -fR ${PWD_DIR}/build/VSPController/VSPController.framework
+rm -fR ${PWD_DIR}/build/VSPController/Makefile
 
-rm -fR build/VSPSetup/VSPSetup.framework
-rm -fR build/VSPSetup/Makefile
+rm -fR ${PWD_DIR}/build/VSPSetup/VSPSetup.framework
+rm -fR ${PWD_DIR}/build/VSPSetup/Makefile
 
-rm -fR build/VSPClient/VSPClient*
-rm -fR build/VSPClient/Makefile
+rm -fR ${PWD_DIR}/build/VSPClient/VSPClient*
+rm -fR ${PWD_DIR}/build/VSPClient/Makefile
 
+# generate localization profile
+lprodump -pro VSPClient.pro -out VSPClient.json
 
-cd build
+cd ${PWD_DIR}/VSPClient
+bash makelocales.sh ${PWD_DIR}/VSPClient
+cd ..
+
+cd ${PWD_DIR}/build
 ${QTDIR}/bin/qmake -recursive ../VSPClient.pro
 
 cd VSPController && make -j8 && cd ..
@@ -54,3 +60,5 @@ if [ "x${COPYDIR}" != "x" ] ; then
 			cp -Rv ${PWD_DIR}/build/VSPSetup/libVSPSetup* ${COPYDIR}/
 	fi
 fi
+
+cd ${PWD_DIR}

@@ -103,8 +103,8 @@ vsp_app {
 		$$PWD/qt-bundle-bugfix.sh $${TARGET} app VSPController && \
 		$$PWD/qt-bundle-bugfix.sh $${TARGET} app VSPSetup
 
-	#CODE_SIGN_ENTITLEMENTS=$$PWD/VSPClient.entitlements
-	#CODE_SIGN_IDENTITY='Mac Developer'
+	QMAKE_CODE_SIGN_ENTITLEMENTS=$$PWD/VSPClient.entitlements
+	QMAKE_CODE_SIGN_IDENTITY='Mac Developer'
 }
 
 # Generate framework bundle

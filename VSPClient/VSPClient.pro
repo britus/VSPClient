@@ -40,10 +40,16 @@ DISTFILES += \
 	$$PWD/makelocales.sh
 
 # Update translation files
-localegen.files = $$TRANSLATIONS
-localegen.commands = $$PWD/makelocales.sh $$shell_quote($$PWD)
-QMAKE_EXTRA_TARGETS += localegen    #'.NOTPARALLEL'
-PRE_TARGETDEPS += localegen
+#LOC_QM_FILES.depends = $$TRANSLATIONS
+#LOC_QM_FILES.files = $$TRANSLATIONS
+#LOC_QM_FILES.depends = FORCE
+#LOC_QM_FILES.commands = $$PWD/makelocales.sh $$shell_quote($$PWD)
+#LOC_QM_FILES.target = \
+#	$$PWD/vspui_en_US.qm \
+#	$$PWD/vspui_de_DE.qm
+#message($${LOC_QM_FILES.files})
+#PRE_TARGETDEPS	    += $${LOC_QM_FILES.files}
+#QMAKE_EXTRA_TARGETS += LOC_QM_FILES   #'.NOTPARALLEL'
 
 # Default rules for deployment.
 target.path = /Applications
