@@ -30,8 +30,8 @@ vsp_app {
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 DEFINES += VSP_TARGET_NAME=$$shell_quote('$$TARGET')
 
-INCLUDEPATH += $$OUT_PWD/../../VSPController
-INCLUDEPATH += $$OUT_PWD/../../VSPSetup
+INCLUDEPATH += $$PWD/../VSPController
+INCLUDEPATH += $$PWD/../VSPSetup
 
 # for QT Creator and Visual Studio project.
 QMAKE_PROJECT_NAME = $${TARGET}
@@ -42,7 +42,7 @@ QMAKE_CXXFLAGS += -fno-omit-frame-pointer
 QMAKE_CXXFLAGS += -funwind-tables
 
 release {
-	QMAKE_LFLAGS += -s
+	#QMAKE_LFLAGS += -s
 }
 debug {
 	QMAKE_CXXFLAGS += -ggdb3
@@ -62,7 +62,7 @@ vsp_app {
 	CONFIG += embed_libraries
 	CONFIG += embed_translations
 
-	#QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.2
+	QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.2
 
 	# Important for the App with embedded frameworks and libs
 	QMAKE_RPATHDIR += @executable_path/../Frameworks
@@ -90,10 +90,10 @@ vsp_app {
 	icons.path = Contents/Resources
 	QMAKE_BUNDLE_DATA += icons
 
-	#vspdext.files = \
-	#	$$PWD/../../VSPDriver/build/Debug-driverkit/org.eof.tools.VSPDriver.dext
 	vspdext.files = \
-		$$PWD/../../VSPDriver/build/Release-driverkit/org.eof.tools.VSPDriver.dext
+		$$PWD/../../VSPDriver/build/Debug-driverkit/org.eof.tools.VSPDriver.dext
+	#vspdext.files = \
+	#	$$PWD/../../VSPDriver/build/Release-driverkit/org.eof.tools.VSPDriver.dext
 	vspdext.path = Contents/Library/SystemExtensions
 	QMAKE_BUNDLE_DATA += vspdext
 

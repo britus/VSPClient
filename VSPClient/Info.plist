@@ -2,20 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
 	<key>CFBundleDisplayName</key>
 	<string>Virtual Serial Port Controller</string>
 	<key>CFBundleName</key>
 	<string>VSPClient</string>
-	<key>LSApplicationCategoryType</key>
-	<string>public.app-category.developer-tools</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>LSUIElement</key>
-	<false/>
-	<key>CFBundleAllowMixedLocalizations</key>
-	<true/>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>VSPClient</string>
 	<key>CFBundleIconFile</key>
@@ -24,6 +16,18 @@
 	<string>org.eof.tools.VSPClient</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleAllowMixedLocalizations</key>
+	<true/>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.developer-tools</string>
+	<key>LSUIElement</key>
+	<false/>
+	<key>LSUIPresentationMode</key>
+	<integer>0</integer>
+	<key>LSVisibleInClassic</key>
+	<true/>
 	<key>LSMinimumSystemVersion</key>
 	<string>12.2</string>
 	<key>NOTE</key>
@@ -37,10 +41,6 @@
 		<string>fetch</string>
 		<string>processing</string>
 	</array>
-	<key>LSUIPresentationMode</key>
-	<integer>0</integer>
-	<key>LSVisibleInClassic</key>
-	<true/>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSPrefPaneIconFile</key>
