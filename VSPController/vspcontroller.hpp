@@ -139,7 +139,7 @@ protected:
     virtual void OnConnected() = 0;
     virtual void OnDisconnected() = 0;
     virtual void OnErrorOccured(const VSPClient::TVSPSystemError& error, const char* message) = 0;
-    virtual void OnDataReady(void*) = 0;
+    virtual void OnDataReady(const TVSPControllerData& data) = 0;
 
 private:
     VSPControllerPriv* p;

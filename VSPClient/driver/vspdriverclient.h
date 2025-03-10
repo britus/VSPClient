@@ -133,7 +133,7 @@ protected:
     void OnDisconnected() override;
     void OnIOUCCallback(int result, void* args, uint32_t numArgs) override;
     void OnErrorOccured(const VSPClient::TVSPSystemError& error, const char* message) override;
-    void OnDataReady(void* data) override;
+    void OnDataReady(const TVSPControllerData& data) override;
 
 private:
     VSPSession* m_session;

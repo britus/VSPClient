@@ -633,7 +633,7 @@ inline bool VSPControllerPriv::DoAsyncCall(TVSPControllerData* input)
     PrintStruct("doAsyncCall-Return", m_vspResponse);
 #endif
 
-    m_controller->OnDataReady(m_vspResponse);
+    m_controller->OnDataReady((*m_vspResponse));
     return true;
 }
 
@@ -676,7 +676,7 @@ void VSPControllerPriv::AsyncCallback(IOReturn result, void** args, UInt32 numAr
     }
 
     if (m_vspResponse) {
-        m_controller->OnIOUCCallback(result, m_vspResponse, sizeof(TVSPControllerData));
+        m_controller->OnIOUCCallback(result, m_vspResponse, VSP_UCD_SIZE);
     }
     else {
         ReportError(kIOReturnNotResponding, "[UC] No VSP async results.");

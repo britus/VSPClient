@@ -60,45 +60,35 @@ void VSPDriverClient::OnNeedsUserApproval()
 }
 
 // called in sync of request
-void VSPDriverClient::OnDataReady(void*)
+void VSPDriverClient::OnDataReady(const TVSPControllerData& data)
 {
-}
-
-// called async of request
-void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
-{
-    const TVSPControllerData* data = (TVSPControllerData*) (args);
-
     QByteArray buffer;
     QTextStream text(&buffer);
 
     // make sure we have an error code
-    result =
-       (result == 0 //
-           ? data->status.code
-           : result);
+    uint result = data.status.code;
 
     QByteArray txStatus =
-       (data->context != 4 //
+       (data.context != 4 //
            ? tr(" success").toUtf8()
            : tr("Last command failed.").toUtf8());
 
     text << tr("Driver callback result:") << Qt::endl;
-    text << tr("Data size......: ") << Qt::dec << size << Qt::endl;
-    text << tr("Context........: ") << Qt::dec << data->context << Qt::endl;
-    text << tr("Command........: ") << Qt::dec << data->command << txStatus << Qt::endl;
-    text << tr("Status code....: 0x") << Qt::hex << data->status.code << Qt::endl;
-    text << tr("Status flags...: 0x") << Qt::hex << data->status.flags << Qt::endl;
-    text << tr("Parameter flags: 0x") << Qt::hex << data->parameter.flags << Qt::endl;
-    text << tr("Port 1.........: ") << Qt::dec << data->parameter.link.source << Qt::endl;
-    text << tr("Port 2.........: ") << Qt::dec << data->parameter.link.target << Qt::endl;
-    text << tr("Port count.....: ") << Qt::dec << data->ports.count << Qt::endl;
-    text << tr("Link count.....: ") << Qt::dec << data->links.count << Qt::endl;
+    text << tr("Data size......: ") << Qt::dec << VSP_UCD_SIZE << Qt::endl;
+    text << tr("Context........: ") << Qt::dec << data.context << Qt::endl;
+    text << tr("Command........: ") << Qt::dec << data.command << txStatus << Qt::endl;
+    text << tr("Status code....: 0x") << Qt::hex << data.status.code << Qt::endl;
+    text << tr("Status flags...: 0x") << Qt::hex << data.status.flags << Qt::endl;
+    text << tr("Parameter flags: 0x") << Qt::hex << data.parameter.flags << Qt::endl;
+    text << tr("Port 1.........: ") << Qt::dec << data.parameter.link.source << Qt::endl;
+    text << tr("Port 2.........: ") << Qt::dec << data.parameter.link.target << Qt::endl;
+    text << tr("Port count.....: ") << Qt::dec << data.ports.count << Qt::endl;
+    text << tr("Link count.....: ") << Qt::dec << data.links.count << Qt::endl;
 
-    if (data->ports.count) {
+    if (data.ports.count) {
         m_portList.resetModel();
-        for (uint i = 0; i < data->ports.count; i++) {
-            TVSPPortListItem pli = data->ports.list[i];
+        for (uint i = 0; i < data.ports.count; i++) {
+            TVSPPortListItem pli = data.ports.list[i];
             QString name = strlen(pli.name) == 0 //
                               ? tr("Port %1").arg(pli.id)
                               : tr("%1").arg(pli.name);
@@ -107,18 +97,18 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
             continue;
         }
     }
-    else if (data->command == vspControlRemovePort) {
+    else if (data.command == vspControlRemovePort) {
         if (m_portList.rowCount() > 0) {
             m_portList.resetModel();
         }
     }
 
-    if (data->links.count) {
+    if (data.links.count) {
         m_linkList.resetModel();
-        for (uint i = 0; i < data->links.count; i++) {
-            const uint8_t _lid = (data->links.list[i] >> 16) & 0x000000ff;
-            const uint8_t _src = (data->links.list[i] >> 8) & 0x000000ff;
-            const uint8_t _tgt = (data->links.list[i]) & 0x000000ff;
+        for (uint i = 0; i < data.links.count; i++) {
+            const uint8_t _lid = (data.links.list[i] >> 16) & 0x000000ff;
+            const uint8_t _src = (data.links.list[i] >> 8) & 0x000000ff;
+            const uint8_t _tgt = (data.links.list[i]) & 0x000000ff;
             VSPDataModel::TPortItem p1 = {};
             VSPDataModel::TPortItem p2 = {};
             QString name = tr("[Port A: %1 <-> Port B: %2]").arg(_src).arg(_tgt);
@@ -143,7 +133,7 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
             continue;
         }
     }
-    else if (data->command == vspControlUnlinkPorts) {
+    else if (data.command == vspControlUnlinkPorts) {
         if (m_linkList.rowCount() > 0) {
             m_linkList.resetModel();
         }
@@ -158,8 +148,8 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
             emit errorOccured(GetSystemError(result), txStatus);
         }
         else {
-            emit commandResult(                                //
-               static_cast<TVSPControlCommand>(data->command), //
+            emit commandResult(                               //
+               static_cast<TVSPControlCommand>(data.command), //
                &m_portList,
                &m_linkList);
         }
@@ -168,6 +158,15 @@ void VSPDriverClient::OnIOUCCallback(int result, void* args, uint32_t size)
     t->setTimerType(Qt::PreciseTimer);
     t->setSingleShot(true);
     t->start(150);
+}
+
+// called async of request
+void VSPDriverClient::OnIOUCCallback(int result, void* /*args*/, uint32_t /*size*/)
+{
+    // const TVSPControllerData* data = (TVSPControllerData*) (args);
+    if (result != 0) {
+        //
+    }
 }
 
 void VSPDriverClient::OnErrorOccured(const VSPClient::TVSPSystemError& error, const char* message)
